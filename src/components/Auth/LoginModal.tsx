@@ -1,0 +1,297 @@
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import useAuthStore from '../../stores/authStore';
+import useNotificationStore from '../../stores/notificationStore';
+import config from '../../config';
+
+const USER_DATABASE: Record<string, { id: string; name: string; password: string; role: string; tier: string; avatar: string; phone: string; joinDate: string }> = {
+  'abuoma@abiaway.gov.ng': { id: 'USR-001', name: 'Abuoma David', password: config.demo.passengerPassword, role: 'passenger', tier: 'Premium', avatar: 'AD', phone: '+234-801-234-5678', joinDate: '2024-01-15' },
+  'chidi@abiaway.gov.ng': { id: 'USR-002', name: 'Chidi Okonkwo', password: config.demo.driverPassword, role: 'driver', tier: 'Professional', avatar: 'CO', phone: '+234-802-345-6789', joinDate: '2024-02-20' },
+  'admin@abiaway.gov.ng': { id: 'ADM-001', name: 'Admin User', password: config.demo.adminPassword, role: 'admin', tier: 'Administrator', avatar: 'AU', phone: '+234-803-456-7890', joinDate: '2024-01-01' },
+  'ngozi@abiaway.gov.ng': { id: 'USR-003', name: 'Ngozi Eze', password: config.demo.goldPassword, role: 'passenger', tier: 'Gold', avatar: 'NE', phone: '+234-804-567-8901', joinDate: '2024-03-01' },
+};
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address')
+    .refine((val) => Object.keys(USER_DATABASE).includes(val.toLowerCase()), { message: 'No account found with this email' }),
+  password: z
+    .string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters')
+    .regex(/(?=.*[A-Z])(?=.*[0-9])/, 'Password must contain at least one uppercase letter and one number'),
+  rememberMe: z.boolean().optional(),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [activeField, setActiveField] = useState<string | null>(null);
+
+  const login = useAuthStore((s) => s.login);
+  const showNotification = useNotificationStore((s) => s.showNotification);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '', rememberMe: false },
+  });
+
+  const emailValue = watch('email');
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setValue('email', savedEmail);
+      setValue('rememberMe', true);
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    if (emailValue && emailValue.length > 2 && !emailValue.includes('@')) {
+      setEmailSuggestions(
+        Object.keys(USER_DATABASE).filter((u) => u.toLowerCase().includes(emailValue.toLowerCase())).slice(0, 3)
+      );
+    } else {
+      setEmailSuggestions([]);
+    }
+  }, [emailValue]);
+
+  useEffect(() => {
+    if (loginAttempts >= 5) {
+      setIsLocked(true);
+      const timer = setTimeout(() => {
+        setIsLocked(false);
+        setLoginAttempts(0);
+        showNotification('Account Unlocked', 'You can now try logging in again', 'info');
+      }, 300000);
+      return () => clearTimeout(timer);
+    }
+  }, [loginAttempts, showNotification]);
+
+  if (!isOpen) return null;
+
+  const onSubmit = async (data: LoginFormData) => {
+    if (isLocked) {
+      showNotification('Account Locked', 'Too many failed attempts. Please try again later.', 'error');
+      return;
+    }
+
+    const user = USER_DATABASE[data.email.toLowerCase()];
+    if (user && user.password === data.password) {
+      user.lastLogin = new Date().toISOString();
+
+      if (data.rememberMe) {
+        localStorage.setItem('rememberedEmail', data.email);
+        localStorage.setItem('userToken', `token_${user.id}_${Date.now()}`);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('userToken');
+      }
+
+      sessionStorage.setItem('currentUser', JSON.stringify({ ...user, password: undefined }));
+
+      const result = await login(data.email, data.password, user);
+      if (result.success) {
+        showNotification('Welcome back!', `Successfully logged in as ${user.name}`, 'success');
+        setLoginAttempts(0);
+        onClose();
+      }
+    } else {
+      setLoginAttempts((prev) => prev + 1);
+      const remaining = 4 - loginAttempts;
+      showNotification('Login Failed', `Invalid credentials. ${remaining} attempts remaining before account lock.`, 'error');
+      setError('password', { message: '' });
+      setError('root', { message: 'Invalid email or password' });
+    }
+  };
+
+  const handleQuickDemo = (demoUser: string) => {
+    setValue('email', demoUser);
+    setValue('password', USER_DATABASE[demoUser].password);
+    setValue('rememberMe', false);
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) form.requestSubmit();
+    }, 100);
+  };
+
+  const handleForgotPassword = () => {
+    if (!emailValue) {
+      showNotification('Email Required', 'Please enter your email address first', 'warning');
+      return;
+    }
+    const user = USER_DATABASE[emailValue.toLowerCase()];
+    if (user) {
+      showNotification('Password Reset', `Reset link sent to ${emailValue}. Check your inbox.`, 'info');
+    } else {
+      showNotification('Email Not Found', 'No account found with this email address.', 'error');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] animate-fadeIn">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4 animate-slideUp">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-white/10 shadow-2xl">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-white">Welcome Back</h3>
+              <p className="text-sm text-gray-400 mt-1">Sign in to continue to Abia Way</p>
+            </div>
+            <div className="flex gap-2">
+              {isLocked && (
+                <div className="px-2 py-1 bg-red-500/20 rounded-lg text-red-400 text-xs">Locked</div>
+              )}
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <div className="relative">
+                <i data-lucide="mail" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                <input
+                  type="email"
+                  {...register('email')}
+                  onFocus={() => setActiveField('email')}
+                  onBlur={() => setTimeout(() => setActiveField(null), 200)}
+                  placeholder="Enter your email"
+                  className={`w-full bg-white/10 border ${errors.email ? 'border-red-500' : 'border-white/20'} rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition`}
+                  disabled={isLocked}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <i data-lucide="alert-circle" className="w-3 h-3"></i>
+                  {errors.email.message}
+                </p>
+              )}
+              {activeField === 'email' && emailSuggestions.length > 0 && (
+                <div className="absolute z-10 mt-1 w-72 bg-gray-800 rounded-lg border border-white/10 overflow-hidden">
+                  {emailSuggestions.map((s) => (
+                    <button key={s} type="button" onClick={() => { setValue('email', s); setEmailSuggestions([]); }} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 transition">
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+              <div className="relative">
+                <i data-lucide="lock" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password')}
+                  placeholder="Enter your password"
+                  className={`w-full bg-white/10 border ${errors.password ? 'border-red-500' : 'border-white/20'} rounded-xl pl-10 pr-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition`}
+                  disabled={isLocked}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                  <i data-lucide={showPassword ? 'eye-off' : 'eye'} className="w-5 h-5"></i>
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <i data-lucide="alert-circle" className="w-3 h-3"></i>
+                  {errors.password.message}
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters with uppercase and number</p>
+            </div>
+
+            <div className="flex justify-between items-center mb-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" {...register('rememberMe')} className="w-4 h-4 rounded border-white/20 bg-white/10 checked:bg-green-600 focus:ring-green-500" disabled={isLocked} />
+                <span className="text-sm text-gray-400">Remember me</span>
+              </label>
+              <button type="button" onClick={handleForgotPassword} className="text-sm text-green-400 hover:text-green-300 transition" disabled={isLocked}>
+                Forgot Password?
+              </button>
+            </div>
+
+            {loginAttempts > 0 && loginAttempts < 5 && (
+              <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-yellow-400 text-sm flex items-center gap-2">
+                  <i data-lucide="alert-triangle" className="w-4 h-4"></i>
+                  {5 - loginAttempts} login attempt(s) remaining before account lock
+                </p>
+              </div>
+            )}
+
+            {errors.root && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-red-400 text-sm flex items-center gap-2">
+                  <i data-lucide="alert-triangle" className="w-4 h-4"></i>
+                  {errors.root.message}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting || isLocked}
+              className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Verifying credentials...
+                </>
+              ) : (
+                <>
+                  <i data-lucide="log-in" className="w-5 h-5"></i>
+                  Sign In
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <p className="text-xs text-gray-500 text-center mb-3">Quick Demo Accounts</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => handleQuickDemo('abuoma@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="user" className="w-3 h-3"></i> Passenger
+              </button>
+              <button onClick={() => handleQuickDemo('chidi@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="truck" className="w-3 h-3"></i> Driver
+              </button>
+              <button onClick={() => handleQuickDemo('admin@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="shield" className="w-3 h-3"></i> Admin
+              </button>
+              <button onClick={() => handleQuickDemo('ngozi@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
+                <i data-lucide="star" className="w-3 h-3"></i> Gold Member
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default LoginModal;
