@@ -3,7 +3,8 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import useNotificationStore from '../../stores/notificationStore';
 import { abiaCenter } from '../../data/constants';
-import { BusMarkersLayer, StopMarkersLayer } from './BusMarkersLayer';
+import { BusMarkersLayer, StopMarkersLayer, SolarStationLayer } from './BusMarkersLayer';
+import { getFleetSummary } from '../../data/fleet';
 import { MapZoomControl } from './MapControls';
 
 if (typeof L !== 'undefined' && L.Icon && L.Icon.Default) {
@@ -56,12 +57,13 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
     }
   }, []);
 
+  const fleetStats = useMemo(getFleetSummary, []);
   const stats = useMemo(() => [
-    { label: 'Active Buses', value: '24', color: 'blue', icon: 'bus' },
-    { label: 'Available Seats', value: '156', color: 'green', icon: 'users' },
-    { label: 'On-Time Rate', value: '94%', color: 'purple', icon: 'clock' },
-    { label: 'Total Routes', value: '12', color: 'orange', icon: 'route' },
-  ], []);
+    { label: 'Active Buses', value: String(fleetStats.active), color: 'blue', icon: 'bus' },
+    { label: 'Charging', value: String(fleetStats.charging), color: 'green', icon: 'battery-charging' },
+    { label: 'Avg Battery', value: `${fleetStats.avgBattery}%`, color: 'purple', icon: 'battery-full' },
+    { label: 'Routes', value: '6', color: 'orange', icon: 'route' },
+  ], [fleetStats]);
 
   const gradientMap: Record<string, string> = {
     blue: 'from-blue-600/20 to-blue-800/20 text-blue-400',
@@ -112,6 +114,7 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
         <TileLayer url={TILE_LAYERS[activeLayerIndex].url} attribution="\u00a9 OpenStreetMap contributors" maxZoom={19} />
         <MapZoomControl />
         <StopMarkersLayer />
+        <SolarStationLayer />
         {renderBusMarkers ? renderBusMarkers() : <BusMarkersLayer />}
       </MapContainer>
 

@@ -2,6 +2,8 @@ import { createContext, useContext, useCallback, useMemo, useState } from 'react
 import useBookingStore from '../../stores/bookingStore';
 import useWalletStore from '../../stores/walletStore';
 import useNotificationStore from '../../stores/notificationStore';
+import { getFare } from '../../data/fares';
+import { TERMINALS, ALL_STOPS } from '../../data/stops';
 import RouteSearch from './RouteSearch';
 import SeatSelection from './SeatSelection';
 import PaymentMethod from '../Payment/PaymentMethod';
@@ -10,10 +12,15 @@ import SavedRoutes from './SavedRoutes';
 import BookingHistory from './BookingHistory';
 import ABSINPaymentDemo from '../Payment/ABSINPaymentDemo';
 
+const TERMINAL_NAMES = Object.fromEntries(TERMINALS.map((t) => [t.id, t.name]));
+const STOP_NAMES = Object.fromEntries(ALL_STOPS.map((s) => [s.id, s.name]));
+
+const resolveName = (id: string) => TERMINAL_NAMES[id] || STOP_NAMES[id] || id;
+
 const AVAILABLE_ROUTES = [
-  { id: 1, name: 'Express Route', via: 'Umuahia-Aba Expressway', duration: '25 mins', fare: 350, departures: ['08:00', '08:30', '09:00', '09:30'], available: 24 },
-  { id: 2, name: 'Local Route', via: 'Bende Road', duration: '35 mins', fare: 300, departures: ['08:15', '08:45', '09:15', '09:45'], available: 18 },
-  { id: 3, name: 'Scenic Route', via: 'Ohafia', duration: '45 mins', fare: 250, departures: ['08:30', '09:00', '09:30', '10:00'], available: 32 },
+  { id: 1, name: 'Umuahia → Aba', via: 'Umuahia-Aba Expressway', duration: '25 mins', fare: getFare('local'), departures: ['08:00', '08:30', '09:00', '09:30'], available: 24, from: 'Umuahia-Terminal', to: 'Aba-Terminal', routeType: 'local' as const },
+  { id: 2, name: 'Aba → Umuahia', via: 'Aba-Umuahia Road', duration: '25 mins', fare: getFare('local'), departures: ['08:15', '08:45', '09:15', '09:45'], available: 18, from: 'Aba-Terminal', to: 'Umuahia-Terminal', routeType: 'local' as const },
+  { id: 3, name: 'Umuahia → Ohafia', via: 'Ohafia Road', duration: '30 mins', fare: getFare('inter-city', 'Umuahia', 'Ohafia'), departures: ['08:30', '09:00', '09:30', '10:00'], available: 32, from: 'Umuahia-Terminal', to: 'Ohafia-Terminal', routeType: 'inter-city' as const },
 ];
 
 interface BookingDetails {

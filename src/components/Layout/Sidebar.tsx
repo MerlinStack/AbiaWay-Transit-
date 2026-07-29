@@ -6,13 +6,21 @@ import MapIcon from '@mui/icons-material/esm/Map';
 import AccountBalanceWalletIcon from '@mui/icons-material/esm/AccountBalanceWallet';
 import ConfirmationNumberIcon from '@mui/icons-material/esm/ConfirmationNumber';
 import DriveEtaIcon from '@mui/icons-material/esm/DriveEta';
+import DirectionsBusIcon from '@mui/icons-material/esm/DirectionsBus';
+import AssignmentTurnedInIcon from '@mui/icons-material/esm/AssignmentTurnedIn';
+import QrCodeScannerIcon from '@mui/icons-material/esm/QrCodeScanner';
+import BadgeIcon from '@mui/icons-material/esm/Badge';
 import CircleIcon from '@mui/icons-material/esm/Circle';
 
 const tabs = [
   { path: '/map', icon: <MapIcon />, label: 'Live Tracking' },
   { path: '/wallet', icon: <AccountBalanceWalletIcon />, label: 'My Wallet' },
   { path: '/booking', icon: <ConfirmationNumberIcon />, label: 'Book & Pay' },
+  { path: '/fleet', icon: <DirectionsBusIcon />, label: 'Fleet Mgmt' },
+  { path: '/checkin', icon: <AssignmentTurnedInIcon />, label: 'Driver Check-in' },
+  { path: '/conductor', icon: <QrCodeScannerIcon />, label: 'Conductor Tap' },
   { path: '/driver', icon: <DriveEtaIcon />, label: 'Driver Dashboard' },
+  { path: '/register', icon: <BadgeIcon />, label: 'ABSSIN Register' },
 ];
 
 function Sidebar() {
