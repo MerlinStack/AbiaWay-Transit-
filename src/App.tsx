@@ -30,6 +30,7 @@ const LazyFleetSchedule = lazy(() => import('./components/Fleet/FleetSchedule'))
 const LazyDriverCheckin = lazy(() => import('./components/Driver/DriverCheckin'));
 const LazyConductorTab = lazy(() => import('./components/Driver/ConductorTab'));
 const LazyABSSINRegister = lazy(() => import('./components/Auth/ABSSINRegister'));
+const LazySystemDiagnostics = lazy(() => import('./components/SystemDiagnostics'));
 
 function AppContent() {
   const [modalOpen, setModalOpen] = useState(null);
@@ -123,6 +124,12 @@ function AppContent() {
               <SEO title="ABSSIN Registration" description="Register with Abia State Identification Number" />
               <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
               <LazyABSSINRegister isOpen={true} onClose={() => navigate('/map')} />
+            </Suspense>
+          } />
+          <Route path="/diagnostics" element={
+            <Suspense fallback={<LoadingSpinner fullScreen />}>
+              <SEO title="System Diagnostics" description="AbiaWay system diagnostic and verification suite" />
+              <LazySystemDiagnostics />
             </Suspense>
           } />
           <Route path="*" element={<Navigate to="/map" replace />} />

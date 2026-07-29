@@ -10,6 +10,7 @@ import DirectionsBusIcon from '@mui/icons-material/esm/DirectionsBus';
 import AssignmentTurnedInIcon from '@mui/icons-material/esm/AssignmentTurnedIn';
 import QrCodeScannerIcon from '@mui/icons-material/esm/QrCodeScanner';
 import BadgeIcon from '@mui/icons-material/esm/Badge';
+import BugReportIcon from '@mui/icons-material/esm/BugReport';
 import CircleIcon from '@mui/icons-material/esm/Circle';
 
 const tabs = [
@@ -21,6 +22,7 @@ const tabs = [
   { path: '/conductor', icon: <QrCodeScannerIcon />, label: 'Conductor Tap' },
   { path: '/driver', icon: <DriveEtaIcon />, label: 'Driver Dashboard' },
   { path: '/register', icon: <BadgeIcon />, label: 'ABSSIN Register' },
+  { path: '/diagnostics', icon: <BugReportIcon />, label: 'Diagnostics' },
 ];
 
 function Sidebar() {

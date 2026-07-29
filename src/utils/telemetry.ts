@@ -37,20 +37,45 @@ export interface ChargeSlot {
   stationName: string;
   estimatedWaitMinutes: number;
   chargersAvailable: number;
+  throughputFactor: number;
 }
 
-const SOLAR_STATIONS = [
+interface SolarStation {
+  id: string;
+  name: string;
+  chargers: number;
+}
+
+const SOLAR_STATIONS: SolarStation[] = [
   { id: 'Umuahia-Terminal', name: 'Umuahia Solar Terminal', chargers: 4 },
   { id: 'Aba-Terminal', name: 'Aba Solar Terminal', chargers: 4 },
 ];
 
+export function getSolarThroughput(): number {
+  const hour = new Date().getHours();
+  if (hour >= 11 && hour <= 14) return 1.0;
+  if (hour >= 8 && hour <= 16) return 0.85;
+  if (hour >= 6 && hour <= 17) return 0.55;
+  return 0.2;
+}
+
 export function dispatchToCharger(busId: string, currentSoC: number): ChargeSlot | null {
   if (currentSoC > 20) return null;
+  const throughputFactor = getSolarThroughput();
   const station = SOLAR_STATIONS.reduce((a, b) => a.chargers < b.chargers ? a : b);
+  const effectiveChargers = Math.round(station.chargers * throughputFactor);
   return {
     stationId: station.id,
     stationName: station.name,
-    estimatedWaitMinutes: Math.max(0, 15 - station.chargers * 5),
-    chargersAvailable: station.chargers,
+    estimatedWaitMinutes: effectiveChargers > 0 ? Math.max(5, Math.round(15 / throughputFactor)) : 60,
+    chargersAvailable: Math.max(0, effectiveChargers),
+    throughputFactor,
   };
+}
+
+export function estimateChargeTime(currentSoC: number, targetSoC: number = 90): number {
+  const throughputFactor = getSolarThroughput();
+  const deficit = targetSoC - currentSoC;
+  const baseMinutesPerPct = 1.2;
+  return Math.round((deficit * baseMinutesPerPct) / Math.max(0.2, throughputFactor));
 }

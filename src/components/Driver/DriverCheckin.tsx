@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
+import { recordCheckEvent, isMaintenanceRequired, type CheckItemKey } from '../../utils/maintenanceTracker';
+import { FLEET, setBusStatus } from '../../data/fleet';
+import { generateRollingTicketQr } from '../../utils/secureTicketQr';
+import { getSolarThroughput, estimateChargeTime } from '../../utils/telemetry';
 
 interface VehicleChecklist {
   batterySoC: boolean;
@@ -19,7 +23,7 @@ const INITIAL_CHECKLIST: VehicleChecklist = {
   fireExtinguisher: false, firstAid: false,
 };
 
-const CHECKLIST_ITEMS: { key: keyof VehicleChecklist; label: string }[] = [
+const CHECKLIST_ITEMS: { key: CheckItemKey; label: string }[] = [
   { key: 'batterySoC', label: 'Battery charge ≥ 80%' },
   { key: 'cctv', label: 'CCTV functional' },
   { key: 'emergencyExits', label: 'Emergency exits clear' },
@@ -30,24 +34,46 @@ const CHECKLIST_ITEMS: { key: keyof VehicleChecklist; label: string }[] = [
   { key: 'firstAid', label: 'First aid kit stocked' },
 ];
 
-const PLATE_NUMBERS = ['ABN-101X', 'ABN-102Y', 'ABN-103Z', 'ABN-104W', 'ABN-105V'];
+const PLATE_NUMBERS = FLEET.map((b) => b.plateNumber).slice(0, 10);
 
 const DriverCheckin = () => {
-  const [step, setStep] = useState<'login' | 'checklist' | 'done'>('login');
+  const [step, setStep] = useState<'login' | 'checklist' | 'done' | 'blocked'>('login');
   const [driverId, setDriverId] = useState('');
   const [coPilotId, setCoPilotId] = useState('');
   const [plate, setPlate] = useState(PLATE_NUMBERS[0]);
+  const [odometer, setOdometer] = useState('');
   const [checklist, setChecklist] = useState<VehicleChecklist>(INITIAL_CHECKLIST);
+  const [maintenanceItems, setMaintenanceItems] = useState<CheckItemKey[]>([]);
+  const [qrToken, setQrToken] = useState('');
   const user = useAuthStore((s) => s.user);
   const showNotification = useNotificationStore((s) => s.showNotification);
 
+  const bus = useMemo(() => FLEET.find((b) => b.plateNumber === plate), [plate]);
+
+  useEffect(() => {
+    if (qrToken) {
+      const timer = setInterval(() => {
+        setQrToken(generateRollingTicketQr(driverId, odometer ? parseInt(odometer) : 0));
+      }, 15000);
+      return () => clearInterval(timer);
+    }
+  }, [qrToken, driverId, odometer]);
+
   const handleLogin = () => {
     if (!driverId) { showNotification('Error', 'Enter driver ID', 'error'); return; }
+    const flagged = isMaintenanceRequired(plate);
+    if (flagged.length >= 3) {
+      setMaintenanceItems(flagged);
+      setStep('blocked');
+      showNotification('Vehicle Blocked', `${plate}: ${flagged.length} items failed 3 consecutive checks`, 'error');
+      return;
+    }
     showNotification('Driver Logged In', `Driver ${driverId} assigned to ${plate}`, 'success');
+    setQrToken(generateRollingTicketQr(driverId, 0));
     setStep('checklist');
   };
 
-  const toggleCheck = (key: keyof VehicleChecklist) =>
+  const toggleCheck = (key: CheckItemKey) =>
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const allChecked = Object.values(checklist).every(Boolean);
@@ -55,19 +81,53 @@ const DriverCheckin = () => {
 
   const handleSubmitChecklist = () => {
     if (!allChecked) { showNotification('Incomplete', 'Complete all checks before signing off', 'error'); return; }
+    const failed = CHECKLIST_ITEMS.filter(({ key }) => !checklist[key]).map(({ key }) => key);
+    const passed = CHECKLIST_ITEMS.filter(({ key }) => checklist[key]).map(({ key }) => key);
+    recordCheckEvent(plate, passed, failed);
+    const flagged = isMaintenanceRequired(plate);
+    if (flagged.length >= 3) {
+      setBusStatus(plate, 'maintenance');
+      setMaintenanceItems(flagged);
+      setStep('blocked');
+      showNotification('Auto-Locked', `${plate} flagged maintenance (${flagged.length} items)`, 'error');
+      return;
+    }
     showNotification('Check-in Complete', `Vehicle ${plate} cleared for service`, 'success');
+    const solarFactor = getSolarThroughput();
+    const chargeEstimate = bus ? estimateChargeTime(bus.batterySoC) : 0;
+    sessionStorage.setItem(`checkin-${plate}-odometer`, odometer);
     setStep('done');
   };
+
+  if (step === 'blocked') {
+    return (
+      <div className="glass-card p-6 text-center border-2 border-red-500/50">
+        <div className="text-6xl mb-4">🚫</div>
+        <h3 className="text-xl font-bold text-red-400 mb-2">Vehicle Blocked — Maintenance Required</h3>
+        <p className="text-gray-400 mb-4">{plate} locked from route assignment</p>
+        <div className="max-w-sm mx-auto space-y-2 mb-6">
+          <p className="text-sm text-gray-500">3-strike threshold exceeded for:</p>
+          {maintenanceItems.map((item) => (
+            <div key={item} className="p-2 bg-red-500/10 rounded-lg text-sm text-red-400">{item}</div>
+          ))}
+        </div>
+        <button className="btn-primary px-6 py-2 rounded-lg"
+          onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); }}>Back to Login</button>
+      </div>
+    );
+  }
 
   if (step === 'done') {
     return (
       <div className="glass-card p-6 text-center">
         <div className="text-6xl mb-4">✅</div>
         <h3 className="text-xl font-bold mb-2">Check-in Complete</h3>
-        <p className="text-gray-400 mb-4">Vehicle {plate} is ready for service</p>
-        <p className="text-sm text-gray-500">Battery: {Math.floor(Math.random() * 20) + 80}% · CCTV OK · All systems go</p>
+        <p className="text-gray-400 mb-2">Vehicle {plate} is ready for service</p>
+        <p className="text-sm text-gray-500">{bus ? `Battery: ${bus.batterySoC}% · Est. charge time: ${estimateChargeTime(bus.batterySoC)} min` : ''}</p>
+        <p className="text-sm text-gray-500">Solar throughput: {Math.round(getSolarThroughput() * 100)}%</p>
+        {odometer && <p className="text-sm text-gray-500">Odometer: {parseInt(odometer).toLocaleString()} km</p>}
         <button className="btn-primary mt-6 px-6 py-2 rounded-lg"
-          onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); }}>New Check-in</button>
+          onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); setOdometer(''); }}>New Check-in</button>
       </div>
     );
   }
@@ -100,6 +160,13 @@ const DriverCheckin = () => {
               {PLATE_NUMBERS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Odometer Reading (km)</label>
+            <input type="text" value={odometer}
+              onChange={(e) => setOdometer(e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 45230" maxLength={7}
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+          </div>
           <button className="w-full btn-primary py-3 rounded-lg" onClick={handleLogin}>
             Start Check-in
           </button>
@@ -109,7 +176,10 @@ const DriverCheckin = () => {
       {step === 'checklist' && (
         <div className="space-y-4 max-w-lg">
           <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-gray-400">Vehicle: <span className="text-white font-semibold">{plate}</span></p>
+            <div>
+              <p className="text-sm text-gray-400">Vehicle: <span className="text-white font-semibold">{plate}</span></p>
+              {bus && <p className="text-xs text-gray-500">Battery: {bus.batterySoC}% · Range: {bus.rangeKm} km</p>}
+            </div>
             <span className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full">{checkedCount}/8</span>
           </div>
           <div className="space-y-2">

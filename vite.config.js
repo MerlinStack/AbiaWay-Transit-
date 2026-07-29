@@ -54,31 +54,30 @@ export default defineConfig(({ mode }) => {
       open: true,
     },
     define: {
-      global: 'window', // Fix for Leaflet
+      global: 'window',
     },
     build: {
+      target: 'esnext',
       outDir: 'dist',
       sourcemap: false,
       minify: isProduction ? 'terser' : 'esbuild',
       terserOptions: isProduction ? {
         compress: {
-          drop_console: true,
+          drop_console: false,
           drop_debugger: true,
         },
-        format: {
-          comments: false,
-        },
+        format: { comments: false },
         mangle: true,
       } : {},
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-helmet-async')) {
-                return 'vendor-react';
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('react-helmet-async')) {
+                return 'vendor-core';
               }
-              if (id.includes('leaflet')) {
-                return 'vendor-leaflet';
+              if (id.includes('leaflet') || id.includes('@react-google-maps')) {
+                return 'vendor-maps';
               }
               if (id.includes('qrcode.react')) {
                 return 'vendor-qrcode';
@@ -86,17 +85,23 @@ export default defineConfig(({ mode }) => {
               if (id.includes('lucide-react')) {
                 return 'vendor-lucide';
               }
+              if (id.includes('@mui')) {
+                return 'vendor-mui';
+              }
               return 'vendor-other';
             }
           },
+          chunkFileNames: 'assets/js/[name]-[hash].js',
+          entryFileNames: 'assets/js/[name]-[hash].js',
+          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
         },
       },
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 600,
       assetsDir: 'assets',
       emptyOutDir: true,
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'leaflet', 'qrcode.react', 'lucide-react', 'react-helmet-async'],
+      include: ['react', 'react-dom', 'leaflet', 'qrcode.react', 'lucide-react', '@mui/material', '@mui/icons-material/esm'],
     },
   };
 });

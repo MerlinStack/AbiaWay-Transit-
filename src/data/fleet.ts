@@ -50,6 +50,18 @@ export const getBatteryColor = (soc: number): string => {
   return '#ef4444';
 };
 
+export const setBusStatus = (plate: string, status: FleetBus['status']): boolean => {
+  const bus = FLEET.find((b) => b.plateNumber === plate);
+  if (!bus) return false;
+  bus.status = status;
+  if (status === 'maintenance') {
+    bus.driverId = null;
+    bus.coPilotId = null;
+    bus.routeId = null;
+  }
+  return true;
+};
+
 export const getFleetSummary = () => ({
   total: FLEET.length,
   active: FLEET.filter((b) => b.status === 'active').length,
