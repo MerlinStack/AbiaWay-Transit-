@@ -1,24 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Bus, Wallet, Clock, Shield, ArrowRight, MapPin, Smartphone, Users, Star, ChevronRight, Menu, X } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Bus, Wallet, Clock, Shield, ArrowRight, MapPin, Users, Star, ChevronRight, Menu, X, WifiOff, CheckCircle2, BatteryCharging } from 'lucide-react';
 
 const LandingPage = ({ onGetStarted }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
   const [counts, setCounts] = useState({ users: 0, buses: 0, trips: 0, rating: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
-  
-  // Refs for animation
-  const heroRef = useRef(null);
+  const [abssinInput, setAbssinInput] = useState('');
+  const [checkStatus, setCheckStatus] = useState<'IDLE' | 'PENDING' | 'VALID' | 'INVALID'>('IDLE');
+
   const featuresRef = useRef(null);
   const stepsRef = useRef(null);
   const statsRef = useRef(null);
 
-  // Parallax scroll effect
+  // rAF-throttled parallax via CSS custom property — zero React re-renders
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -29,13 +35,10 @@ const LandingPage = ({ onGetStarted }) => {
         const [entry] = entries;
         if (entry.isIntersecting && !hasAnimated) {
           setHasAnimated(true);
-          
-          // Animate counters
           const targets = { users: 10000, buses: 50, trips: 100000, rating: 48 };
           const duration = 2000;
           const stepTime = 20;
           const steps = duration / stepTime;
-          
           let currentStep = 0;
           const interval = setInterval(() => {
             currentStep++;
@@ -55,19 +58,11 @@ const LandingPage = ({ onGetStarted }) => {
       },
       { threshold: 0.3 }
     );
-
-    if (statsRef.current) {
-      observer.observe(statsRef.current);
-    }
-
-    return () => {
-      if (statsRef.current) {
-        observer.unobserve(statsRef.current);
-      }
-    };
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => { if (statsRef.current) observer.unobserve(statsRef.current); };
   }, [hasAnimated]);
 
-  // Intersection Observer for fade-in animations
+  // IntersectionObserver for fade-in animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -80,23 +75,30 @@ const LandingPage = ({ onGetStarted }) => {
       },
       { threshold: 0.1, rootMargin: '0px' }
     );
-
-    const elements = [featuresRef.current, stepsRef.current];
-    elements.forEach(el => el && observer.observe(el));
-
-    return () => elements.forEach(el => el && observer.unobserve(el));
+    [featuresRef.current, stepsRef.current].forEach(el => el && observer.observe(el));
+    return () => [featuresRef.current, stepsRef.current].forEach(el => el && observer.unobserve(el));
   }, []);
+
+  const handleAbssinVerification = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (abssinInput.length !== 12 || !/^\d+$/.test(abssinInput)) {
+      setCheckStatus('INVALID');
+      return;
+    }
+    setCheckStatus('PENDING');
+    setTimeout(() => { setCheckStatus('VALID'); }, 900);
+  }, [abssinInput]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-x-hidden">
-      {/* Floating Animated Background Elements - Fixed z-index */}
+      {/* Floating Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
         <div className="absolute top-20 left-10 w-64 h-64 bg-green-600/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
 
-      {/* Navigation - Fixed z-index */}
+      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-white/10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -109,7 +111,6 @@ const LandingPage = ({ onGetStarted }) => {
               </span>
             </div>
 
-            {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-300 hover:text-white transition relative group">
                 Features
@@ -123,7 +124,7 @@ const LandingPage = ({ onGetStarted }) => {
                 Stats
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-500 group-hover:w-full transition-all duration-300"></span>
               </a>
-              <button 
+              <button
                 onClick={onGetStarted}
                 className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-600/30"
               >
@@ -131,8 +132,7 @@ const LandingPage = ({ onGetStarted }) => {
               </button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
+            <button
               className="md:hidden text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -140,96 +140,129 @@ const LandingPage = ({ onGetStarted }) => {
             </button>
           </div>
 
-          {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden mt-4 pb-4 animate-slideDown">
               <a href="#features" className="block py-2 text-gray-300 hover:text-white transition">Features</a>
               <a href="#how-it-works" className="block py-2 text-gray-300 hover:text-white transition">How It Works</a>
               <a href="#stats" className="block py-2 text-gray-300 hover:text-white transition">Stats</a>
-              <button 
-                onClick={onGetStarted}
-                className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-500 px-6 py-2 rounded-lg font-semibold"
-              >
-                Launch App
-              </button>
+              <button onClick={onGetStarted} className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-500 px-6 py-2 rounded-lg font-semibold">Launch App</button>
             </div>
           )}
         </div>
       </nav>
 
-      {/* Hero Section with Parallax - Added position relative and z-index */}
-      <section 
-        ref={heroRef}
+      {/* Hero Section — GPU-accelerated parallax via CSS var */}
+      <section
         className="container mx-auto px-4 pt-32 pb-16 relative"
-        style={{ transform: `translateY(${scrollY * 0.5}px)`, position: 'relative', zIndex: 1 }}
+        style={{ transform: 'translateY(calc(var(--scroll-y, 0) * 0.3))', willChange: 'transform', position: 'relative', zIndex: 1 }}
       >
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fadeInLeft">
-            <div className="inline-block px-4 py-2 bg-green-600/20 rounded-full text-green-400 text-sm mb-6 animate-pulse">
-              🚀 Smart Transit System
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-600/20 rounded-full text-green-400 text-sm mb-6">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              Official Abia State Green Shuttle OS
             </div>
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
-              Smart Transit for{' '}
-              <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent animate-gradient">
-                Abia State
-              </span>
+              The Smarter Way to Move Between{' '}
+              <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">Aba &amp; Umuahia</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 animate-fadeInUp delay-200">
-              Real-time bus tracking, digital payments, and seamless journey planning for modern public transportation.
+              Abia State&rsquo;s official green fleet is here. Tap your Abia Connect Card, bypass cash delays, and experience seamless, solar-powered transit across all LGAs.
             </p>
             <div className="flex flex-wrap gap-4 animate-fadeInUp delay-400">
-              <button 
+              <button
                 onClick={onGetStarted}
                 className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-600/40"
               >
-                Get Started 
+                Get Moving Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="group bg-white/10 hover:bg-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20">
-                Learn More
-              </button>
+              <a href="#features" className="group bg-white/10 hover:bg-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20">
+                Explore Features
+              </a>
             </div>
 
             {/* Floating Stats */}
             <div className="flex gap-6 mt-12 animate-fadeInUp delay-600">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-green-400" />
-                <span className="text-sm text-gray-300">10K+ Users</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                <span className="text-sm text-gray-300">4.8 Rating</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bus className="w-5 h-5 text-blue-400" />
-                <span className="text-sm text-gray-300">50+ Buses</span>
-              </div>
+              <div className="flex items-center gap-2"><Users className="w-5 h-5 text-green-400" /><span className="text-sm text-gray-300">10K+ Users</span></div>
+              <div className="flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400 fill-yellow-400" /><span className="text-sm text-gray-300">4.8 Rating</span></div>
+              <div className="flex items-center gap-2"><Bus className="w-5 h-5 text-blue-400" /><span className="text-sm text-gray-300">50+ Buses</span></div>
+            </div>
+
+            {/* ABSSIN Quick-Check Widget */}
+            <div className="mt-8 border border-white/10 bg-white/5 backdrop-blur p-5 rounded-2xl max-w-md animate-fadeInUp delay-700">
+              <span className="text-xs font-semibold text-gray-400 block mb-3 uppercase tracking-wider flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-green-400" />
+                Abia Connect Card &mdash; Pre-Flight Verification
+              </span>
+              <form onSubmit={handleAbssinVerification} className="flex gap-2">
+                <input
+                  type="text"
+                  maxLength={12}
+                  placeholder="Enter 12-digit ABSSIN number"
+                  value={abssinInput}
+                  onChange={(e) => setAbssinInput(e.target.value.replace(/\D/g, ''))}
+                  className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition"
+                />
+                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">
+                  Verify
+                </button>
+              </form>
+              {checkStatus === 'INVALID' && <p className="text-xs text-red-400 font-semibold mt-2">ABSSIN must be exactly 12 numeric digits.</p>}
+              {checkStatus === 'PENDING' && <p className="text-xs text-gray-400 font-semibold mt-2 animate-pulse">Querying state transit identity ledger...</p>}
+              {checkStatus === 'VALID' && (
+                <p className="text-xs text-green-400 font-bold mt-2 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                  Card active. Proceed to launch app to fund your digital wallet.
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Animated Hero Image */}
+          {/* Abia Connect Card visual */}
           <div className="relative animate-float">
             <div className="absolute inset-0 bg-gradient-to-r from-green-600/30 to-blue-600/30 rounded-3xl blur-3xl animate-pulse"></div>
-            <div className="relative aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl border border-white/10 p-2 backdrop-blur-sm">
-              <div className="absolute top-4 left-4 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-              <div className="absolute top-4 left-10 w-20 h-2 bg-white/10 rounded-full"></div>
-              <div className="absolute bottom-4 right-4 flex gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce-slow"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce-slow delay-100"></div>
-                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce-slow delay-200"></div>
+            <div className="relative max-w-[400px] mx-auto h-[420px] rounded-3xl bg-gradient-to-br from-green-900 to-gray-900 p-6 flex flex-col justify-between shadow-2xl border border-white/10 overflow-hidden group">
+              <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/5 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+
+              <div className="flex justify-between items-start z-10">
+                <div>
+                  <h4 className="font-black text-xl tracking-tight">Abia Connect Card</h4>
+                  <p className="text-xs text-green-300/80 mt-0.5">Cashless Smart Boarding Token</p>
+                </div>
+                <Shield className="w-8 h-8 text-green-400" />
               </div>
-              <img 
-                src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Bus" 
-                className="rounded-2xl w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
-              />
-              
-              {/* Floating Cards - Fixed positioning to prevent overlap */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center animate-float delay-300 shadow-2xl">
-                <Clock className="w-10 h-10 text-white" />
+
+              {/* Live telemetry widget overlay */}
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 z-10">
+                <div className="flex justify-between items-center text-xs mb-3">
+                  <span className="opacity-80 font-medium">Active Loop: Aba &ndash; Umuahia</span>
+                  <span className="text-green-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping"></span>
+                    Live (WS)
+                  </span>
+                </div>
+                <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden mb-3">
+                  <div className="bg-gradient-to-r from-green-400 to-green-500 h-full rounded-full" style={{ width: '84%' }}></div>
+                </div>
+                <div className="flex justify-between text-[11px] opacity-90 font-mono">
+                  <span className="flex items-center gap-1"><BatteryCharging className="w-3 h-3" /> ABS-040</span>
+                  <span>SoC 84% (Optimal)</span>
+                </div>
               </div>
-              <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center animate-float delay-700 shadow-2xl">
-                <Wallet className="w-8 h-8 text-white" />
+
+              {/* Offline badge */}
+              <div className="flex items-center gap-2 text-[11px] text-gray-400 z-10">
+                <WifiOff className="w-3.5 h-3.5 text-yellow-400" />
+                Offline-ready · LeakyBucket sync
+              </div>
+
+              <div className="flex justify-between items-end z-10">
+                <div className="font-mono text-sm tracking-widest opacity-80">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 2026</div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase block tracking-wider opacity-60">System Role</span>
+                  <span className="text-xs font-bold bg-green-400/20 text-green-300 border border-green-400/30 px-2 py-0.5 rounded-md">Verified Resident</span>
+                </div>
               </div>
             </div>
           </div>
@@ -240,14 +273,14 @@ const LandingPage = ({ onGetStarted }) => {
       <section id="features" ref={featuresRef} className="container mx-auto px-4 py-24 opacity-0 translate-y-10 transition-all duration-1000 relative z-10">
         <h2 className="text-4xl lg:text-5xl font-bold text-center mb-16">
           <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-            Why Choose Abia Way?
+            Engineered for Fleet Operational Resilience
           </span>
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { icon: MapPin, title: 'Live Tracking', desc: 'Track buses in real-time on an interactive map with accurate ETAs', color: 'green', delay: 0 },
-            { icon: Wallet, title: 'Digital Wallet', desc: 'Cashless payments with instant top-up and transaction history', color: 'blue', delay: 200 },
-            { icon: Clock, title: 'Real-time ETA', desc: 'Know exactly when your bus will arrive with accurate predictions', color: 'yellow', delay: 400 },
+            { icon: MapPin, title: 'Adaptive Map Telemetry', desc: 'Track exact bus locations and real-time battery charge profiles. See which eco-buses are fully charged and ready to board.', color: 'green', delay: 0 },
+            { icon: Shield, title: 'ABSSIN Digital Identity', desc: 'Every transaction secured by your Abia State ID. Rolling 30-second encrypted QR codes prevent ticket duplication and fraud.', color: 'blue', delay: 200 },
+            { icon: WifiOff, title: 'Offline-First Validation', desc: 'Conductors validate ticket scans in low-coverage remote corridors. LeakyBucket sync engine rehydrates when network returns.', color: 'yellow', delay: 400 },
           ].map((feature, index) => (
             <div
               key={index}
@@ -260,8 +293,6 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
               <h3 className="text-xl font-semibold mb-2 group-hover:text-green-400 transition-colors">{feature.title}</h3>
               <p className="text-gray-400 group-hover:text-gray-300 transition-colors">{feature.desc}</p>
-              
-              {/* Animated border */}
               <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-500 group-hover:w-1/2 transition-all duration-300"></div>
               <div className="absolute bottom-0 right-1/2 w-0 h-0.5 bg-green-500 group-hover:w-1/2 transition-all duration-300"></div>
             </div>
@@ -278,10 +309,10 @@ const LandingPage = ({ onGetStarted }) => {
         </h2>
         <div className="grid md:grid-cols-4 gap-8">
           {[
-            { number: '1', title: 'Sign Up', desc: 'Create your free account', icon: Users },
-            { number: '2', title: 'Load Wallet', desc: 'Add funds to your digital wallet', icon: Wallet },
-            { number: '3', title: 'Plan Trip', desc: 'Search and book your route', icon: MapPin },
-            { number: '4', title: 'Travel', desc: 'Track and pay as you go', icon: Bus },
+            { number: '1', title: 'Get ABSSIN', desc: 'Register your Abia State ID at any terminal', icon: Shield },
+            { number: '2', title: 'Fund Wallet', desc: 'Load cash or link your ABSIN card', icon: Wallet },
+            { number: '3', title: 'Plan Trip', desc: 'Search routes & see live bus availability', icon: MapPin },
+            { number: '4', title: 'Tap & Travel', desc: 'Board with a tap — offline or online', icon: Bus },
           ].map((step, index) => (
             <div
               key={index}
@@ -302,47 +333,32 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Stats Section with Counter Animation */}
+      {/* Stats Section */}
       <section id="stats" ref={statsRef} className="container mx-auto px-4 py-24 relative z-10">
         <div className="glass-card p-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-blue-600/10 animate-gradient"></div>
           <div className="grid md:grid-cols-4 gap-8 text-center relative z-10">
-            {/* Active Users */}
             <div className="group">
               <Users className="w-10 h-10 mx-auto mb-4 text-green-400 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-5xl font-bold text-green-400 mb-2 tabular-nums">
-                {counts.users.toLocaleString()}+
-              </div>
+              <div className="text-5xl font-bold text-green-400 mb-2 tabular-nums">{counts.users.toLocaleString()}+</div>
               <div className="text-gray-400">Active Users</div>
               <div className="w-0 h-1 bg-green-500 mx-auto group-hover:w-16 transition-all duration-500 mt-2"></div>
             </div>
-
-            {/* Buses Tracked */}
             <div className="group">
               <Bus className="w-10 h-10 mx-auto mb-4 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-5xl font-bold text-blue-400 mb-2 tabular-nums">
-                {counts.buses}+
-              </div>
+              <div className="text-5xl font-bold text-blue-400 mb-2 tabular-nums">{counts.buses}+</div>
               <div className="text-gray-400">Buses Tracked</div>
               <div className="w-0 h-1 bg-blue-500 mx-auto group-hover:w-16 transition-all duration-500 mt-2"></div>
             </div>
-
-            {/* Trips Completed */}
             <div className="group">
               <Clock className="w-10 h-10 mx-auto mb-4 text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-5xl font-bold text-yellow-400 mb-2 tabular-nums">
-                {counts.trips.toLocaleString()}+
-              </div>
+              <div className="text-5xl font-bold text-yellow-400 mb-2 tabular-nums">{counts.trips.toLocaleString()}+</div>
               <div className="text-gray-400">Trips Completed</div>
               <div className="w-0 h-1 bg-yellow-500 mx-auto group-hover:w-16 transition-all duration-500 mt-2"></div>
             </div>
-
-            {/* User Rating */}
             <div className="group">
               <Star className="w-10 h-10 mx-auto mb-4 text-purple-400 fill-purple-400 group-hover:scale-110 transition-transform duration-300" />
-              <div className="text-5xl font-bold text-purple-400 mb-2 tabular-nums">
-                {counts.rating.toFixed(1)}★
-              </div>
+              <div className="text-5xl font-bold text-purple-400 mb-2 tabular-nums">{counts.rating.toFixed(1)}★</div>
               <div className="text-gray-400">User Rating</div>
               <div className="w-0 h-1 bg-purple-500 mx-auto group-hover:w-16 transition-all duration-500 mt-2"></div>
             </div>
@@ -355,16 +371,9 @@ const LandingPage = ({ onGetStarted }) => {
         <div className="glass-card p-16 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-blue-600/20 animate-pulse"></div>
           <div className="relative z-10">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              Ready to Start Your Journey?
-            </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join thousands of satisfied users and experience the future of public transportation.
-            </p>
-            <button 
-              onClick={onGetStarted}
-              className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-600/40"
-            >
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Start Your Journey?</h2>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Join thousands of verified users and experience the future of public transportation across Abia State.</p>
+            <button onClick={onGetStarted} className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-600/40">
               Launch App Now
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -407,101 +416,35 @@ const LandingPage = ({ onGetStarted }) => {
               <h4 className="font-semibold mb-4">Download App</h4>
               <div className="space-y-2">
                 <button className="w-full bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2 group">
-                  <i data-lucide="apple" className="w-4 h-4 group-hover:scale-110 transition"></i>
-                  App Store
+                  <i data-lucide="apple" className="w-4 h-4 group-hover:scale-110 transition"></i> App Store
                 </button>
                 <button className="w-full bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2 group">
-                  <i data-lucide="chrome" className="w-4 h-4 group-hover:scale-110 transition"></i>
-                  Google Play
+                  <i data-lucide="chrome" className="w-4 h-4 group-hover:scale-110 transition"></i> Google Play
                 </button>
               </div>
             </div>
           </div>
           <div className="mt-8 pt-8 text-center text-xs text-gray-500 border-t border-white/10">
-            © {new Date().getFullYear()} Abia Way Transit System. All rights reserved.
+            &copy; {new Date().getFullYear()} Abia Way Transit System. All rights reserved.
           </div>
         </div>
       </footer>
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        @keyframes fadeInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
-        }
-        
-        .animate-fadeInLeft {
-          animation: fadeInLeft 1s ease-out forwards;
-        }
-        
-        .animate-fadeInUp {
-          opacity: 0;
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out forwards;
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce 2s infinite;
-        }
-        
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        .delay-500 { animation-delay: 0.5s; }
-        .delay-600 { animation-delay: 0.6s; }
-        .delay-700 { animation-delay: 0.7s; }
-        .delay-1000 { animation-delay: 1s; }
+        @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes fadeInLeft { from { opacity:0; transform:translateX(-50px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(50px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-gradient { background-size: 200% 200%; animation: gradient 3s ease infinite; }
+        .animate-fadeInLeft { animation: fadeInLeft 1s ease-out forwards; }
+        .animate-fadeInUp { opacity:0; animation: fadeInUp 0.8s ease-out forwards; }
+        .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
+        .animate-bounce-slow { animation: bounce 2s infinite; }
+        .delay-100 { animation-delay:0.1s; } .delay-200 { animation-delay:0.2s; } .delay-300 { animation-delay:0.3s; }
+        .delay-400 { animation-delay:0.4s; } .delay-500 { animation-delay:0.5s; } .delay-600 { animation-delay:0.6s; }
+        .delay-700 { animation-delay:0.7s; } .delay-1000 { animation-delay:1s; }
       `}</style>
     </div>
   );

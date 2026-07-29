@@ -103,26 +103,7 @@ const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess
           })}
         </div>
 
-        <div className="mt-4 p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
-          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-            <i data-lucide="credit-card" className="w-4 h-4 text-purple-400"></i>
-            Test ABSIN Cards:
-          </h4>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="font-mono">1234 5678 9012 3456</span>
-              <span className="text-green-400">PIN: 1234 \u2022 N12,450</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-mono">1111 2222 3333 4444</span>
-              <span className="text-yellow-400">PIN: 1234 \u2022 N5,000</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-mono">5555 6666 7777 8888</span>
-              <span className="text-purple-400">PIN: 1234 \u2022 N25,000</span>
-            </div>
-          </div>
-        </div>
+
 
         <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg flex items-center gap-3">
           <i data-lucide="shield" className="w-8 h-8 text-green-400"></i>

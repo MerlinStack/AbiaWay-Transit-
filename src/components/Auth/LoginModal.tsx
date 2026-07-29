@@ -4,26 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
-import config from '../../config';
-
-const USER_DATABASE: Record<string, { id: string; name: string; password: string; role: string; tier: string; avatar: string; phone: string; joinDate: string }> = {
-  'abuoma@abiaway.gov.ng': { id: 'USR-001', name: 'Abuoma David', password: config.demo.passengerPassword, role: 'passenger', tier: 'Premium', avatar: 'AD', phone: '+234-801-234-5678', joinDate: '2024-01-15' },
-  'chidi@abiaway.gov.ng': { id: 'USR-002', name: 'Chidi Okonkwo', password: config.demo.driverPassword, role: 'driver', tier: 'Professional', avatar: 'CO', phone: '+234-802-345-6789', joinDate: '2024-02-20' },
-  'admin@abiaway.gov.ng': { id: 'ADM-001', name: 'Admin User', password: config.demo.adminPassword, role: 'admin', tier: 'Administrator', avatar: 'AU', phone: '+234-803-456-7890', joinDate: '2024-01-01' },
-  'ngozi@abiaway.gov.ng': { id: 'USR-003', name: 'Ngozi Eze', password: config.demo.goldPassword, role: 'passenger', tier: 'Gold', avatar: 'NE', phone: '+234-804-567-8901', joinDate: '2024-03-01' },
-};
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address')
-    .refine((val) => Object.keys(USER_DATABASE).includes(val.toLowerCase()), { message: 'No account found with this email' }),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .regex(/(?=.*[A-Z])(?=.*[0-9])/, 'Password must contain at least one uppercase letter and one number'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
   rememberMe: z.boolean().optional(),
 });
 
@@ -38,7 +22,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
-  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [activeField, setActiveField] = useState<string | null>(null);
 
   const login = useAuthStore((s) => s.login);
@@ -56,8 +39,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
     defaultValues: { email: '', password: '', rememberMe: false },
   });
 
-  const emailValue = watch('email');
-
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
@@ -65,16 +46,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setValue('rememberMe', true);
     }
   }, [setValue]);
-
-  useEffect(() => {
-    if (emailValue && emailValue.length > 2 && !emailValue.includes('@')) {
-      setEmailSuggestions(
-        Object.keys(USER_DATABASE).filter((u) => u.toLowerCase().includes(emailValue.toLowerCase())).slice(0, 3)
-      );
-    } else {
-      setEmailSuggestions([]);
-    }
-  }, [emailValue]);
 
   useEffect(() => {
     if (loginAttempts >= 5) {
@@ -96,26 +67,18 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
       return;
     }
 
-    const user = USER_DATABASE[data.email.toLowerCase()];
-    if (user && user.password === data.password) {
-      user.lastLogin = new Date().toISOString();
+    const result = await login(data.email, data.password);
+    if (result.success) {
+      showNotification('Welcome back!', `Successfully logged in`, 'success');
+      setLoginAttempts(0);
 
       if (data.rememberMe) {
         localStorage.setItem('rememberedEmail', data.email);
-        localStorage.setItem('userToken', `token_${user.id}_${Date.now()}`);
       } else {
         localStorage.removeItem('rememberedEmail');
-        localStorage.removeItem('userToken');
       }
 
-      sessionStorage.setItem('currentUser', JSON.stringify({ ...user, password: undefined }));
-
-      const result = await login(data.email, data.password, user);
-      if (result.success) {
-        showNotification('Welcome back!', `Successfully logged in as ${user.name}`, 'success');
-        setLoginAttempts(0);
-        onClose();
-      }
+      onClose();
     } else {
       setLoginAttempts((prev) => prev + 1);
       const remaining = 4 - loginAttempts;
@@ -125,27 +88,12 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
   };
 
-  const handleQuickDemo = (demoUser: string) => {
-    setValue('email', demoUser);
-    setValue('password', USER_DATABASE[demoUser].password);
-    setValue('rememberMe', false);
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) form.requestSubmit();
-    }, 100);
-  };
-
   const handleForgotPassword = () => {
-    if (!emailValue) {
+    if (!watch('email')) {
       showNotification('Email Required', 'Please enter your email address first', 'warning');
       return;
     }
-    const user = USER_DATABASE[emailValue.toLowerCase()];
-    if (user) {
-      showNotification('Password Reset', `Reset link sent to ${emailValue}. Check your inbox.`, 'info');
-    } else {
-      showNotification('Email Not Found', 'No account found with this email address.', 'error');
-    }
+    showNotification('Password Reset', `Reset link sent to ${watch('email')}. Check your inbox.`, 'info');
   };
 
   return (
@@ -189,15 +137,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   {errors.email.message}
                 </p>
               )}
-              {activeField === 'email' && emailSuggestions.length > 0 && (
-                <div className="absolute z-10 mt-1 w-72 bg-gray-800 rounded-lg border border-white/10 overflow-hidden">
-                  {emailSuggestions.map((s) => (
-                    <button key={s} type="button" onClick={() => { setValue('email', s); setEmailSuggestions([]); }} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 transition">
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             <div className="mb-4">
@@ -221,7 +160,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   {errors.password.message}
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters with uppercase and number</p>
             </div>
 
             <div className="flex justify-between items-center mb-6">
@@ -270,24 +208,6 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
               )}
             </button>
           </form>
-
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <p className="text-xs text-gray-500 text-center mb-3">Quick Demo Accounts</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => handleQuickDemo('abuoma@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
-                <i data-lucide="user" className="w-3 h-3"></i> Passenger
-              </button>
-              <button onClick={() => handleQuickDemo('chidi@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
-                <i data-lucide="truck" className="w-3 h-3"></i> Driver
-              </button>
-              <button onClick={() => handleQuickDemo('admin@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
-                <i data-lucide="shield" className="w-3 h-3"></i> Admin
-              </button>
-              <button onClick={() => handleQuickDemo('ngozi@abiaway.gov.ng')} className="text-xs bg-white/5 hover:bg-white/10 p-2 rounded-lg transition flex items-center justify-center gap-1">
-                <i data-lucide="star" className="w-3 h-3"></i> Gold Member
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

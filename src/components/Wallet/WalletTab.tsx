@@ -512,7 +512,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 </div>
 
                 <div className="text-center text-xs text-gray-500">
-                  <p>Test cards: 1234 5678 9012 3456 (PIN: 1234)</p>
+
                 </div>
               </div>
             </div>

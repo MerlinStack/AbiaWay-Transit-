@@ -16,7 +16,7 @@ const ABSINCardDisplay = () => {
       const service = getABSINService();
       await service.initialize();
       
-      // For demo, simulate a linked card
+      // Simulate a linked card
       setCardInfo({
         cardId: '**** **** **** 3456',
         cardholder: 'Abuoma David',

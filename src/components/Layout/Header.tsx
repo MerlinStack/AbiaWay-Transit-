@@ -56,7 +56,7 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
     >
       <div className="min-w-0 flex-1">
         <h2 className="text-3xl font-extrabold mb-1 text-white">
-          {greeting}, {user?.name || 'Abuoma'}! 👋
+          {greeting}, {user?.name || 'Guest'}! 👋
         </h2>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-wrap">
           <Chip label="System Online" color="success" icon={<CircleIcon style={{ width: 10, height: 10 }} />} size="small" />

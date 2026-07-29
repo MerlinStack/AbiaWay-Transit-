@@ -10,7 +10,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "firebase deploy",
     "analyze": "vite build --mode analyze",
     "test": "vitest",
     "test:run": "vitest run"
@@ -22,6 +22,7 @@
     "@mui/icons-material": "^5.14.0",
     "@mui/material": "^5.14.0",
     "date-fns": "^4.1.0",
+    "firebase": "^12.16.0",
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
     "leaflet-fullscreen": "^1.0.2",

@@ -2,7 +2,8 @@ import { calculateRealWorldRange, getSolarThroughput, dispatchToCharger, estimat
 import { verifyRollingTicketQrWithSkew, generateRollingTicketQr } from './secureTicketQr';
 import { recordCheckEvent, isMaintenanceRequired, getConsecutiveFailures } from './maintenanceTracker';
 import { LeakyBucketSync } from './syncEngine';
-import { TelemetrySyncEngine, type TransportMode } from './telemetrySync';
+import { TelemetrySyncEngine } from './telemetrySync';
+import type { TransportMode } from './telemetrySync';
 import { FLEET, getFleetSummary, getBatteryColor, setBusStatus } from '../data/fleet';
 
 export function runSystemSmokeTest(): string {

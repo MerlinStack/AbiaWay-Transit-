@@ -31,6 +31,9 @@ const LazyDriverCheckin = lazy(() => import('./components/Driver/DriverCheckin')
 const LazyConductorTab = lazy(() => import('./components/Driver/ConductorTab'));
 const LazyABSSINRegister = lazy(() => import('./components/Auth/ABSSINRegister'));
 const LazySystemDiagnostics = lazy(() => import('./components/SystemDiagnostics'));
+const LazyAdminDashboard = lazy(() => import('./components/Admin/AdminDashboard'));
+const LazyAdminDriverPanel = lazy(() => import('./components/Admin/AdminDriverPanel'));
+const LazyLoginPortal = lazy(() => import('./components/Auth/LoginPortal'));
 
 function AppContent() {
   const [modalOpen, setModalOpen] = useState(null);
@@ -41,8 +44,9 @@ function AppContent() {
   const isLanding = location.pathname === '/';
 
   useEffect(() => {
-    useAuthStore.getState().verifyToken();
+    const unsubscribe = useAuthStore.getState().initialize();
     useABSINStore.getState().initialize();
+    return () => { if (unsubscribe) unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -57,6 +61,14 @@ function AppContent() {
     return (
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <LazyLandingPage onGetStarted={() => navigate('/map')} />
+      </Suspense>
+    );
+  }
+
+  if (location.pathname === '/login') {
+    return (
+      <Suspense fallback={<LoadingSpinner fullScreen />}>
+        <LazyLoginPortal />
       </Suspense>
     );
   }
@@ -130,6 +142,24 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <SEO title="System Diagnostics" description="AbiaWay system diagnostic and verification suite" />
               <LazySystemDiagnostics />
+            </Suspense>
+          } />
+          <Route path="/admin" element={
+            <Suspense fallback={<LoadingSpinner fullScreen />}>
+              <AdminGuard requiredRole="admin">
+                <SEO title="Admin Dashboard" description="System-wide fleet and operations overview" />
+                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+                <LazyAdminDashboard />
+              </AdminGuard>
+            </Suspense>
+          } />
+          <Route path="/admin/drivers" element={
+            <Suspense fallback={<LoadingSpinner fullScreen />}>
+              <AdminGuard requiredRole="admin">
+                <SEO title="Driver Management" description="View and manage all drivers" />
+                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+                <LazyAdminDriverPanel />
+              </AdminGuard>
             </Suspense>
           } />
           <Route path="*" element={<Navigate to="/map" replace />} />

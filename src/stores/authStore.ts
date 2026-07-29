@@ -1,117 +1,186 @@
 import { create } from 'zustand';
-import API from '../utils/api';
-import config from '../config';
 import { User } from '../types';
+import {
+  firebaseSignIn,
+  firebaseSignOut,
+  onFirebaseAuthChanged,
+  getUserProfile,
+} from '../lib/firebaseAuth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import type { User as FirebaseUser } from 'firebase/auth';
+
+type UserRole = User['role'];
 
 interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
   isAuthenticated: boolean;
+  initialized: boolean;
   setLoading: (loading: boolean) => void;
+  initialize: () => () => void;
   verifyToken: () => Promise<void>;
-  determineUserRole: (email: string) => string;
-  login: (email: string, password: string, userData?: User | null) => Promise<{success: boolean; user?: User; error?: string}>;
-  demoLogin: (role?: string) => Promise<{success: boolean; user?: User}>;
+  login: (email: string, password: string) => Promise<{success: boolean; user?: User; error?: string}>;
+  staffLogin: (badgeId: string, role: 'driver' | 'conductor') => Promise<{success: boolean; user?: User; error?: string}>;
+  adminLogin: (email: string, password: string) => Promise<{success: boolean; user?: User; error?: string}>;
   logout: () => Promise<{success: boolean}>;
   updateUser: (data: Partial<User>) => User;
-  hasRole: (role: string) => boolean;
+  hasRole: (role: UserRole) => boolean;
   isAdmin: () => boolean;
   isDriver: () => boolean;
+  isConductor: () => boolean;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('token'),
+  token: null,
   loading: true,
   isAuthenticated: false,
+  initialized: false,
 
   setLoading: (loading) => set({ loading }),
 
-  verifyToken: async () => {
-    const token = get().token;
-    if (token) {
-      try {
-        const response = await API.auth.verifyToken();
-        if (response.valid) {
-          set({ user: response.user as User, isAuthenticated: true, loading: false });
+  initialize: () => {
+    const unsubscribe = onFirebaseAuthChanged(async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const tokenResult = await firebaseUser.getIdTokenResult();
+        const userProfile = await getUserProfile(firebaseUser.uid);
+
+        if (userProfile) {
+          set({
+            user: userProfile,
+            token: tokenResult.token,
+            isAuthenticated: true,
+            loading: false,
+            initialized: true,
+          });
         } else {
-          localStorage.removeItem('token');
-          set({ user: null, token: null, isAuthenticated: false, loading: false });
+          set({ user: null, token: null, isAuthenticated: false, loading: false, initialized: true });
         }
-      } catch {
-        localStorage.removeItem('token');
+      } else {
+        set({ user: null, token: null, isAuthenticated: false, loading: false, initialized: true });
+      }
+    });
+    return unsubscribe;
+  },
+
+  verifyToken: async () => {
+    const existingToken = get().token;
+    if (!existingToken) {
+      set({ loading: false });
+      return;
+    }
+    try {
+      const currentUser = get().user;
+      if (currentUser) {
+        set({ isAuthenticated: true, loading: false });
+      } else {
         set({ user: null, token: null, isAuthenticated: false, loading: false });
       }
-    } else {
-      set({ loading: false });
+    } catch {
+      set({ user: null, token: null, isAuthenticated: false, loading: false });
     }
   },
 
-  determineUserRole: (email) => {
-    const adminEmails = [
-      'admin@abiaway.gov.ng',
-      'admin@abiaone.gov.ng',
-      'director@abiaway.gov.ng'
-    ];
-    const driverEmails = [
-      'driver@abiaway.gov.ng',
-      'chidi.okonkwo@abiaway.gov.ng',
-      'emeka.okafor@abiaway.gov.ng',
-      'ngozi.eze@abiaway.gov.ng'
-    ];
-    if (adminEmails.includes(email.toLowerCase())) return 'admin';
-    if (driverEmails.includes(email.toLowerCase())) return 'driver';
-    return 'passenger';
-  },
-
-  login: async (email, password, userData = null) => {
+  login: async (email, password) => {
     try {
-      let response;
-      if (userData) {
-        response = { user: userData };
-      } else {
-        response = await API.auth.login(email, password);
+      const firebaseUser = await firebaseSignIn(email, password);
+      const tokenResult = await firebaseUser.getIdTokenResult();
+      let userProfile = await getUserProfile(firebaseUser.uid);
+
+      if (!userProfile) {
+        userProfile = {
+          id: firebaseUser.uid,
+          email: email,
+          name: firebaseUser.displayName || email.split('@')[0],
+          role: 'passenger',
+          tier: 'Premium',
+          avatar: (firebaseUser.displayName || email.split('@')[0]).charAt(0).toUpperCase(),
+          phone: firebaseUser.phoneNumber || '',
+          joinDate: firebaseUser.metadata.creationTime || new Date().toISOString(),
+          loginTime: new Date().toISOString(),
+          identifier: firebaseUser.uid,
+        };
+
+        await setDoc(doc(db, 'users', firebaseUser.uid), {
+          ...userProfile,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
       }
 
-      const userWithRole = {
-        ...(response.user || userData),
-        email: email || response.user?.email,
-        role: get().determineUserRole(email || response.user?.email),
-        loginTime: new Date().toISOString()
-      };
-
-      const token = response.token || config.demo.authToken;
-      set({ user: userWithRole, token, isAuthenticated: true });
-      localStorage.setItem('token', token);
-      sessionStorage.setItem('currentUser', JSON.stringify(userWithRole));
-
-      return { success: true, user: userWithRole };
-    } catch (error) {
-      return { success: false, error: error.message };
+      set({ user: userProfile, token: tokenResult.token, isAuthenticated: true });
+      sessionStorage.setItem('currentUser', JSON.stringify(userProfile));
+      return { success: true, user: userProfile };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Authentication failed';
+      return { success: false, error: message };
     }
   },
 
-  demoLogin: async (role = 'passenger') => {
-    const demoUsers = {
-      admin: { id: 'ADM-001', email: 'admin@abiaway.gov.ng', name: 'Admin User', role: 'admin', tier: 'Administrator', avatar: 'AU', phone: '+234-803-456-7890', joinDate: '2024-01-01' },
-      driver: { id: 'DRV-001', email: 'chidi.okonkwo@abiaway.gov.ng', name: 'Chidi Okonkwo', role: 'driver', tier: 'Professional', avatar: 'CO', phone: '+234-802-345-6789', joinDate: '2024-02-20' },
-      passenger: { id: 'USR-001', email: 'abuoma@abiaway.gov.ng', name: 'Abuoma David', role: 'passenger', tier: 'Premium', avatar: 'AD', phone: '+234-801-234-5678', joinDate: '2024-01-15' }
-    };
+  staffLogin: async (badgeId, role) => {
+    try {
+      const badgeDoc = await getDoc(doc(db, 'staffBadges', badgeId));
+      if (!badgeDoc.exists()) {
+        return { success: false, error: 'Invalid badge number.' };
+      }
 
-    const demoUser = demoUsers[role];
-    const userWithDetails = { ...demoUser, loginTime: new Date().toISOString() };
+      const badgeData = badgeDoc.data();
+      if (badgeData.role !== role) {
+        return { success: false, error: 'Role mismatch for this badge.' };
+      }
 
-    set({ user: userWithDetails, token: config.demo.authToken, isAuthenticated: true });
-    localStorage.setItem('token', config.demo.authToken);
-    sessionStorage.setItem('currentUser', JSON.stringify(userWithDetails));
+      const user: User = {
+        id: badgeId,
+        email: `${badgeId.toLowerCase()}@abiaway.gov.ng`,
+        name: badgeData.name,
+        role: badgeData.role,
+        tier: 'Staff',
+        avatar: badgeData.name.charAt(0),
+        phone: '',
+        joinDate: new Date().toISOString(),
+        loginTime: new Date().toISOString(),
+        identifier: badgeId,
+        assignedRoute: badgeData.assignedRoute || '',
+        assignedVehicle: badgeData.assignedVehicle || '',
+        badgeNumber: badgeId,
+      };
 
-    return { success: true, user: demoUser };
+      set({ user, token: badgeId, isAuthenticated: true });
+      localStorage.setItem('token', badgeId);
+      sessionStorage.setItem('currentUser', JSON.stringify(user));
+      return { success: true, user };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Badge verification failed';
+      return { success: false, error: message };
+    }
+  },
+
+  adminLogin: async (email, password) => {
+    try {
+      const firebaseUser = await firebaseSignIn(email, password);
+      const tokenResult = await firebaseUser.getIdTokenResult();
+      let userProfile = await getUserProfile(firebaseUser.uid);
+
+      if (!userProfile || userProfile.role !== 'admin') {
+        return { success: false, error: 'Access denied. Not an admin account.' };
+      }
+
+      userProfile = { ...userProfile, loginTime: new Date().toISOString() };
+      set({ user: userProfile, token: tokenResult.token, isAuthenticated: true });
+      localStorage.setItem('token', tokenResult.token);
+      sessionStorage.setItem('currentUser', JSON.stringify(userProfile));
+      return { success: true, user: userProfile };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Authentication failed';
+      return { success: false, error: message };
+    }
   },
 
   logout: async () => {
     try {
-      await API.auth.logout();
+      await firebaseSignOut();
     } catch {
       // Force clear even if API fails
     }
@@ -124,6 +193,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   updateUser: (updatedData) => {
     const currentUser = get().user;
+    if (!currentUser) throw new Error('No user logged in');
     const updatedUser = { ...currentUser, ...updatedData };
     set({ user: updatedUser });
     sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
@@ -133,6 +203,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   hasRole: (role) => get().user?.role === role,
   isAdmin: () => get().user?.role === 'admin',
   isDriver: () => get().user?.role === 'driver',
+  isConductor: () => get().user?.role === 'conductor',
 }));
 
 export default useAuthStore;

@@ -145,13 +145,13 @@ const DriverCheckin = () => {
             <label className="block text-sm text-gray-400 mb-2">Driver ID</label>
             <input type="text" value={driverId}
               onChange={(e) => setDriverId(e.target.value.toUpperCase())}
-              placeholder="DRV-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+              placeholder="e.g. DRV-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-2">Co-Pilot ID (optional)</label>
             <input type="text" value={coPilotId}
               onChange={(e) => setCoPilotId(e.target.value.toUpperCase())}
-              placeholder="COP-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+              placeholder="e.g. COP-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-2">Vehicle Plate</label>

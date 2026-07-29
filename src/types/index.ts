@@ -1,14 +1,20 @@
+export type UserRole = 'admin' | 'driver' | 'conductor' | 'passenger';
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'driver' | 'passenger';
+  role: UserRole;
   tier: string;
   avatar: string;
   phone: string;
   joinDate: string;
   loginTime?: string;
   lastLogin?: string | null;
+  identifier?: string;
+  assignedRoute?: string;
+  assignedVehicle?: string;
+  badgeNumber?: string;
 }
 
 export interface Booking {

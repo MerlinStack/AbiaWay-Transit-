@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User profiles — only the owning user or admins can read/write
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || request.auth.token.role == 'admin');
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+    }
+
+    // Staff badges — readable by authenticated users, writable only by admins
+    match /staffBadges/{badgeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    // Buses — readable by everyone, writable by drivers and admins
+    match /buses/{busId} {
+      allow read: if true;
+      allow write: if request.auth != null && (request.auth.token.role == 'admin' || request.auth.token.role == 'driver');
+    }
+
+    // Routes — readable by everyone, writable by admins
+    match /routes/{routeId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    // Bookings — users can read/write their own; admins can read all
+    match /bookings/{bookingId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.role == 'admin');
+      allow write: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow create: if request.auth != null;
+    }
+
+    // Transactions — users can read their own
+    match /transactions/{txnId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.role == 'admin');
+      allow write: if request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

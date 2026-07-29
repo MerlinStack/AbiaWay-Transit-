@@ -12,12 +12,12 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'robots.txt'],
+        includeAssets: ['favicon.svg', 'robots.txt'],
         manifest: {
           name: 'AbiaWay Transit',
           short_name: 'AbiaWay',
           description: 'Smart transit system for Abia State. Real-time bus tracking, digital payments, and route planning.',
-          theme_color: '#07101f',
+          theme_color: '#0F5132',
           background_color: '#07101f',
           display: 'standalone',
           orientation: 'portrait',

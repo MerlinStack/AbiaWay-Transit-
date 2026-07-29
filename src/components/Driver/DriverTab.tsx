@@ -3,6 +3,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import DriverGpsLayer from './DriverGpsLayer';
+import useAuthStore from '../../stores/authStore';
 
 if (typeof L !== 'undefined' && L.Icon && L.Icon.Default) {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -14,9 +15,10 @@ if (typeof L !== 'undefined' && L.Icon && L.Icon.Default) {
 }
 
 function DriverTab() {
-  const [location, setLocation] = useState('Umuahia Main Park');
-  const [speed, setSpeed] = useState(35);
-  const [nextStop, setNextStop] = useState('Aba Road (2.5 km)');
+  const [location, setLocation] = useState('Awaiting GPS fix…');
+  const [speed, setSpeed] = useState(0);
+  const [nextStop, setNextStop] = useState('—');
+  const user = useAuthStore((s) => s.user);
 
   const handleGpsUpdate = useCallback((data) => {
     setLocation(data.location);
@@ -34,8 +36,8 @@ function DriverTab() {
               <i data-lucide="user" className="w-8 h-8"></i>
             </div>
             <div>
-              <h4 className="font-semibold">Chidi Okonkwo</h4>
-              <p className="text-sm text-gray-400">Driver ID: DRV-101 \u2022 Bus #AB-101</p>
+              <h4 className="font-semibold">{user?.name || 'Driver'}</h4>
+              <p className="text-sm text-gray-400">{user?.id ? `ID: ${user.id}` : ''}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

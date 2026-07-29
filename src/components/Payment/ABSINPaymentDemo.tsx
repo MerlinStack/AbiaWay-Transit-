@@ -111,33 +111,13 @@ const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }) => {
           cancelPayment();
         });
       } else {
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 20;
-          setPaymentProgress(progress);
-          if (progress >= 100) {
-            clearInterval(interval);
-            processCardPayment({ cardId: '1234567890123456', cardholder: 'Abuoma David', balance: 12450 });
-          }
-        }, 400);
-        return () => clearInterval(interval);
+        showNotificationMessage('NFC Unavailable', 'NFC reader not detected. Please use manual card entry.', 'error');
+        cancelPayment();
       }
     } catch (error) {
       showNotificationMessage('NFC Error', 'Please ensure NFC is enabled', 'error');
       cancelPayment();
     }
-  };
-
-  const simulateQRScan = () => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setPaymentProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        processCardPayment({ cardId: '1234567890123456', cardholder: 'Abuoma David', method: 'qr' });
-      }
-    }, 400);
   };
 
   const startQR = async () => {
@@ -162,12 +142,12 @@ const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }) => {
           }
         }, 400);
       } else {
-        showNotificationMessage('Camera Unavailable', 'Camera not detected. Using simulated scan.', 'info');
-        simulateQRScan();
+        showNotificationMessage('Camera Unavailable', 'Camera not detected. Please use manual card entry.', 'error');
+        cancelPayment();
       }
     } catch (error) {
-      showNotificationMessage('Camera Unavailable', 'Unable to access camera. Using simulated scan.', 'info');
-      simulateQRScan();
+      showNotificationMessage('Camera Unavailable', 'Unable to access camera. Please use manual card entry.', 'error');
+      cancelPayment();
     }
   };
 

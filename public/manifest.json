@@ -1,9 +1,17 @@
 {
-  "name": "Abia Way Transit",
+  "name": "Abia Way Transit — Smart Green Shuttle OS",
   "short_name": "AbiaWay",
-  "description": "Smart transit system for Abia State",
+  "description": "Abia State Green Shuttle — electric fleet telemetry, ABSSIN ticketing, and real-time transit infrastructure",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#16a34a"
+  "background_color": "#07101f",
+  "theme_color": "#0F5132",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
