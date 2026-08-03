@@ -1,3 +1,4 @@
+import { Smartphone, CheckCircle, Check, Info } from 'lucide-react';
 import React, { useState } from 'react';
 import useWalletStore from '../../stores/walletStore';
 import useNotificationStore from '../../stores/notificationStore';
@@ -48,10 +49,10 @@ const NFCPayment = ({ selectedRoute, onSuccess }) => {
   return (
     <div className="mb-6">
       <h4 className="text-lg font-semibold mb-4 flex items-center">
-        <i data-lucide="smartphone" className="w-5 h-5 mr-2"></i>
+        <Smartphone className="w-5 h-5 mr-2" />
         NFC Tap to Pay
         <span className="ml-auto text-xs text-green-400 flex items-center">
-          <i data-lucide="check-circle" className="w-3 h-3 mr-1"></i>Haptic Ready
+          <CheckCircle className="w-3 h-3 mr-1" />Haptic Ready
         </span>
       </h4>
       
@@ -59,9 +60,9 @@ const NFCPayment = ({ selectedRoute, onSuccess }) => {
         <div className={`nfc-reader p-8 text-center ${isActive ? 'active' : ''}`}>
           <div className="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
             {isProcessing ? (
-              <i data-lucide="check" className="w-10 h-10"></i>
+              <Check className="w-10 h-10" />
             ) : (
-              <i data-lucide="smartphone" className="w-10 h-10"></i>
+              <Smartphone className="w-10 h-10" />
             )}
           </div>
           <p className="text-lg font-medium mb-2">
@@ -102,7 +103,7 @@ const NFCPayment = ({ selectedRoute, onSuccess }) => {
           
           <div className="mt-6 p-4 bg-green-500/10 rounded-lg">
             <p className="text-sm text-green-300">
-              <i data-lucide="info" className="w-4 h-4 inline mr-2"></i>
+              <Info className="w-4 h-4 inline mr-2" />
               First card is FREE. Minimum top-up: ₦50. Card never expires.
             </p>
           </div>

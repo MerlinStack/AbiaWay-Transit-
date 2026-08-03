@@ -1,3 +1,4 @@
+import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -111,7 +112,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <div className="px-2 py-1 bg-red-500/20 rounded-lg text-red-400 text-xs">Locked</div>
               )}
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+                <X className="w-4 h-4 text-gray-400" />
               </button>
             </div>
           </div>
@@ -120,7 +121,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
               <div className="relative">
-                <i data-lucide="mail" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="email"
                   {...register('email')}
@@ -133,7 +134,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </div>
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                  <i data-lucide="alert-circle" className="w-3 h-3"></i>
+                  <AlertCircle className="w-3 h-3" />
                   {errors.email.message}
                 </p>
               )}
@@ -142,7 +143,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
               <div className="relative">
-                <i data-lucide="lock" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
@@ -151,12 +152,12 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   disabled={isLocked}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
-                  <i data-lucide={showPassword ? 'eye-off' : 'eye'} className="w-5 h-5"></i>
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                  <i data-lucide="alert-circle" className="w-3 h-3"></i>
+                  <AlertCircle className="w-3 h-3" />
                   {errors.password.message}
                 </p>
               )}
@@ -175,7 +176,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {loginAttempts > 0 && loginAttempts < 5 && (
               <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                 <p className="text-yellow-400 text-sm flex items-center gap-2">
-                  <i data-lucide="alert-triangle" className="w-4 h-4"></i>
+                  <AlertTriangle className="w-4 h-4" />
                   {5 - loginAttempts} login attempt(s) remaining before account lock
                 </p>
               </div>
@@ -184,7 +185,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {errors.root && (
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                 <p className="text-red-400 text-sm flex items-center gap-2">
-                  <i data-lucide="alert-triangle" className="w-4 h-4"></i>
+                  <AlertTriangle className="w-4 h-4" />
                   {errors.root.message}
                 </p>
               </div>
@@ -202,7 +203,7 @@ function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </>
               ) : (
                 <>
-                  <i data-lucide="log-in" className="w-5 h-5"></i>
+                  <LogIn className="w-5 h-5" />
                   Sign In
                 </>
               )}

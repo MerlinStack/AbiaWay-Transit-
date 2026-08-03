@@ -2,9 +2,11 @@ import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import useNotificationStore from '../../stores/notificationStore';
+import { Locate, MapPin, Maximize, Bus, BatteryFull, BatteryCharging, Route, Circle } from 'lucide-react';
 import { abiaCenter } from '../../data/constants';
 import { BusMarkersLayer, StopMarkersLayer, SolarStationLayer } from './BusMarkersLayer';
-import { getFleetSummary } from '../../data/fleet';
+import { getTransitService } from '../../services/transit';
+import { FleetSummary } from '../../types/abssin';
 import { MapZoomControl } from './MapControls';
 import { TelemetrySyncEngine } from '../../utils/telemetrySync';
 import type { TransportMode } from '../../utils/telemetrySync';
@@ -31,7 +33,7 @@ const CenterButton = memo(({ map }: CenterButtonProps) => {
   }, [map, showNotification]);
   return (
     <button className="btn-secondary px-3 py-1 rounded-lg text-sm" onClick={handleClick} title="Center on my location">
-      <i data-lucide="locate" className="w-4 h-4"></i>
+      <Locate className="w-4 h-4" />
     </button>
   );
 });
@@ -44,7 +46,21 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
   const [activeLayerIndex, setActiveLayerIndex] = useState(0);
   const [map, setMap] = useState<L.Map | null>(null);
   const [transportMode, setTransportMode] = useState<TransportMode>('DISCONNECTED');
+  const [fleetStats, setFleetStats] = useState<FleetSummary>({
+    total: 0, active: 0, charging: 0, maintenance: 0, idle: 0, avgBattery: 0
+  });
+  const [loading, setLoading] = useState(true);
   const showNotification = useNotificationStore((s) => s.showNotification);
+
+  useEffect(() => {
+    const loadFleetStats = async () => {
+      const transit = getTransitService();
+      const stats = await transit.getFleetSummary();
+      setFleetStats(stats);
+      setLoading(false);
+    };
+    loadFleetStats();
+  }, []);
 
   useEffect(() => {
     const engine = new TelemetrySyncEngine(
@@ -73,7 +89,6 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
     else document.exitFullscreen();
   }, []);
 
-  const fleetStats = useMemo(getFleetSummary, []);
   const stats = useMemo(() => [
     { label: 'Active Buses', value: String(fleetStats.active), color: 'blue', icon: 'bus' },
     { label: 'Avg Battery', value: `${fleetStats.avgBattery}%`, color: 'purple', icon: 'battery-full' },
@@ -88,6 +103,10 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
     orange: 'from-orange-600/20 to-orange-800/20 text-orange-400',
   };
 
+  if (loading) {
+    return <div className="flex items-center justify-center h-[500px]">Loading...</div>;
+  }
+
   return (
     <div className="space-y-4">
       <div className="glass-card overflow-hidden">
@@ -95,7 +114,7 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
           <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <i data-lucide="map-pin" className="text-green-400"></i>
+                <MapPin className="text-green-400" />
                 Live Bus Tracking
               </h3>
               <div className="flex gap-1 bg-white/10 rounded-lg p-1">
@@ -122,7 +141,7 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
               </span>
               {map && <CenterButton map={map} />}
               <button className="btn-secondary px-3 py-1 rounded-lg text-sm" title="Toggle fullscreen" onClick={toggleFullscreen}>
-                <i data-lucide="maximize" className="w-4 h-4"></i>
+                <Maximize className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -149,7 +168,12 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
             <div key={s.label} className={`text-center p-3 rounded-lg bg-gradient-to-br ${gradientMap[s.color]}`}>
               <p className={`text-2xl font-bold ${gradientMap[s.color].split(' ').pop()}`}>{s.value}</p>
               <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
-                <i data-lucide={s.icon || 'circle'} className="w-3 h-3"></i> {s.label}
+                {{
+                  'bus': <Bus className="w-3 h-3" />,
+                  'battery-full': <BatteryFull className="w-3 h-3" />,
+                  'battery-charging': <BatteryCharging className="w-3 h-3" />,
+                  'route': <Route className="w-3 h-3" />,
+                }[s.icon] || <Circle className="w-3 h-3" />} {s.label}
               </p>
             </div>
           ))}

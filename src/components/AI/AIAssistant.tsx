@@ -1,5 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import useNotificationStore from '../../stores/notificationStore';
+import { Bot, BarChart3, Clock, Map, AlertTriangle, CloudRain, CreditCard, Mic, Send } from 'lucide-react';
+
+interface SpeechRecognition extends EventTarget {
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  onend: (() => void) | null;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+  length: number;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
 
 interface SpeechRecognitionConstructor {
   new (): SpeechRecognition;
@@ -69,7 +100,7 @@ const AIAssistant = () => {
     if (!input.trim()) return;
 
     // Add user message
-    const userMsg = {
+    const userMsg: Message = {
       id: Date.now(),
       type: 'user',
       text: input,
@@ -153,7 +184,7 @@ const AIAssistant = () => {
       <div className="flex items-center gap-2 mb-4">
         <div className="relative">
           <div className="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
-            <i data-lucide="bot" className="w-6 h-6 text-white"></i>
+            <Bot className="w-6 h-6 text-white" />
           </div>
           <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></span>
         </div>
@@ -235,7 +266,14 @@ const AIAssistant = () => {
               setTimeout(() => handleSend(), 100);
             }}
           >
-            <i data-lucide={icon} className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`}></i>
+            {{
+              'bar-chart-3': <BarChart3 className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+              'clock': <Clock className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+              'map': <Map className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+              'alert-triangle': <AlertTriangle className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+              'cloud-rain': <CloudRain className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+              'credit-card': <CreditCard className={`w-4 h-5 ${iconC} group-hover:scale-110 transition`} />,
+            }[icon]}
             <span className="text-[10px]">{label}</span>
           </button>
           );
@@ -258,14 +296,14 @@ const AIAssistant = () => {
             }`}
             onClick={handleVoiceInput}
           >
-            <i data-lucide="mic" className="w-4 h-4"></i>
+            <Mic className="w-4 h-4" />
           </button>
         </div>
         <button
           className="btn-primary px-4 py-2 rounded-lg"
           onClick={handleSend}
         >
-          <i data-lucide="send" className="w-5 h-5"></i>
+          <Send className="w-5 h-5" />
         </button>
       </div>
       
@@ -277,7 +315,7 @@ const AIAssistant = () => {
             setTimeout(() => handleSend(), 100);
           }}
         >
-          <i data-lucide="alert-triangle" className="w-4 h-4 text-yellow-400"></i>
+          <AlertTriangle className="w-4 h-4 text-yellow-400" />
           <div>
             <span className="text-gray-300 font-medium">Delay Alert</span>
             <p className="text-gray-400">Osisioma to Park +10min</p>
@@ -290,7 +328,7 @@ const AIAssistant = () => {
             setTimeout(() => handleSend(), 100);
           }}
         >
-          <i data-lucide="cloud-rain" className="w-4 h-4 text-blue-400"></i>
+          <CloudRain className="w-4 h-4 text-blue-400" />
           <div>
             <span className="text-gray-300 font-medium">Weather</span>
             <p className="text-gray-400">Light rain at 6 PM</p>

@@ -1,4 +1,9 @@
-// Card reader for NFC and QR scanning
+declare global {
+  interface Window {
+    NDEFReader: new () => { scan: (options?: { signal?: AbortSignal }) => Promise<void>; addEventListener: (event: string, handler: EventListener) => void };
+  }
+}
+
 export class ABSINCardReader {
   private nfc: any;
   private isNFCSupported: boolean;
@@ -13,7 +18,7 @@ export class ABSINCardReader {
   async initialize() {
     // Check for NFC support
     if ('NDEFReader' in window) {
-      this.nfc = new NDEFReader();
+      this.nfc = new window.NDEFReader();
       this.isNFCSupported = true;
     }
     
@@ -79,7 +84,7 @@ export class ABSINCardReader {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
         .then(stream => {
           video.srcObject = stream;
-          video.setAttribute('playsinline', true);
+          video.setAttribute('playsinline', 'true');
           video.play();
           
           const scanInterval = setInterval(() => {

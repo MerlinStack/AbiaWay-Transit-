@@ -1,13 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Menu, MenuItem, Chip } from '@mui/material';
-import AddIcon from '@mui/icons-material/esm/Add';
-import ShieldIcon from '@mui/icons-material/esm/Shield';
-import LoginIcon from '@mui/icons-material/esm/Login';
-import LogoutIcon from '@mui/icons-material/esm/Logout';
-import PersonIcon from '@mui/icons-material/esm/Person';
-import SettingsIcon from '@mui/icons-material/esm/Settings';
-import ExpandMoreIcon from '@mui/icons-material/esm/ExpandMore';
-import CircleIcon from '@mui/icons-material/esm/Circle';
+import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, Circle } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 
@@ -59,7 +52,7 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
           {greeting}, {user?.name || 'Guest'}! 👋
         </h2>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-wrap">
-          <Chip label="System Online" color="success" icon={<CircleIcon style={{ width: 10, height: 10 }} />} size="small" />
+          <Chip label="System Online" color="success" icon={<Circle size={10} />} size="small" />
           <span className="text-sm text-gray-400">Abia State Transit ⚡</span>
           <Chip label={`${user?.tier || 'Premium'} Member`} color="secondary" size="small" />
           <span className="text-sm text-gray-400">{currentDate}</span>
@@ -67,12 +60,12 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
       </div>
 
       <div className="flex flex-row gap-1 flex-wrap items-center">
-        <Button color="error" variant="contained" startIcon={<ShieldIcon />} onClick={handleSOS} className="min-w-[120px]">
+        <Button color="error" variant="contained" startIcon={<Shield size={20} />} onClick={handleSOS} className="min-w-[120px]">
           SOS
         </Button>
 
         {!user && (
-          <Button color="primary" variant="contained" startIcon={<LoginIcon />} onClick={onLoginClick} className="min-w-[120px]">
+          <Button color="primary" variant="contained" startIcon={<LogIn size={20} />} onClick={onLoginClick} className="min-w-[120px]">
             Sign In
           </Button>
         )}
@@ -87,7 +80,7 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
                   {user.avatar || user.name?.charAt(0) || 'U'}
                 </Avatar>
               }
-              endIcon={<ExpandMoreIcon />}
+              endIcon={<ChevronDown size={20} />}
               onClick={(event) => setAnchorEl(event.currentTarget)}
               className="min-w-[160px]"
             >
@@ -106,7 +99,7 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
                   onOpenModal('profile');
                 }}
               >
-                <PersonIcon className="mr-1" />
+                <User size={18} className="mr-1" />
                 My Profile
               </MenuItem>
               <MenuItem
@@ -115,19 +108,19 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
                   onOpenModal('settings');
                 }}
               >
-                <SettingsIcon className="mr-1" />
+                <Settings size={18} className="mr-1" />
                 Settings
               </MenuItem>
               <hr className="my-1 border-[rgba(148,163,184,0.12)]" />
               <MenuItem onClick={handleLogout} className="text-red-500">
-                <LogoutIcon className="mr-1" />
+                <LogOut size={18} className="mr-1" />
                 Sign Out
               </MenuItem>
             </Menu>
           </>
         )}
 
-        <Button color="primary" variant="contained" startIcon={<AddIcon />} onClick={() => onOpenModal('quickTopup')} className="min-w-[160px]">
+        <Button color="primary" variant="contained" startIcon={<Plus size={20} />} onClick={() => onOpenModal('quickTopup')} className="min-w-[160px]">
           Quick Top-up
         </Button>
       </div>

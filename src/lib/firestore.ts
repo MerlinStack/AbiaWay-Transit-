@@ -26,13 +26,13 @@ interface BusDocument extends Omit<Bus, 'driver'> {
   lastUpdated: Timestamp;
 }
 
-interface BookingDocument extends Omit<Booking, 'date'> {
+interface BookingDocument extends Omit<Booking, 'date' | 'createdAt'> {
   userId: string;
   date: Timestamp;
   createdAt: Timestamp;
 }
 
-interface RouteDocument extends BusRoute {
+interface RouteDocument extends Omit<BusRoute, 'stops'> {
   fare: number;
   stops: string[];
   isActive: boolean;
@@ -67,12 +67,12 @@ export async function updateBusLocation(id: string, lat: number, lng: number, so
 
 export async function getAllRoutes(): Promise<RouteDocument[]> {
   const snapshot = await getDocs(routesCollection);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as RouteDocument));
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as unknown as RouteDocument));
 }
 
 export async function getActiveRoutes(): Promise<RouteDocument[]> {
   const snapshot = await getDocs(query(routesCollection, where('isActive', '==', true)));
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as RouteDocument));
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as unknown as RouteDocument));
 }
 
 export async function createBooking(booking: Omit<BookingDocument, 'createdAt'>): Promise<string> {
@@ -94,5 +94,5 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
   const snapshot = await getDocs(
     query(transactionsCollection, where('userId', '==', userId), orderBy('date', 'desc'))
   );
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Transaction));
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as unknown as Transaction));
 }

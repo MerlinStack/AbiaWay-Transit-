@@ -1,3 +1,4 @@
+import { X, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import React from 'react';
 import useNotificationStore from '../../stores/notificationStore';
 
@@ -52,11 +53,11 @@ const NotificationsModal = ({ isOpen, onClose }) => {
   const getTypeIcon = (type) => {
     switch(type) {
       case 'warning':
-        return 'alert-triangle';
+        return <AlertTriangle className="w-4 h-4 text-primary" />;
       case 'success':
-        return 'check-circle';
+        return <CheckCircle className="w-4 h-4 text-primary" />;
       default:
-        return 'info';
+        return <Info className="w-4 h-4 text-primary" />;
     }
   };
 
@@ -73,7 +74,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Notifications</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-white">
-              <i data-lucide="x" className="w-6 h-6"></i>
+              <X className="w-6 h-6" />
             </button>
           </div>
           
@@ -85,7 +86,7 @@ const NotificationsModal = ({ isOpen, onClose }) => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
-                    <i data-lucide={getTypeIcon(notif.type)} className="w-4 h-4 text-primary"></i>
+                    {getTypeIcon(notif.type)}
                     <p className="font-medium">{notif.title}</p>
                   </div>
                   <span className="text-xs text-gray-400">{notif.time}</span>

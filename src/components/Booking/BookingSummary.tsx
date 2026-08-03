@@ -1,6 +1,21 @@
+import { Tag, Info, CheckCircle } from 'lucide-react';
 import React, { memo, useMemo } from 'react';
 
-const BookingSummary = memo(({ details, onConfirm }) => {
+interface BookingSummaryProps {
+  details: {
+    from: string;
+    to: string;
+    date: string;
+    time: string;
+    passengers: number;
+    seats: string[];
+    vehicleType: string;
+    route?: { fare?: number };
+  };
+  onConfirm: () => void;
+}
+
+const BookingSummary = memo(({ details, onConfirm }: BookingSummaryProps) => {
   const totals = useMemo(() => {
     const baseFare = details.route?.fare || 350;
     const subtotal = baseFare * details.passengers;
@@ -46,7 +61,7 @@ const BookingSummary = memo(({ details, onConfirm }) => {
         {totals.discount > 0 && (
           <div className="flex justify-between items-center text-green-400">
             <span className="flex items-center gap-1">
-              <i data-lucide="tag" className="w-4 h-4"></i>
+              <Tag className="w-4 h-4" />
               Group Discount
             </span>
             <span>-₦{totals.discount.toLocaleString()}</span>
@@ -64,7 +79,7 @@ const BookingSummary = memo(({ details, onConfirm }) => {
 
       {/* Terms */}
       <div className="flex items-start gap-2 text-xs text-gray-400">
-        <i data-lucide="info" className="w-4 h-4 mt-0.5 flex-shrink-0"></i>
+        <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <p>
           By confirming this booking, you agree to our terms of service and cancellation policy. 
           Tickets are non-refundable within 2 hours of departure.
@@ -76,7 +91,7 @@ const BookingSummary = memo(({ details, onConfirm }) => {
         className="w-full btn-primary py-4 text-lg"
         onClick={onConfirm}
       >
-        <i data-lucide="check-circle" className="w-5 h-5 inline mr-2"></i>
+        <CheckCircle className="w-5 h-5 inline mr-2" />
         Confirm Booking
       </button>
     </div>

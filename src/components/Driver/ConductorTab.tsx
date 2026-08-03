@@ -1,3 +1,4 @@
+import { ScanLine } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { generateSecuredTicket } from '../../utils/cryptoSync';
 import { LeakyBucketSync, atomicIndexedDbWrite } from '../../utils/syncEngine';
@@ -16,6 +17,7 @@ interface TapRecord {
   synced: boolean;
   retryCount: number;
   lastAttempt: number | null;
+  payload: unknown;
 }
 
 const ROUTES = ['Umuahia → Aba', 'Aba → Umuahia', 'Umuahia → Ohafia', 'Ohafia → Umuahia'];
@@ -93,6 +95,7 @@ const ConductorTab = () => {
       sectorTag: SECTOR_TAGS[selectedRoute] || 'Unmapped',
       timestamp: new Date(secured.timestamp).toISOString(),
       verificationHash: secured.verificationHash,
+      payload: null,
       synced: false,
       retryCount: 0,
       lastAttempt: null,
@@ -123,12 +126,14 @@ const ConductorTab = () => {
 
   const handleSync = useCallback(async () => {
     setSyncStatus('syncing');
+    const syncedIds: string[] = [];
     const { synced, failed } = await syncEngineRef.current.flush(async (batch) => {
       await new Promise((r) => setTimeout(r, 600));
+      batch.forEach((b) => syncedIds.push(b.id));
       return true;
     });
     if (synced > 0) {
-      setRecords((prev) => prev.map((r) => batch.some((b) => b.id === r.id) ? { ...r, synced: true } : r));
+      setRecords((prev) => prev.map((r) => syncedIds.includes(r.id) ? { ...r, synced: true } : r));
     }
     setSyncStatus('done');
     showNotification('Sync Complete', `${synced} uploaded, ${failed} failed`, failed > 0 ? 'error' : 'success');
@@ -154,7 +159,7 @@ const ConductorTab = () => {
     <div className="glass-card p-6">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <h3 className="text-xl font-bold flex items-center gap-2">
-          <i data-lucide="scan-line" className="text-primary"></i>
+          <ScanLine className="text-primary" />
           Conductor Tap Validation
         </h3>
         <div className="flex items-center gap-4 text-sm">

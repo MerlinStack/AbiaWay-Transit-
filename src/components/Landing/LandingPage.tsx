@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Bus, Wallet, Clock, Shield, ArrowRight, MapPin, Users, Star, ChevronRight, Menu, X, WifiOff, CheckCircle2, BatteryCharging } from 'lucide-react';
+import { Bus, Wallet, Clock, Shield, ArrowRight, MapPin, Users, Star, ChevronRight, Menu, X, WifiOff, CheckCircle2, BatteryCharging, Apple, Chrome } from 'lucide-react';
 
 const LandingPage = ({ onGetStarted }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -416,10 +416,10 @@ const LandingPage = ({ onGetStarted }) => {
               <h4 className="font-semibold mb-4">Download App</h4>
               <div className="space-y-2">
                 <button className="w-full bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2 group">
-                  <i data-lucide="apple" className="w-4 h-4 group-hover:scale-110 transition"></i> App Store
+                  <Apple className="w-4 h-4 group-hover:scale-110 transition" /> App Store
                 </button>
                 <button className="w-full bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2 group">
-                  <i data-lucide="chrome" className="w-4 h-4 group-hover:scale-110 transition"></i> Google Play
+                  <Chrome className="w-4 h-4 group-hover:scale-110 transition" /> Google Play
                 </button>
               </div>
             </div>

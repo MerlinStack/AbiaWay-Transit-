@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AlertCircle, CreditCard } from 'lucide-react';
 import { getABSINService } from '../../services/absin';
 
 const ABSINCardDisplay = () => {
@@ -46,7 +47,7 @@ const ABSINCardDisplay = () => {
   if (error) {
     return (
       <div className="glass-card p-6 text-center">
-        <i data-lucide="alert-circle" className="w-12 h-12 text-red-400 mx-auto mb-3"></i>
+        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p className="text-red-400">{error}</p>
         <button onClick={loadCardInfo} className="btn-secondary mt-4">Retry</button>
       </div>
@@ -57,7 +58,7 @@ const ABSINCardDisplay = () => {
     <div className="glass-card p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <i data-lucide="credit-card" className="text-purple-400"></i>
+          <CreditCard className="text-purple-400" />
           Linked ABSIN Card
         </h3>
         <span className="badge-success">Active</span>

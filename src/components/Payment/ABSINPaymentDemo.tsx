@@ -10,7 +10,14 @@ import ABSINManualEntry from './ABSINManualEntry';
 import ABSINProcessing from './ABSINProcessing';
 import ABSINReceipt from './ABSINReceipt';
 
-const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }) => {
+interface ABSINPaymentDemoProps {
+  onClose: () => void;
+  rideDetails?: { from?: string; to?: string; busId?: string; seats?: string[]; passengers?: number; distance?: string; duration?: string };
+  amount: number;
+  onSuccess?: (result: unknown) => void;
+}
+
+const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }: ABSINPaymentDemoProps) => {
   const [currentView, setCurrentView] = useState('payment-selection');
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [paymentProgress, setPaymentProgress] = useState(0);
@@ -220,7 +227,7 @@ const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }) => {
   const processManualPayment = async () => {
     const cleanedCardNumber = cardNumber.replace(/\s/g, '');
     const validation = validateWithSchema(absinPaymentSchema, { amount, cardNumber: cleanedCardNumber, pin });
-    if (!validation.success) {
+    if (validation.error) {
       showNotificationMessage('Error', validation.error.message, 'error');
       return;
     }

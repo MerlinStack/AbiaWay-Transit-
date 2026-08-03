@@ -6,7 +6,9 @@ const config = {
     enabled: import.meta.env.VITE_ENABLE_ABSIN === 'true',
     mockMode: import.meta.env.VITE_ABSIN_MOCK_MODE !== 'false',
   },
-
+  demo: {
+    mockJwtToken: 'mock-jwt-token-for-development',
+  },
 };
 
 export default config;

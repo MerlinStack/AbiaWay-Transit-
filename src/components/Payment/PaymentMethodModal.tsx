@@ -1,3 +1,4 @@
+import { CreditCard, Smartphone, Banknote, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import useWalletStore from '../../stores/walletStore';
 import useNotificationStore from '../../stores/notificationStore';
@@ -36,7 +37,13 @@ const resetAll = () => ({
   absinCard: { number: '', pin: '' },
 });
 
-const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
+interface PaymentMethodModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalProps) => {
   const [currentView, setCurrentView] = useState('select');
   const [amount, setAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -78,12 +85,12 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
     setCheckingBalance(true);
-    const result = await CardPaymentService.checkBalance(cardNum);
-    if (result.success) {
-      setCardBalance(result);
-      showNotification('Balance Check', `Available: ₦${result.balance.toLocaleString()}`, 'success');
+    const balanceResult = await CardPaymentService.checkBalance(cardNum);
+    if (balanceResult.success) {
+      setCardBalance(balanceResult);
+      showNotification('Balance Check', `Available: ₦${balanceResult.balance.toLocaleString()}`, 'success');
     } else {
-      showNotification('Error', result.message, 'error');
+      showNotification('Error', 'Balance check failed', 'error');
     }
     setCheckingBalance(false);
   };
@@ -91,44 +98,44 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
   const handleCardPayment = async () => {
     const amountNum = parseInt(amount);
     const cardNum = cardDetails.number.replace(/\s/g, '');
-    const validation = validateWithSchema(cardPaymentSchema, {
+    const schemaValidation = validateWithSchema(cardPaymentSchema, {
       amount: amountNum, cardNumber: cardNum, expiry: cardDetails.expiry, cvv: cardDetails.cvv, holder: cardDetails.holder,
     });
-    if (!validation.success) { showNotification('Error', validation.error.message, 'error'); return; }
+    if (schemaValidation.error) { showNotification('Error', schemaValidation.error.message, 'error'); return; }
 
     setIsProcessing(true);
     setProcessingMessage('Validating card...');
     const svcValidation = await CardPaymentService.validateCard(cardDetails);
-    if (!svcValidation.success) { showNotification('Error', svcValidation.message, 'error'); setIsProcessing(false); return; }
+    if (!svcValidation.success) { showNotification('Error', svcValidation.message || 'Card validation failed', 'error'); setIsProcessing(false); return; }
 
     setProcessingMessage('Processing payment...');
-    const result = await CardPaymentService.processPayment(cardDetails, amountNum);
-    if (result.success) {
+    const paymentResult = await CardPaymentService.processPayment(cardDetails, amountNum);
+    if (paymentResult.success) {
       addFunds(amountNum);
       await refreshBalance();
       showNotification('Payment Successful', `₦${amountNum.toLocaleString()} added to wallet!`, 'success');
       onSuccess?.();
       setTimeout(() => onClose(), 2000);
     } else {
-      showNotification('Payment Failed', result.message, 'error');
+      showNotification('Payment Failed', paymentResult.message || 'Payment failed', 'error');
     }
     setIsProcessing(false);
   };
 
   const handleUSSDPayment = async () => {
     const amountNum = parseInt(amount);
-    const validation = validateWithSchema(ussdPaymentSchema, { amount: amountNum, bank: ussdDetails.bank, phone: ussdDetails.phone });
-    if (!validation.success) { showNotification('Error', validation.error.message, 'error'); return; }
+    const schemaValidation = validateWithSchema(ussdPaymentSchema, { amount: amountNum, bank: ussdDetails.bank, phone: ussdDetails.phone });
+    if (schemaValidation.error) { showNotification('Error', schemaValidation.error.message, 'error'); return; }
 
     setIsProcessing(true);
     setProcessingMessage('Generating USSD code...');
-    const result = await USSDPaymentService.initiatePayment(ussdDetails.bank, ussdDetails.phone, amountNum);
-    if (result.success) {
-      setUssdResponse(result);
-      showNotification('USSD Instructions', `Dial ${result.ussdCode} from ${ussdDetails.phone}`, 'info');
+    const ussdResult = await USSDPaymentService.initiatePayment(ussdDetails.bank, ussdDetails.phone, amountNum);
+    if (ussdResult.success) {
+      setUssdResponse(ussdResult);
+      showNotification('USSD Instructions', `Dial ${ussdResult.ussdCode} from ${ussdDetails.phone}`, 'info');
       setProcessingMessage('Waiting for USSD confirmation...');
       setTimeout(async () => {
-        const confirmed = await USSDPaymentService.confirmPayment(result.reference);
+        const confirmed = await USSDPaymentService.confirmPayment(ussdResult.reference);
         if (confirmed.success) {
           addFunds(amountNum);
           await refreshBalance();
@@ -138,25 +145,25 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
         }
       }, 5000);
     } else {
-      showNotification('Error', result.message, 'error');
+      showNotification('Error', ussdResult.message || 'USSD payment failed', 'error');
       setIsProcessing(false);
     }
   };
 
   const handleBankTransfer = async () => {
     const amountNum = parseInt(amount);
-    const validation = validateWithSchema(transferPaymentSchema, { amount: amountNum });
-    if (!validation.success) { showNotification('Error', validation.error.message, 'error'); return; }
+    const schemaValidation = validateWithSchema(transferPaymentSchema, { amount: amountNum });
+    if (schemaValidation.error) { showNotification('Error', schemaValidation.error.message, 'error'); return; }
 
     setIsProcessing(true);
     setProcessingMessage('Generating transfer details...');
-    const result = await TransferPaymentService.generateReference(amountNum);
-    if (result.success) {
-      setTransferDetails(result);
-      showNotification('Transfer Instructions', `Transfer ₦${amountNum.toLocaleString()} to ${result.accountDetails.accountName} (${result.accountDetails.accountNumber})`, 'info');
+    const transferResult = await TransferPaymentService.generateReference(amountNum);
+    if (transferResult.success) {
+      setTransferDetails(transferResult);
+      showNotification('Transfer Instructions', `Transfer ₦${amountNum.toLocaleString()} to ${transferResult.accountDetails.accountName} (${transferResult.accountDetails.accountNumber})`, 'info');
       setProcessingMessage('Waiting for transfer confirmation...');
       setTimeout(async () => {
-        const confirmed = await TransferPaymentService.confirmTransfer(result.reference);
+        const confirmed = await TransferPaymentService.confirmTransfer(transferResult.reference);
         if (confirmed.success) {
           addFunds(amountNum);
           await refreshBalance();
@@ -166,7 +173,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
         }
       }, 10000);
     } else {
-      showNotification('Error', result.message, 'error');
+      showNotification('Error', 'Bank transfer failed', 'error');
       setIsProcessing(false);
     }
   };
@@ -174,25 +181,25 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
   const handleABSINPayment = async () => {
     const amountNum = parseInt(amount);
     const cardNum = absinCard.number.replace(/\s/g, '');
-    const validation = validateWithSchema(absinPaymentSchema, { amount: amountNum, cardNumber: cardNum, pin: absinCard.pin });
-    if (!validation.success) { showNotification('Error', validation.error.message, 'error'); return; }
+    const schemaValidation = validateWithSchema(absinPaymentSchema, { amount: amountNum, cardNumber: cardNum, pin: absinCard.pin });
+    if (schemaValidation.error) { showNotification('Error', schemaValidation.error.message, 'error'); return; }
 
     setIsProcessing(true);
     setProcessingMessage('Validating ABSIN card...');
     const svcResult = await ABSINPaymentService.validateCard(absinCard.number, absinCard.pin);
-    if (!svcResult.success) { showNotification('Error', svcResult.message, 'error'); setIsProcessing(false); return; }
+    if (!svcResult.success) { showNotification('Error', svcResult.message || 'Card validation failed', 'error'); setIsProcessing(false); return; }
 
     setProcessingMessage('Processing payment...');
-    const result = await ABSINPaymentService.processPayment(absinCard.number, amountNum);
-    if (result.success) {
+    const paymentResult = await ABSINPaymentService.processPayment(absinCard.number, amountNum);
+    if (paymentResult.success) {
       addFunds(amountNum);
       await refreshBalance();
       showNotification('Payment Successful', `₦${amountNum.toLocaleString()} added to wallet!`, 'success');
-      showNotification('Points Earned', `You earned ${result.pointsEarned} loyalty points!`, 'success');
+      showNotification('Points Earned', `You earned ${paymentResult.pointsEarned} loyalty points!`, 'success');
       onSuccess?.();
       setTimeout(() => onClose(), 2000);
     } else {
-      showNotification('Payment Failed', result.message, 'error');
+      showNotification('Payment Failed', paymentResult.message || 'Payment failed', 'error');
     }
     setIsProcessing(false);
   };
@@ -213,7 +220,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
             className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-primary transition-all group"
             onClick={() => selectPaymentMethod(pm.id)}>
             <div className={`w-12 h-12 rounded-full ${pm.color === 'blue' ? 'bg-blue-500/20' : pm.color === 'green' ? 'bg-green-500/20' : pm.color === 'purple' ? 'bg-purple-500/20' : 'bg-yellow-500/20'} flex items-center justify-center`}>
-              <i data-lucide={pm.icon} className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`}></i>
+              {(() => { const icons: Record<string, React.JSX.Element> = { 'credit-card': <CreditCard className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, smartphone: <Smartphone className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, banknote: <Banknote className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} /> }; return icons[pm.icon] || null; })()}
             </div>
             <div className="flex-1 text-left">
               <p className="font-semibold">{pm.name}</p>
@@ -223,7 +230,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }) => {
                 <span className="text-gray-500">Min: ₦{pm.minAmount}</span>
               </div>
             </div>
-            <i data-lucide="chevron-right" className="w-5 h-5 text-gray-400"></i>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
           </button>
         ))}
       </div>

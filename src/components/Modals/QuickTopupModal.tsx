@@ -2,8 +2,14 @@ import React, { useState } from 'react';
 import useWalletStore from '../../stores/walletStore';
 import useNotificationStore from '../../stores/notificationStore';
 import { topupSchema, validateWithSchema } from '../../schemas/paymentSchemas';
+import { X, Gift, CreditCard } from 'lucide-react';
 
-const QuickTopupModal = ({ isOpen, onClose }) => {
+interface QuickTopupModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const QuickTopupModal = ({ isOpen, onClose }: QuickTopupModalProps) => {
   const [selectedAmount, setSelectedAmount] = useState(1000);
   const [customAmount, setCustomAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,7 +40,7 @@ const QuickTopupModal = ({ isOpen, onClose }) => {
     const amount = customAmount ? parseInt(customAmount) : selectedAmount;
     
     const validation = validateWithSchema(topupSchema, { amount });
-    if (!validation.success) {
+    if (validation.error) {
       showNotification('Error', validation.error.message, 'error');
       return;
     }
@@ -75,7 +81,7 @@ const QuickTopupModal = ({ isOpen, onClose }) => {
               onClick={onClose} 
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
             >
-              <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+              <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
           
@@ -134,7 +140,7 @@ const QuickTopupModal = ({ isOpen, onClose }) => {
           {getBonusMessage() && (
             <div className="mb-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/30 animate-pulse">
               <p className="text-yellow-400 text-sm flex items-center gap-2">
-                <i data-lucide="gift" className="w-4 h-4"></i>
+                <Gift className="w-4 h-4" />
                 {getBonusMessage()}
               </p>
             </div>
@@ -171,7 +177,7 @@ const QuickTopupModal = ({ isOpen, onClose }) => {
               </>
             ) : (
               <>
-                <i data-lucide="credit-card" className="w-5 h-5"></i>
+                <CreditCard className="w-5 h-5" />
                 Add Funds
               </>
             )}

@@ -83,7 +83,7 @@ export const nfcPaymentSchema = z.object({
   sufficientBalance: z.boolean().refine((val) => val === true, 'Insufficient balance'),
 });
 
-type ValidationResult = { success: true } | { success: false; error: { message: string } };
+export type ValidationResult = { success: boolean; error: { message: string } | null };
 
 export function validateWithSchema<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult {
   const result = schema.safeParse(data);
@@ -91,5 +91,5 @@ export function validateWithSchema<T>(schema: z.ZodSchema<T>, data: unknown): Va
     const firstError = result.error.errors[0];
     return { success: false, error: { message: firstError?.message || 'Validation failed' } };
   }
-  return { success: true };
+  return { success: true, error: null };
 }

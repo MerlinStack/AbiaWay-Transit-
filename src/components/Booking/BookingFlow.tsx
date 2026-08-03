@@ -1,9 +1,10 @@
-import { createContext, useContext, useCallback, useMemo, useState } from 'react';
+import { Check, MapPin, Gift, Clock, CreditCard, Smartphone } from 'lucide-react';
+import { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import useBookingStore from '../../stores/bookingStore';
 import useWalletStore from '../../stores/walletStore';
 import useNotificationStore from '../../stores/notificationStore';
-import { getFare } from '../../data/fares';
-import { TERMINALS, ALL_STOPS } from '../../data/stops';
+import { getTransitService } from '../../services/transit';
+import { BusStop } from '../../types/abssin';
 import RouteSearch from './RouteSearch';
 import SeatSelection from './SeatSelection';
 import PaymentMethod from '../Payment/PaymentMethod';
@@ -12,15 +13,15 @@ import SavedRoutes from './SavedRoutes';
 import BookingHistory from './BookingHistory';
 import ABSINPaymentDemo from '../Payment/ABSINPaymentDemo';
 
-const TERMINAL_NAMES = Object.fromEntries(TERMINALS.map((t) => [t.id, t.name]));
-const STOP_NAMES = Object.fromEntries(ALL_STOPS.map((s) => [s.id, s.name]));
+const TERMINAL_NAMES: Record<string, string> = {};
+const STOP_NAMES: Record<string, string> = {};
 
 const resolveName = (id: string) => TERMINAL_NAMES[id] || STOP_NAMES[id] || id;
 
 const AVAILABLE_ROUTES = [
-  { id: 1, name: 'Umuahia → Aba', via: 'Umuahia-Aba Expressway', duration: '25 mins', fare: getFare('local'), departures: ['08:00', '08:30', '09:00', '09:30'], available: 24, from: 'Umuahia-Terminal', to: 'Aba-Terminal', routeType: 'local' as const },
-  { id: 2, name: 'Aba → Umuahia', via: 'Aba-Umuahia Road', duration: '25 mins', fare: getFare('local'), departures: ['08:15', '08:45', '09:15', '09:45'], available: 18, from: 'Aba-Terminal', to: 'Umuahia-Terminal', routeType: 'local' as const },
-  { id: 3, name: 'Umuahia → Ohafia', via: 'Ohafia Road', duration: '30 mins', fare: getFare('inter-city', 'Umuahia', 'Ohafia'), departures: ['08:30', '09:00', '09:30', '10:00'], available: 32, from: 'Umuahia-Terminal', to: 'Ohafia-Terminal', routeType: 'inter-city' as const },
+  { id: 1, name: 'Umuahia → Aba', via: 'Umuahia-Aba Expressway', duration: '25 mins', fare: 800, departures: ['08:00', '08:30', '09:00', '09:30'], available: 24, from: 'Umuahia-Terminal', to: 'Aba-Terminal', routeType: 'local' as const },
+  { id: 2, name: 'Aba → Umuahia', via: 'Aba-Umuahia Road', duration: '25 mins', fare: 800, departures: ['08:15', '08:45', '09:15', '09:45'], available: 18, from: 'Aba-Terminal', to: 'Umuahia-Terminal', routeType: 'local' as const },
+  { id: 3, name: 'Umuahia → Ohafia', via: 'Ohafia Road', duration: '30 mins', fare: 1000, departures: ['08:30', '09:00', '09:30', '10:00'], available: 32, from: 'Umuahia-Terminal', to: 'Ohafia-Terminal', routeType: 'inter-city' as const },
 ];
 
 interface BookingDetails {
@@ -66,6 +67,21 @@ const BookingFlowRoot = ({ children }: { children: React.ReactNode }) => {
   const [showABSINModal, setShowABSINModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [rideDetails, setRideDetails] = useState({});
+  const [loadingStops, setLoadingStops] = useState(true);
+
+  useEffect(() => {
+    const loadStops = async () => {
+      const transit = getTransitService();
+      const [terminals, stops] = await Promise.all([
+        transit.getTerminals(),
+        transit.getAllStops(),
+      ]);
+      terminals.forEach(t => { TERMINAL_NAMES[t.id] = t.name; });
+      stops.forEach(s => { STOP_NAMES[s.id] = s.name; });
+      setLoadingStops(false);
+    };
+    loadStops();
+  }, []);
 
   const createBooking = useBookingStore((s) => s.createBooking);
   const addRecentSearch = useBookingStore((s) => s.addRecentSearch);
@@ -77,7 +93,7 @@ const BookingFlowRoot = ({ children }: { children: React.ReactNode }) => {
 
   const handleSearch = useCallback((searchData: Partial<BookingDetails>) => {
     setBookingDetails((prev) => ({ ...prev, ...searchData }));
-    addRecentSearch(searchData);
+    addRecentSearch({ from: searchData.from || '', to: searchData.to || '' });
     setStep(2);
   }, [addRecentSearch]);
 
@@ -153,7 +169,7 @@ const StepIndicator = () => {
               s < step ? 'bg-green-600 text-white' : s === step
                 ? 'bg-primary text-white ring-4 ring-primary/30' : 'bg-white/10 text-gray-400'
             }`} aria-label={`Step ${s}: ${labels[s]}${s < step ? ' (completed)' : ''}`}>
-              {s < step ? <i data-lucide="check" className="w-4 h-4" /> : s}
+              {s < step ? <Check className="w-4 h-4" /> : s}
             </div>
             <div className={`flex-1 h-1 ml-2 ${s < step ? 'bg-green-600' : 'bg-white/10'}`} aria-hidden="true" />
           </div>
@@ -191,7 +207,7 @@ const RouteSelect = () => {
                   <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full">{route.available} seats left</span>
                 </div>
                 <p className="text-sm text-gray-400 mb-2">
-                  <i data-lucide="map-pin" className="w-3 h-3 inline mr-1"></i>Via: {route.via}
+                  <MapPin className="w-3 h-3 inline mr-1" />Via: {route.via}
                 </p>
                 <div className="flex gap-2 mt-2">
                   {route.departures.map((time) => (
@@ -253,7 +269,7 @@ const Sidebar = () => {
       <SavedRoutes onSelect={(route) => { setBookingDetails((prev) => ({ ...prev, ...route })); goToStep(2); }} />
       <div className="glass-card p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i data-lucide="gift" className="text-primary"></i>Special Offers
+          <Gift className="text-primary" />Special Offers
         </h3>
         <div className="space-y-3">
           <div className="p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-500/30">
@@ -282,9 +298,9 @@ const Sidebar = () => {
       <div className="glass-card p-4">
         <h3 className="text-lg font-semibold mb-3">Travel Tips</h3>
         <ul className="space-y-2 text-sm text-gray-400">
-          <li className="flex items-start gap-2"><i data-lucide="clock" className="w-4 h-4 text-primary mt-0.5"></i><span>Arrive 15 mins before departure</span></li>
-          <li className="flex items-start gap-2"><i data-lucide="credit-card" className="w-4 h-4 text-primary mt-0.5"></i><span>Use wallet for 5% cashback</span></li>
-          <li className="flex items-start gap-2"><i data-lucide="smartphone" className="w-4 h-4 text-primary mt-0.5"></i><span>Digital tickets save paper</span></li>
+          <li className="flex items-start gap-2"><Clock className="w-4 h-4 text-primary mt-0.5" /><span>Arrive 15 mins before departure</span></li>
+          <li className="flex items-start gap-2"><CreditCard className="w-4 h-4 text-primary mt-0.5" /><span>Use wallet for 5% cashback</span></li>
+          <li className="flex items-start gap-2"><Smartphone className="w-4 h-4 text-primary mt-0.5" /><span>Digital tickets save paper</span></li>
         </ul>
       </div>
     </div>

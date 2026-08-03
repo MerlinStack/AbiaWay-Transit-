@@ -12,7 +12,7 @@ interface ReceiptData {
 interface ABSINReceiptProps {
   receipt: ReceiptData;
   amount: number;
-  rideDetails: { from: string; to: string; busId?: string; seats?: string[]; passengers?: number };
+  rideDetails: { from?: string; to?: string; busId?: string; seats?: string[]; passengers?: number };
   onPrint: () => void;
   onDone: () => void;
 }

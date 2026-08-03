@@ -1,3 +1,4 @@
+import { User, Play, Pause, Square } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
@@ -33,7 +34,7 @@ function DriverTab() {
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
-              <i data-lucide="user" className="w-8 h-8"></i>
+              <User className="w-8 h-8" />
             </div>
             <div>
               <h4 className="font-semibold">{user?.name || 'Driver'}</h4>
@@ -54,13 +55,13 @@ function DriverTab() {
             <h4 className="font-semibold">Trip Management</h4>
             <div className="flex gap-3">
               <button className="btn-primary flex-1" onClick={() => alert('Trip started!')}>
-                <i data-lucide="play" className="w-4 h-4 inline mr-2"></i> Start Trip
+                <Play className="w-4 h-4 inline mr-2" /> Start Trip
               </button>
               <button className="btn-secondary flex-1" onClick={() => alert('Trip paused')}>
-                <i data-lucide="pause" className="w-4 h-4 inline mr-2"></i> Pause
+                <Pause className="w-4 h-4 inline mr-2" /> Pause
               </button>
               <button className="btn-secondary flex-1" onClick={() => alert('Trip ended')}>
-                <i data-lucide="square" className="w-4 h-4 inline mr-2"></i> End
+                <Square className="w-4 h-4 inline mr-2" /> End
               </button>
             </div>
           </div>

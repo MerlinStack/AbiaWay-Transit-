@@ -1,7 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, image }) => {
+interface SEOProps {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const SEO = ({ title, description, image }: SEOProps) => {
   const siteTitle = 'AbiaWay Transit';
   const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const defaultDescription = 'Smart transit system for Abia State. Real-time bus tracking, digital payments, and route planning.';

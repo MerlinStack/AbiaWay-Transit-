@@ -1,5 +1,8 @@
-import { useMemo } from 'react';
-import { FLEET, getBatteryColor } from '../../data/fleet';
+import React, { memo, useMemo, useState, useEffect } from 'react';
+import { Bus, Activity, BatteryCharging, Wrench, BatteryFull, Route, Truck } from 'lucide-react';
+import { getTransitService } from '../../services/transit';
+import { FleetBus } from '../../types/abssin';
+import { getBatteryColor } from '../../utils/battery';
 
 const summaryCards = [
   { label: 'Total Buses', icon: 'bus', key: 'total' as const, color: 'blue' },
@@ -18,16 +21,33 @@ const batteryLevels = [
 const ROUTES = ['Umuahia-Aba', 'Aba-Umuahia', 'Umuahia-Ohafia', 'Ohafia-Umuahia', 'Umuahia-Ugwogo', 'Aba-Owerri'];
 
 function AdminDashboard() {
-  const summary = useMemo(() => ({
-    total: FLEET.length,
-    active: FLEET.filter((b) => b.status === 'active').length,
-    charging: FLEET.filter((b) => b.status === 'charging').length,
-    maintenance: FLEET.filter((b) => b.status === 'maintenance').length,
-    idle: FLEET.filter((b) => b.status === 'idle').length,
-    avgBattery: Math.round(FLEET.reduce((s, b) => s + b.batterySoC, 0) / FLEET.length),
-  }), []);
+  const [summary, setSummary] = useState({
+    total: 0,
+    active: 0,
+    charging: 0,
+    maintenance: 0,
+    idle: 0,
+    avgBattery: 0,
+  });
+  const [activeBuses, setActiveBuses] = useState<FleetBus[]>([]);
+  const [fleet, setFleet] = useState<FleetBus[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const activeBuses = useMemo(() => FLEET.filter((b) => b.status === 'active'), []);
+  useEffect(() => {
+    const loadData = async () => {
+      const transit = getTransitService();
+      const [fleetData, summaryData] = await Promise.all([
+        transit.getActiveFleet(),
+        transit.getFleetSummary(),
+      ]);
+      setFleet(fleetData);
+      setActiveBuses(fleetData);
+      setSummary(summaryData);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
   const routeDistribution = useMemo(() =>
     ROUTES.map((route) => ({
       route,
@@ -37,8 +57,8 @@ function AdminDashboard() {
   const batteryBins = useMemo(() =>
     batteryLevels.map((bin) => ({
       ...bin,
-      count: FLEET.filter((b) => b.batterySoC >= bin.min && (bin.min === 0 || b.batterySoC < (bin.min + 20))).length,
-    })), []);
+      count: fleet.filter((b) => b.batterySoC >= bin.min && (bin.min === 0 || b.batterySoC < (bin.min + 20))).length,
+    })), [fleet]);
 
   const colorMap: Record<string, string> = {
     blue: 'from-blue-600/20 to-blue-800/20 text-blue-400 border-blue-500/30',
@@ -46,6 +66,10 @@ function AdminDashboard() {
     yellow: 'from-yellow-600/20 to-yellow-800/20 text-yellow-400 border-yellow-500/30',
     red: 'from-red-600/20 to-red-800/20 text-red-400 border-red-500/30',
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -63,7 +87,7 @@ function AdminDashboard() {
         {summaryCards.map((card) => (
           <div key={card.key} className={`p-4 rounded-xl bg-gradient-to-br ${colorMap[card.color]} border`}>
             <div className="flex items-center gap-3 mb-2">
-              <i data-lucide={card.icon} className="w-5 h-5"></i>
+              {(() => { const icons: Record<string, React.JSX.Element> = { bus: <Bus className="w-5 h-5" />, activity: <Activity className="w-5 h-5" />, 'battery-charging': <BatteryCharging className="w-5 h-5" />, wrench: <Wrench className="w-5 h-5" /> }; return icons[card.icon] || null; })()}
               <span className="text-sm text-gray-400">{card.label}</span>
             </div>
             <p className="text-3xl font-bold">{summary[card.key]}</p>
@@ -74,7 +98,7 @@ function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass-card p-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <i data-lucide="battery-full" className="w-5 h-5 text-green-400"></i>
+            <BatteryFull className="w-5 h-5 text-green-400" />
             Battery Distribution
           </h3>
           <div className="space-y-3">
@@ -98,7 +122,7 @@ function AdminDashboard() {
 
         <div className="glass-card p-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <i data-lucide="route" className="w-5 h-5 text-blue-400"></i>
+            <Route className="w-5 h-5 text-blue-400" />
             Route Distribution
           </h3>
           <div className="space-y-3">
@@ -122,7 +146,7 @@ function AdminDashboard() {
 
       <div className="glass-card p-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i data-lucide="truck" className="w-5 h-5 text-green-400"></i>
+          <Truck className="w-5 h-5 text-green-400" />
           Fleet Status Overview
         </h3>
         <div className="overflow-x-auto">
@@ -140,7 +164,7 @@ function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {FLEET.slice(0, 15).map((bus) => (
+              {fleet.slice(0, 15).map((bus) => (
                 <tr key={bus.id} className="border-b border-white/5 hover:bg-white/5 transition">
                   <td className="py-2 px-3 font-mono text-xs">{bus.plateNumber}</td>
                   <td className="py-2 px-3 text-xs text-gray-400">{bus.routeId || '—'}</td>
@@ -176,7 +200,7 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
-          <p className="text-xs text-gray-500 text-center mt-3">Showing 15 of {FLEET.length} buses</p>
+          <p className="text-xs text-gray-500 text-center mt-3">Showing 15 of {fleet.length} buses</p>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { memo, useEffect, useState } from 'react';
 import { Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { ACTIVE_FLEET, getBatteryColor } from '../../data/fleet';
-import { ALL_STOPS, SOLAR_STOPS, TERMINALS } from '../../data/stops';
-import { FleetBus } from '../../types/abssin';
+import { getTransitService } from '../../services/transit';
+import { FleetBus, BusStop } from '../../types/abssin';
+import { getBatteryColor } from '../../utils/battery';
 
 const ROUTE_U_A: [number, number][] = [
   [5.5244, 7.4946], [5.4900, 7.4700], [5.4400, 7.4400],
@@ -26,23 +26,6 @@ const ROUTE_POINTS: Record<string, [number, number][]> = {
   'Umuahia-Ohafia': ROUTE_U_O,
   'Ohafia-Umuahia': ROUTE_O_U,
 };
-
-const FLEET_LOCATIONS = ACTIVE_FLEET.map((bus, i) => {
-  const routePoints = ROUTE_POINTS[bus.routeId || 'Umuahia-Aba'] || ROUTE_U_A;
-  const idx = i % routePoints.length;
-  const [lat, lng] = routePoints[idx];
-  const offset = (Math.random() - 0.5) * 0.004;
-  return {
-    id: bus.id,
-    lat: lat + offset,
-    lng: lng + offset,
-    route: bus.routeId || 'Unknown',
-    capacity: bus.capacity,
-    speed: 18 + Math.floor(Math.random() * 14),
-    batterySoC: bus.batterySoC,
-    rangeKm: bus.rangeKm,
-  };
-});
 
 const busIcon = (soC: number) => L.divIcon({
   className: '',
@@ -78,8 +61,19 @@ const solarIcon = L.divIcon({
   iconAnchor: [7, 7],
 });
 
+interface FleetLocation {
+  id: string;
+  lat: number;
+  lng: number;
+  route: string;
+  capacity: number;
+  speed: number;
+  batterySoC: number;
+  rangeKm: number;
+}
+
 interface BusMarkersLayerProps {
-  locations?: typeof FLEET_LOCATIONS;
+  locations?: FleetLocation[];
 }
 
 const ZoomWatcher = ({ onZoom }: { onZoom: (z: number) => void }) => {
@@ -93,40 +87,101 @@ const ZoomWatcher = ({ onZoom }: { onZoom: (z: number) => void }) => {
   return null;
 };
 
-const BusMarkersLayer = memo(({ locations = FLEET_LOCATIONS }: BusMarkersLayerProps) => (
-  <>
-    {locations.map((bus) => (
-      <Marker key={bus.id} position={[bus.lat, bus.lng]} icon={busIcon(bus.batterySoC)}>
-        <Popup>
-          <div className="text-sm min-w-[160px]">
-            <b className="text-lg" style={{ color: getBatteryColor(bus.batterySoC) }}>{bus.id}</b>
-            <div className="mt-1 space-y-0.5 text-gray-700">
-              <div>Route: {bus.route}</div>
-              <div>Battery: <span style={{ color: getBatteryColor(bus.batterySoC), fontWeight: 600 }}>{bus.batterySoC}%</span></div>
-              <div>Range: {bus.rangeKm} km</div>
-              <div>Speed: {bus.speed} km/h</div>
+const BusMarkersLayer = memo(({ locations }: BusMarkersLayerProps) => {
+  const [fleetLocations, setFleetLocations] = useState<FleetLocation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (locations) {
+      setFleetLocations(locations);
+      setLoading(false);
+      return;
+    }
+
+    const loadFleet = async () => {
+      const transit = getTransitService();
+      const fleet = await transit.getActiveFleet();
+      const fleetLocations = fleet.map((bus, i) => {
+        const routePoints = ROUTE_POINTS[bus.routeId || 'Umuahia-Aba'] || ROUTE_U_A;
+        const idx = i % routePoints.length;
+        const [lat, lng] = routePoints[idx];
+        const offset = (Math.random() - 0.5) * 0.004;
+        return {
+          id: bus.id,
+          lat: lat + offset,
+          lng: lng + offset,
+          route: bus.routeId || 'Unknown',
+          capacity: bus.capacity,
+          speed: 18 + Math.floor(Math.random() * 14),
+          batterySoC: bus.batterySoC,
+          rangeKm: bus.rangeKm,
+        };
+      });
+      setFleetLocations(fleetLocations);
+      setLoading(false);
+    };
+    loadFleet();
+  }, [locations]);
+
+  if (loading) return null;
+
+  return (
+    <>
+      {fleetLocations.map((bus) => (
+        <Marker key={bus.id} position={[bus.lat, bus.lng]} icon={busIcon(bus.batterySoC)}>
+          <Popup>
+            <div className="text-sm min-w-[160px]">
+              <b className="text-lg" style={{ color: getBatteryColor(bus.batterySoC) }}>{bus.id}</b>
+              <div className="mt-1 space-y-0.5 text-gray-700">
+                <div>Route: {bus.route}</div>
+                <div>Battery: <span style={{ color: getBatteryColor(bus.batterySoC), fontWeight: 600 }}>{bus.batterySoC}%</span></div>
+                <div>Range: {bus.rangeKm} km</div>
+                <div>Speed: {bus.speed} km/h</div>
+              </div>
             </div>
-          </div>
-        </Popup>
-      </Marker>
-    ))}
-    {Object.entries(ROUTE_POINTS).map(([name, points]) => (
-      <Polyline key={name} positions={points} pathOptions={{ color: '#16a34a', weight: 2, opacity: 0.5, dashArray: '6 8' }} />
-    ))}
-  </>
-));
+          </Popup>
+        </Marker>
+      ))}
+      {Object.entries(ROUTE_POINTS).map(([name, points]) => (
+        <Polyline key={name} positions={points} pathOptions={{ color: '#16a34a', weight: 2, opacity: 0.5, dashArray: '6 8' }} />
+      ))}
+    </>
+  );
+});
 
 const StopMarkersLayer = memo(() => {
   const [zoom, setZoom] = useState(11);
+  const [terminals, setTerminals] = useState<BusStop[]>([]);
+  const [stops, setStops] = useState<BusStop[]>([]);
+  const [solarStops, setSolarStops] = useState<BusStop[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loaded) return;
+    const loadStops = async () => {
+      const transit = getTransitService();
+      const [termData, stopData, solarData] = await Promise.all([
+        transit.getTerminals(),
+        transit.getAllStops(),
+        transit.getSolarStops(),
+      ]);
+      setTerminals(termData);
+      setStops(stopData);
+      setSolarStops(solarData);
+      setLoaded(true);
+    };
+    loadStops();
+  }, [loaded]);
+
   return (
     <>
       <ZoomWatcher onZoom={setZoom} />
-      {zoom >= 12 && TERMINALS.map((t) => (
+      {zoom >= 12 && terminals.map((t) => (
         <Marker key={t.id} position={[t.lat, t.lng]} icon={terminalIcon}>
           <Popup><b>{t.name}</b><br />Terminal{t.solarCharger ? ' · Solar Charging' : ''}</Popup>
         </Marker>
       ))}
-      {zoom >= 14 && ALL_STOPS.filter((s) => s.type === 'stop').map((stop) => (
+      {zoom >= 14 && stops.filter((s) => s.type === 'stop').map((stop) => (
         <Marker key={stop.id} position={[stop.lat, stop.lng]} icon={stopIcon}>
           <Popup><b>{stop.name}</b><br />Bus Stop</Popup>
         </Marker>
@@ -135,15 +190,31 @@ const StopMarkersLayer = memo(() => {
   );
 });
 
-const SolarStationLayer = memo(() => (
-  <>
-    {SOLAR_STOPS.map((s) => (
-      <Marker key={`sol-${s.id}`} position={[s.lat, s.lng]} icon={solarIcon}>
-        <Popup><b>{s.name}</b><br />Solar Charging Available</Popup>
-      </Marker>
-    ))}
-  </>
-));
+const SolarStationLayer = memo(() => {
+  const [solarStops, setSolarStops] = useState<BusStop[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-export { BusMarkersLayer, StopMarkersLayer, SolarStationLayer, FLEET_LOCATIONS };
-export type { BusMarkersLayerProps };
+  useEffect(() => {
+    if (loaded) return;
+    const loadSolarStops = async () => {
+      const transit = getTransitService();
+      const data = await transit.getSolarStops();
+      setSolarStops(data);
+      setLoaded(true);
+    };
+    loadSolarStops();
+  }, [loaded]);
+
+  return (
+    <>
+      {solarStops.map((s) => (
+        <Marker key={`sol-${s.id}`} position={[s.lat, s.lng]} icon={solarIcon}>
+          <Popup><b>{s.name}</b><br />Solar Charging Available</Popup>
+        </Marker>
+      ))}
+    </>
+  );
+});
+
+export { BusMarkersLayer, StopMarkersLayer, SolarStationLayer };
+export type { BusMarkersLayerProps, FleetLocation };

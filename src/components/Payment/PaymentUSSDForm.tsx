@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 interface USSDFormProps {
   amount: string;
@@ -23,7 +24,7 @@ const PaymentUSSDForm = memo(({
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <button onClick={onBack} className="text-gray-400 hover:text-white">
-          <i data-lucide="arrow-left" className="w-5 h-5"></i>
+          <ArrowLeft className="w-5 h-5" />
         </button>
         <h3 className="text-xl font-bold">USSD Payment</h3>
       </div>

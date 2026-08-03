@@ -1,5 +1,6 @@
 // src/components/Wallet/CreditCard.jsx
 import React from 'react';
+import { Cpu } from 'lucide-react';
 
 const CreditCard = ({ balance }) => {
   const isZero = balance === 0;
@@ -12,7 +13,7 @@ const CreditCard = ({ balance }) => {
           <p className="text-xs text-green-300 mono">ABIA-2026-4729</p>
         </div>
         <div className="chip">
-          <i data-lucide="cpu" className="w-6 h-6 text-amber-800"></i>
+          <Cpu className="w-6 h-6 text-amber-800" />
         </div>
       </div>
       

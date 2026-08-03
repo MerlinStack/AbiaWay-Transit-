@@ -1,6 +1,25 @@
 import React, { memo, useRef } from 'react';
+import { Printer } from 'lucide-react';
 
-const PaymentReceipt = memo(({ receipt, onClose, onPrint }) => {
+interface PaymentReceiptProps {
+  receipt: {
+    transactionId?: string;
+    date?: string;
+    cardNumber?: string;
+    cardholder?: string;
+    route?: string;
+    busId?: string;
+    seats?: string[];
+    passengers?: number;
+    amount?: number;
+    balanceAfter?: number;
+    pointsEarned?: number;
+  } | null;
+  onClose: () => void;
+  onPrint?: () => void;
+}
+
+const PaymentReceipt = memo(({ receipt, onClose, onPrint }: PaymentReceiptProps) => {
   const receiptRef = useRef(null);
 
   const handlePrint = () => {
@@ -163,7 +182,7 @@ const PaymentReceipt = memo(({ receipt, onClose, onPrint }) => {
           className="btn-secondary flex-1 py-3 rounded-xl flex items-center justify-center gap-2"
           onClick={handlePrint}
         >
-          <i data-lucide="printer" className="w-4 h-4"></i>
+          <Printer className="w-4 h-4" />
           Print Receipt
         </button>
         <button 

@@ -1,3 +1,4 @@
+import { Activity } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { runSystemSmokeTest, runTelemetryFallbackAssertions } from '../utils/productionSmokeTest';
 import useNotificationStore from '../stores/notificationStore';
@@ -98,7 +99,7 @@ const SystemDiagnostics = () => {
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <div>
           <h3 className="text-xl font-bold flex items-center gap-2">
-            <i data-lucide="activity" className="text-primary"></i>
+            <Activity className="text-primary" />
             System Diagnostic Engine
           </h3>
           <p className="text-sm text-gray-400 mt-1">Verify state framework integrity, cache usage quotas, and link degradation.</p>

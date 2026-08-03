@@ -1,3 +1,4 @@
+import { X, Download, Share } from 'lucide-react';
 import React, { useRef, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -43,7 +44,7 @@ const QRCodeModal = ({ isOpen, onClose }) => {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Your QR Code</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-white">
-              <i data-lucide="x" className="w-6 h-6"></i>
+              <X className="w-6 h-6" />
             </button>
           </div>
           
@@ -69,14 +70,14 @@ const QRCodeModal = ({ isOpen, onClose }) => {
               className="btn-secondary px-6 py-3 rounded-lg flex items-center gap-2"
               onClick={handleDownload}
             >
-              <i data-lucide="download" className="w-4 h-4"></i>
+              <Download className="w-4 h-4" />
               Download
             </button>
             <button 
               className="btn-secondary px-6 py-3 rounded-lg flex items-center gap-2"
               onClick={handleShare}
             >
-              <i data-lucide="share" className="w-4 h-4"></i>
+              <Share className="w-4 h-4" />
               Share
             </button>
           </div>

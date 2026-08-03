@@ -1,3 +1,4 @@
+import { Wallet, CreditCard, Banknote, QrCode, Check, Shield } from 'lucide-react';
 import React from 'react';
 import useWalletStore from '../../stores/walletStore';
 import { getPaymentColorClasses } from '../../utils/colorMap';
@@ -28,7 +29,7 @@ const PaymentMethod = ({ selected, onSelect }) => {
           >
             <div className="flex items-start gap-3">
               <div className={`w-10 h-10 rounded-full ${pc.bg} flex items-center justify-center`}>
-                <i data-lucide={method.icon} className={`w-5 h-5 ${pc.text}`}></i>
+                {(() => { const icons: Record<string, React.JSX.Element> = { wallet: <Wallet className={`w-5 h-5 ${pc.text}`} />, 'credit-card': <CreditCard className={`w-5 h-5 ${pc.text}`} />, banknote: <Banknote className={`w-5 h-5 ${pc.text}`} />, 'qr-code': <QrCode className={`w-5 h-5 ${pc.text}`} /> }; return icons[method.icon] || null; })()}
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
@@ -45,7 +46,7 @@ const PaymentMethod = ({ selected, onSelect }) => {
                 selected === method.id ? `${pc.border} ${pc.solid}` : 'border-white/20'
               }`}>
                 {selected === method.id && (
-                  <i data-lucide="check" className="w-4 h-4 text-white"></i>
+                  <Check className="w-4 h-4 text-white" />
                 )}
               </div>
             </div>
@@ -54,7 +55,7 @@ const PaymentMethod = ({ selected, onSelect }) => {
         })}
       </div>
       <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg flex items-center gap-3">
-        <i data-lucide="shield" className="w-8 h-8 text-green-400"></i>
+        <Shield className="w-8 h-8 text-green-400" />
         <div>
           <p className="font-semibold">Secure Payment</p>
           <p className="text-xs text-gray-400">Your payment information is encrypted and secure</p>

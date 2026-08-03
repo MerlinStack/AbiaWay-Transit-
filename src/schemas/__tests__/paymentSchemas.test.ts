@@ -159,7 +159,7 @@ describe('validateWithSchema', () => {
       holder: 'ABUOMA DAVID',
     });
     expect(result.success).toBe(false);
-    expect(result.error).toHaveProperty('message');
-    expect(typeof result.error.message).toBe('string');
+    expect((result as { success: false; error: { message: string } }).error).toHaveProperty('message');
+    expect(typeof (result as { success: false; error: { message: string } }).error.message).toBe('string');
   });
 });

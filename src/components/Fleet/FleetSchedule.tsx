@@ -1,33 +1,61 @@
-import { useMemo, useState } from 'react';
-import { FLEET, ACTIVE_FLEET, FLEET_SCALING_TARGET, getFleetSummary, getBatteryColor } from '../../data/fleet';
+import { useMemo, useState, useEffect } from 'react';
+import { getTransitService } from '../../services/transit';
+import { FleetBus, FleetSummary } from '../../types/abssin';
+import { Bus } from 'lucide-react';
+import { getBatteryColor } from '../../utils/battery';
 
+const FLEET_SCALING_TARGET = 120;
 const LOOP_LABELS = ['Loop 1 (06:00–09:00)', 'Loop 2 (09:00–12:00)', 'Loop 3 (12:00–15:00)', 'Loop 4 (15:00–18:00)', 'Loop 5 (18:00–21:00)', 'Night Pool (21:00–06:00)'];
 
 const FleetSchedule = () => {
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const summary = useMemo(getFleetSummary, []);
+  const [fleet, setFleet] = useState<FleetBus[]>([]);
+  const [summary, setSummary] = useState<FleetSummary>({
+    total: 0, active: 0, charging: 0, maintenance: 0, idle: 0, avgBattery: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const transit = getTransitService();
+      const [fleetData, summaryData] = await Promise.all([
+        transit.getActiveFleet(),
+        transit.getFleetSummary(),
+      ]);
+      setFleet(fleetData);
+      setSummary(summaryData);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   const filteredFleet = useMemo(() =>
-    filterStatus === 'all' ? FLEET : FLEET.filter((b) => b.status === filterStatus),
-  [filterStatus]);
+    filterStatus === 'all' ? fleet : fleet.filter((b) => b.status === filterStatus),
+  [filterStatus, fleet]);
 
   const activeLoops = useMemo(() => {
-    const loops: Record<number, typeof FLEET> = {};
-    ACTIVE_FLEET.forEach((b) => {
-      const l = b.currentLoop;
-      if (!loops[l]) loops[l] = [];
-      loops[l].push(b);
+    const loops: Record<number, typeof fleet> = {};
+    fleet.forEach((b) => {
+      if (b.status === 'active') {
+        const l = b.currentLoop;
+        if (!loops[l]) loops[l] = [];
+        loops[l].push(b);
+      }
     });
     return Object.entries(loops).sort(([a], [b]) => Number(a) - Number(b));
-  }, []);
+  }, [fleet]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <div className="glass-card p-6">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            <i data-lucide="bus" className="text-primary"></i>
+            <Bus className="text-primary" />
             Fleet Management
             <span className="text-sm font-normal text-gray-400 ml-2">({summary.total} / {FLEET_SCALING_TARGET} target)</span>
           </h3>

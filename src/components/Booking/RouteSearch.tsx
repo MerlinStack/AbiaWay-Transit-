@@ -1,6 +1,12 @@
+import { MapPin, ArrowLeftRight, Flag, Calendar, Clock, Users, ArrowRight, Search } from 'lucide-react';
 import React, { memo, useState, useEffect } from 'react';
 
-const RouteSearch = memo(({ onSearch, initialData }) => {
+interface RouteSearchProps {
+  onSearch: (data: { from: string; to: string; date: string; time: string; passengers: number }) => void;
+  initialData: { from?: string; to?: string; date?: string; time?: string; passengers?: number };
+}
+
+const RouteSearch = memo(({ onSearch, initialData }: RouteSearchProps) => {
   const [searchData, setSearchData] = useState({
     from: initialData.from || '',
     to: initialData.to || '',
@@ -53,7 +59,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
           <div className="md:col-span-2 relative">
             <label className="block text-sm text-gray-400 mb-2">From</label>
             <div className="relative">
-              <i data-lucide="map-pin" className="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+              <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <select
                 value={searchData.from}
                 onChange={(e) => setSearchData(prev => ({ ...prev, from: e.target.value }))}
@@ -74,14 +80,14 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
               onClick={handleSwap}
               className={`w-10 h-10 rounded-full bg-primary/20 hover:bg-primary/30 flex items-center justify-center transition-all ${swapAnimation ? 'rotate-180' : ''}`}
             >
-              <i data-lucide="arrow-left-right" className="w-5 h-5 text-primary"></i>
+              <ArrowLeftRight className="w-5 h-5 text-primary" />
             </button>
           </div>
 
           <div className="md:col-span-2">
             <label className="block text-sm text-gray-400 mb-2">To</label>
             <div className="relative">
-              <i data-lucide="flag" className="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+              <Flag className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <select
                 value={searchData.to}
                 onChange={(e) => setSearchData(prev => ({ ...prev, to: e.target.value }))}
@@ -101,7 +107,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
           <div>
             <label className="block text-sm text-gray-400 mb-2">Date</label>
             <div className="relative">
-              <i data-lucide="calendar" className="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+              <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
                 type="date"
                 value={searchData.date}
@@ -115,7 +121,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
           <div>
             <label className="block text-sm text-gray-400 mb-2">Time</label>
             <div className="relative">
-              <i data-lucide="clock" className="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+              <Clock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <select
                 value={searchData.time}
                 onChange={(e) => setSearchData(prev => ({ ...prev, time: e.target.value }))}
@@ -131,7 +137,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
           <div>
             <label className="block text-sm text-gray-400 mb-2">Passengers</label>
             <div className="relative">
-              <i data-lucide="users" className="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+              <Users className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <select
                 value={searchData.passengers}
                 onChange={(e) => setSearchData(prev => ({ ...prev, passengers: parseInt(e.target.value) }))}
@@ -160,7 +166,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
                   to: route.to
                 })}
               >
-                <i data-lucide="arrow-right" className="w-3 h-3"></i>
+                <ArrowRight className="w-3 h-3" />
                 {route.from} → {route.to}
               </button>
             ))}
@@ -172,7 +178,7 @@ const RouteSearch = memo(({ onSearch, initialData }) => {
           className="w-full btn-primary py-4 text-lg mt-6"
           disabled={!searchData.from || !searchData.to}
         >
-          <i data-lucide="search" className="w-5 h-5 inline mr-2"></i>
+          <Search className="w-5 h-5 inline mr-2" />
           Search Available Buses
         </button>
       </form>

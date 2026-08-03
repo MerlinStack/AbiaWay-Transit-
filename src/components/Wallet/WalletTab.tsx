@@ -1,8 +1,9 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { Wallet, Plus, X, CreditCard, PlusCircle, Unlink, Smartphone, Banknote, QrCode, Bus, CheckCircle, History, Inbox, ArrowDownLeft, ArrowUpRight, Download, TrendingUp, BarChart3, TrendingDown, Shield } from 'lucide-react';
 import useWalletStore from '../../stores/walletStore';
 import { getABSINService } from '../../services/absin';
 import useNotificationStore from '../../stores/notificationStore';
-import CreditCard from './CreditCard';
+import CreditCardDisplay from './CreditCard';
 import PaymentMethodModal from '../Payment/PaymentMethodModal';
 import { linkCardSchema, validateWithSchema } from '../../schemas/paymentSchemas';
 
@@ -65,7 +66,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
   const handleLinkCard = async () => {
     const cleanedCardNumber = cardNumber.replace(/\s/g, '');
     const validation = validateWithSchema(linkCardSchema, { cardNumber: cleanedCardNumber, pin: cardPin });
-    if (!validation.success) {
+    if (validation.error) {
       showNotification('Error', validation.error.message, 'error');
       return;
     }
@@ -148,14 +149,14 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
       {/* Wallet Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold flex items-center gap-3">
-          <i data-lucide="wallet" className="w-6 h-6 text-green-400"></i>
+          <Wallet className="w-6 h-6 text-green-400" />
           Your Wallet
         </h3>
         <button 
           className="btn-primary px-4 py-2 rounded-lg flex items-center gap-2" 
           onClick={() => setShowPaymentModal(true)}
         >
-          <i data-lucide="plus" className="w-5 h-5"></i>
+          <Plus className="w-5 h-5" />
           <span>Add Funds</span>
         </button>
       </div>
@@ -183,20 +184,20 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                   className="text-gray-400 hover:text-white"
                   onClick={() => setShowWelcomeBanner(false)}
                 >
-                  <i data-lucide="x" className="w-5 h-5"></i>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
           )}
 
           {/* Credit Card Display with Zero Balance State */}
-          <CreditCard balance={balance} />
+          <CreditCardDisplay balance={balance} />
 
           {/* ABSIN Card Section */}
           <div className="glass-card p-6">
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-lg font-semibold flex items-center gap-2">
-                <i data-lucide="credit-card" className="text-purple-400"></i>
+                <CreditCard className="text-purple-400" />
                 Linked ABSIN Card
               </h4>
               {!linkedCard ? (
@@ -204,7 +205,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                   className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1"
                   onClick={() => setShowLinkModal(true)}
                 >
-                  <i data-lucide="plus-circle" className="w-4 h-4"></i>
+                  <PlusCircle className="w-4 h-4" />
                   Link Card
                 </button>
               ) : (
@@ -212,7 +213,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                   className="text-sm text-red-400 hover:text-red-300 transition flex items-center gap-1"
                   onClick={handleUnlinkCard}
                 >
-                  <i data-lucide="unlink" className="w-4 h-4"></i>
+                  <Unlink className="w-4 h-4" />
                   Unlink
                 </button>
               )}
@@ -242,7 +243,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 onClick={() => setShowLinkModal(true)}
               >
                 <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <i data-lucide="credit-card" className="w-8 h-8 text-purple-400"></i>
+                  <CreditCard className="w-8 h-8 text-purple-400" />
                 </div>
                 <p className="font-semibold text-purple-400 mb-1">No ABSIN Card Linked</p>
                 <p className="text-xs text-gray-400">Link your ABSIN card to earn points and enjoy benefits</p>
@@ -283,7 +284,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 onClick={() => setShowPaymentModal(true)}
                 className="p-4 bg-white/5 border border-white/10 rounded-xl text-center hover:border-blue-500 transition"
               >
-                <i data-lucide="credit-card" className="w-8 h-8 mx-auto mb-2 text-blue-400"></i>
+                <CreditCard className="w-8 h-8 mx-auto mb-2 text-blue-400" />
                 <p className="text-sm font-medium">Card</p>
                 <p className="text-xs text-gray-500">Visa/Mastercard</p>
               </button>
@@ -291,7 +292,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 onClick={() => setShowPaymentModal(true)}
                 className="p-4 bg-white/5 border border-white/10 rounded-xl text-center hover:border-green-500 transition"
               >
-                <i data-lucide="smartphone" className="w-8 h-8 mx-auto mb-2 text-green-400"></i>
+                <Smartphone className="w-8 h-8 mx-auto mb-2 text-green-400" />
                 <p className="text-sm font-medium">USSD</p>
                 <p className="text-xs text-gray-500">Quick banking</p>
               </button>
@@ -299,7 +300,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 onClick={() => setShowPaymentModal(true)}
                 className="p-4 bg-white/5 border border-white/10 rounded-xl text-center hover:border-purple-500 transition"
               >
-                <i data-lucide="banknote" className="w-8 h-8 mx-auto mb-2 text-purple-400"></i>
+                <Banknote className="w-8 h-8 mx-auto mb-2 text-purple-400" />
                 <p className="text-sm font-medium">Transfer</p>
                 <p className="text-xs text-gray-500">Bank transfer</p>
               </button>
@@ -307,7 +308,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 onClick={() => setShowLinkModal(true)}
                 className="p-4 bg-white/5 border border-white/10 rounded-xl text-center hover:border-orange-500 transition"
               >
-                <i data-lucide="credit-card" className="w-8 h-8 mx-auto mb-2 text-orange-400"></i>
+                <CreditCard className="w-8 h-8 mx-auto mb-2 text-orange-400" />
                 <p className="text-sm font-medium">ABSIN</p>
                 <p className="text-xs text-gray-500">State card</p>
               </button>
@@ -327,14 +328,14 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
           {/* QR Code Payment Section */}
           <div className="glass-card p-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i data-lucide="qr-code" className="text-primary"></i>
+              <QrCode className="text-primary" />
               QR Code Payment
             </h3>
             <div className="flex items-center gap-6 flex-wrap">
               <div className="qr-code bg-white p-4 rounded-xl">
                 <div className="w-32 h-32 bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-xs text-center p-2 rounded-lg">
                   <div>
-                    <i data-lucide="bus" className="w-8 h-8 mx-auto mb-2"></i>
+                    <Bus className="w-8 h-8 mx-auto mb-2" />
                     Scan to Pay
                   </div>
                 </div>
@@ -342,11 +343,11 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
               <div className="flex-1">
                 <p className="text-sm mb-2">Scan QR code to pay for your ride</p>
                 <p className="text-xs text-gray-400 flex items-center gap-1">
-                  <i data-lucide="check-circle" className="w-3 h-3 text-green-400"></i>
+                  <CheckCircle className="w-3 h-3 text-green-400" />
                   Available at all bus terminals
                 </p>
                 <button className="btn-secondary text-sm px-4 py-2 mt-3" onClick={() => onOpenModal('qrCode')}>
-                  <i data-lucide="qr-code" className="w-4 h-4 inline mr-2"></i>
+                  <QrCode className="w-4 h-4 inline mr-2" />
                   Generate QR
                 </button>
               </div>
@@ -358,13 +359,13 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
         <div className="space-y-6">
           <div className="glass-card p-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i data-lucide="history" className="text-primary"></i>
+              <History className="text-primary" />
               Recent Transactions
             </h3>
             <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
               {transactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <i data-lucide="inbox" className="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+                  <Inbox className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-400">No transactions yet</p>
                   <p className="text-xs text-gray-500 mt-1">Your first top-up will appear here</p>
                 </div>
@@ -375,11 +376,11 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         tx.type === 'credit' ? 'bg-green-500/20' : 'bg-red-500/20'
                       }`}>
-                        <i data-lucide={tx.type === 'credit' ? 'arrow-down-left' : 'arrow-up-right'} className={`w-4 h-4 ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'}`}></i>
+                        {tx.type === 'credit' ? <ArrowDownLeft className="w-4 h-4 text-green-400" /> : <ArrowUpRight className="w-4 h-4 text-red-400" />}
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between">
-                          <p className="text-sm font-medium">{tx.description}</p>
+                          <p className="text-sm font-medium truncate">{tx.description}</p>
                           <p className={`text-sm font-bold ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'}`}>
                             {tx.type === 'credit' ? '+' : '-'}₦{tx.amount.toLocaleString()}
                           </p>
@@ -392,7 +393,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
               )}
             </div>
             <button className="btn-secondary w-full mt-4 py-2 text-sm" disabled={transactions.length === 0}>
-              <i data-lucide="download" className="w-4 h-4 inline mr-2"></i>
+              <Download className="w-4 h-4 inline mr-2" />
               Download Statement
             </button>
           </div>
@@ -400,12 +401,12 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
           {/* Spending Insights - Shows differently for zero balance */}
           <div className="glass-card p-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i data-lucide="trending-up" className="text-primary"></i>
+              <TrendingUp className="text-primary" />
               Spending Insights
             </h3>
             {balance === 0 ? (
               <div className="text-center py-6">
-                <i data-lucide="bar-chart-3" className="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+                <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400 text-sm">Add funds to see insights</p>
                 <button 
                   className="mt-3 text-primary text-sm hover:text-primary-light transition"
@@ -436,7 +437,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                     </div>
                   </div>
                   <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
-                    <i data-lucide="trending-down" className="w-3 h-3"></i>
+                    <TrendingDown className="w-3 h-3" />
                     15% less than last week
                   </p>
                 </div>
@@ -455,7 +456,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold">Link ABSIN Card</h3>
                 <button onClick={() => setShowLinkModal(false)} className="text-gray-400 hover:text-white">
-                  <i data-lucide="x" className="w-6 h-6"></i>
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
@@ -471,7 +472,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                       setCardNumber(groups ? groups.join(' ') : formatted);
                     }}
                     placeholder="1234 5678 9012 3456"
-                    maxLength="19"
+                    maxLength={19}
                     className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500"
                   />
                 </div>
@@ -483,14 +484,14 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                     value={cardPin}
                     onChange={(e) => setCardPin(e.target.value.slice(0, 6))}
                     placeholder="****"
-                    maxLength="6"
+                    maxLength={6}
                     className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-purple-500"
                   />
                 </div>
 
                 <div className="p-3 bg-purple-500/10 rounded-lg">
                   <p className="text-xs text-purple-400">
-                    <i data-lucide="shield" className="w-3 h-3 inline mr-1"></i>
+                    <Shield className="w-3 h-3 inline mr-1" />
                     Your card details are encrypted and secure
                   </p>
                 </div>

@@ -1,38 +1,17 @@
 import React, { memo, useState, useMemo, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { History, Inbox, ArrowDownLeft, ArrowUpRight, Download } from 'lucide-react';
 
-const ROW_HEIGHT = 80;
+interface TransactionHistoryProps {
+  transactions: Array<{
+    id: number;
+    type: 'credit' | 'debit';
+    description: string;
+    amount: number;
+    date: string;
+  }>;
+}
 
-const TransactionRow = memo(({ data, index, style }) => {
-  const tx = data[index];
-  const icon = tx.type === 'credit' ? 'arrow-down-left' : 'arrow-up-right';
-  const color = tx.type === 'credit' ? 'text-green-400' : 'text-red-400';
-  return (
-    <div style={style}>
-      <div className={`transaction-item ${tx.type} p-3 hover:bg-white/5 transition rounded-lg mx-1`}>
-        <div className="flex items-start gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === 'credit' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-            <i data-lucide={icon} className={`w-4 h-4 ${color}`}></i>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex justify-between">
-              <p className="text-sm font-medium truncate">{tx.description}</p>
-              <p className={`text-sm font-bold ${color} shrink-0 ml-2`}>
-                {tx.type === 'credit' ? '+' : '-'}N{tx.amount.toLocaleString()}
-              </p>
-            </div>
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-gray-400">{tx.date}</p>
-              <span className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full">{tx.type}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-const TransactionHistory = memo(({ transactions }) => {
+const TransactionHistory = memo(({ transactions }: TransactionHistoryProps) => {
   const [filter, setFilter] = useState('all');
 
   const filteredTransactions = useMemo(() => {
@@ -50,7 +29,7 @@ const TransactionHistory = memo(({ transactions }) => {
     <div className="glass-card p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <i data-lucide="history" className="text-primary"></i>
+          <History className="text-primary" />
           Transactions
         </h3>
         <div className="flex gap-1 bg-white/10 rounded-lg p-1">
@@ -70,28 +49,39 @@ const TransactionHistory = memo(({ transactions }) => {
         </div>
       </div>
 
-      <div className="custom-scrollbar">
+      <div className="custom-scrollbar space-y-2 max-h-[380px] overflow-y-auto">
         {itemCount > 0 ? (
-          <List
-            height={380}
-            itemCount={itemCount}
-            itemSize={ROW_HEIGHT}
-            width="100%"
-            itemData={filteredTransactions}
-            overscanCount={2}
-          >
-            {TransactionRow}
-          </List>
+          filteredTransactions.map((tx) => (
+            <div key={tx.id} className={`transaction-item ${tx.type} p-3 hover:bg-white/5 transition rounded-lg mx-1`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === 'credit' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                  {tx.type === 'credit' ? <ArrowDownLeft className="w-4 h-4 text-green-400" /> : <ArrowUpRight className="w-4 h-4 text-red-400" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between">
+                    <p className="text-sm font-medium truncate">{tx.description}</p>
+                    <p className={`text-sm font-bold ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'} shrink-0 ml-2`}>
+                      {tx.type === 'credit' ? '+' : '-'}₦{tx.amount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-xs text-gray-400">{tx.date}</p>
+                    <span className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full">{tx.type}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
         ) : (
           <div className="text-center py-8">
-            <i data-lucide="inbox" className="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+            <Inbox className="w-12 h-12 text-gray-600 mx-auto mb-3" />
             <p className="text-gray-400">No transactions found</p>
           </div>
         )}
       </div>
 
       <button className="w-full btn-secondary mt-4 py-2 text-sm">
-        <i data-lucide="download" className="w-4 h-4 inline mr-2"></i>
+        <Download className="w-4 h-4 inline mr-2" />
         Download Statement
       </button>
     </div>

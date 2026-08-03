@@ -1,9 +1,18 @@
 import React, { memo, useState } from 'react';
 import useWalletStore from '../../stores/walletStore';
 import { getPaymentColorClasses } from '../../utils/colorMap';
+import { CreditCard, Wallet, QrCode, Check, ArrowRight, Shield } from 'lucide-react';
 import ABSINPaymentDemo from './ABSINPaymentDemo';
 
-const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess }) => {
+interface PaymentMethodProps {
+  selected?: string;
+  onSelect: (method: string) => void;
+  rideDetails?: { from?: string; to?: string; busId?: string; seats?: string[]; passengers?: number };
+  amount?: number;
+  onSuccess?: (result: unknown) => void;
+}
+
+const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess }: PaymentMethodProps) => {
   const balance = useWalletStore((s) => s.balance);
   const [showABSINModal, setShowABSINModal] = useState(false);
 
@@ -74,7 +83,7 @@ const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-full ${c.bg} flex items-center justify-center`}>
-                  <i data-lucide={method.icon} className={`w-5 h-5 ${c.text}`}></i>
+                  {method.icon === 'credit-card' ? <CreditCard className={`w-5 h-5 ${c.text}`} /> : method.icon === 'wallet' ? <Wallet className={`w-5 h-5 ${c.text}`} /> : <QrCode className={`w-5 h-5 ${c.text}`} />}
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
@@ -89,12 +98,12 @@ const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess
                 </div>
                 {selected === method.id && method.id !== 'absin' && (
                   <div className={`w-5 h-5 rounded-full border-2 ${c.border} ${c.solid} flex items-center justify-center`}>
-                    <i data-lucide="check" className="w-4 h-4 text-white"></i>
+                    <Check className="w-4 h-4 text-white" />
                   </div>
                 )}
                 {method.id === 'absin' && (
                   <div className="w-5 h-5 rounded-full border-2 border-purple-500 flex items-center justify-center">
-                    <i data-lucide="arrow-right" className="w-4 h-4 text-purple-400"></i>
+                    <ArrowRight className="w-4 h-4 text-purple-400" />
                   </div>
                 )}
               </div>
@@ -106,7 +115,7 @@ const PaymentMethod = memo(({ selected, onSelect, rideDetails, amount, onSuccess
 
 
         <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg flex items-center gap-3">
-          <i data-lucide="shield" className="w-8 h-8 text-green-400"></i>
+          <Shield className="w-8 h-8 text-green-400" />
           <div>
             <p className="font-semibold">Secure Payment</p>
             <p className="text-xs text-gray-400">Your payment information is encrypted and secure</p>

@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import useNotificationStore from '../../stores/notificationStore';
+import { Clock } from 'lucide-react';
 
 const ETAPanel = memo(() => {
   const [updates, setUpdates] = useState([
@@ -34,7 +35,7 @@ const ETAPanel = memo(() => {
   return (
     <div className="glass-card p-4">
       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <i data-lucide="clock" className="text-primary"></i>
+        <Clock className="text-primary" />
         Real-time ETA & Capacity
       </h3>
       <div className="space-y-4">

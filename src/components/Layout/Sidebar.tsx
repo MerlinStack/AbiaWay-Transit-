@@ -2,35 +2,24 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Drawer } from '@mui/material';
 import Logo from './Logo';
-import MapIcon from '@mui/icons-material/esm/Map';
-import AccountBalanceWalletIcon from '@mui/icons-material/esm/AccountBalanceWallet';
-import ConfirmationNumberIcon from '@mui/icons-material/esm/ConfirmationNumber';
-import DriveEtaIcon from '@mui/icons-material/esm/DriveEta';
-import DirectionsBusIcon from '@mui/icons-material/esm/DirectionsBus';
-import AssignmentTurnedInIcon from '@mui/icons-material/esm/AssignmentTurnedIn';
-import QrCodeScannerIcon from '@mui/icons-material/esm/QrCodeScanner';
-import BadgeIcon from '@mui/icons-material/esm/Badge';
-import BugReportIcon from '@mui/icons-material/esm/BugReport';
-import AdminPanelSettingsIcon from '@mui/icons-material/esm/AdminPanelSettings';
-import GroupIcon from '@mui/icons-material/esm/Group';
-import CircleIcon from '@mui/icons-material/esm/Circle';
+import { Map, Wallet, Ticket, CarFront, Bus, ClipboardCheck, QrCode, IdCard, Bug, Shield, Users, Circle } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 
 const mainTabs = [
-  { path: '/map', icon: <MapIcon />, label: 'Live Tracking', badge: 'LIVE' as const },
-  { path: '/wallet', icon: <AccountBalanceWalletIcon />, label: 'My Wallet' },
-  { path: '/booking', icon: <ConfirmationNumberIcon />, label: 'Book & Pay' },
-  { path: '/fleet', icon: <DirectionsBusIcon />, label: 'Fleet Mgmt' },
-  { path: '/driver', icon: <DriveEtaIcon />, label: 'Driver Dashboard' },
-  { path: '/checkin', icon: <AssignmentTurnedInIcon />, label: 'Driver Check-in' },
-  { path: '/conductor', icon: <QrCodeScannerIcon />, label: 'Conductor Tap' },
-  { path: '/register', icon: <BadgeIcon />, label: 'ABSSIN Register' },
-  { path: '/diagnostics', icon: <BugReportIcon />, label: 'Diagnostics' },
+  { path: '/map', icon: <Map size={20} />, label: 'Live Tracking', badge: 'LIVE' as const },
+  { path: '/wallet', icon: <Wallet size={20} />, label: 'My Wallet' },
+  { path: '/booking', icon: <Ticket size={20} />, label: 'Book & Pay' },
+  { path: '/fleet', icon: <Bus size={20} />, label: 'Fleet Mgmt' },
+  { path: '/driver', icon: <CarFront size={20} />, label: 'Driver Dashboard' },
+  { path: '/checkin', icon: <ClipboardCheck size={20} />, label: 'Driver Check-in' },
+  { path: '/conductor', icon: <QrCode size={20} />, label: 'Conductor Tap' },
+  { path: '/register', icon: <IdCard size={20} />, label: 'ABSSIN Register' },
+  { path: '/diagnostics', icon: <Bug size={20} />, label: 'Diagnostics' },
 ];
 
 const adminTabs = [
-  { path: '/admin', icon: <AdminPanelSettingsIcon />, label: 'Admin Dashboard' },
-  { path: '/admin/drivers', icon: <GroupIcon />, label: 'Driver Management' },
+  { path: '/admin', icon: <Shield size={20} />, label: 'Admin Dashboard' },
+  { path: '/admin/drivers', icon: <Users size={20} />, label: 'Driver Management' },
 ];
 
 function Sidebar() {
@@ -141,7 +130,7 @@ function Sidebar() {
           )}
           <hr className="my-2 border-[rgba(148,163,184,0.12)]" />
           <div className="flex items-center gap-2">
-            <CircleIcon style={{ width: 10, height: 10, color: '#22c55e' }} />
+            <Circle size={10} fill="#22c55e" color="#22c55e" />
             <p className="text-xs text-green-400">Connected</p>
           </div>
         </div>

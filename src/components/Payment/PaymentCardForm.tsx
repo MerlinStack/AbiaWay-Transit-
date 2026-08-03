@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { ArrowLeft, Eye } from 'lucide-react';
 
 interface CardFormProps {
   amount: string;
@@ -28,7 +29,7 @@ const PaymentCardForm = memo(({
     <div className="space-y-4" role="form" aria-label="Card payment form">
       <div className="flex items-center gap-2 mb-4">
         <button onClick={onBack} aria-label="Go back to payment method selection" className="text-gray-400 hover:text-white">
-          <i data-lucide="arrow-left" className="w-5 h-5"></i>
+          <ArrowLeft className="w-5 h-5" />
         </button>
         <h3 className="text-xl font-bold">Card Payment</h3>
       </div>
@@ -53,7 +54,7 @@ const PaymentCardForm = memo(({
             className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
           <button onClick={onCheckBalance} disabled={checkingBalance} aria-label="Check card balance"
             className="px-4 bg-white/10 rounded-lg hover:bg-white/20 transition">
-            <i data-lucide="eye" className="w-5 h-5"></i>
+            <Eye className="w-5 h-5" />
           </button>
         </div>
       </div>

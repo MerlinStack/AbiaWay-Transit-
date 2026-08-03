@@ -1,6 +1,13 @@
 import React, { memo, useState } from 'react';
+import { Armchair, Gauge } from 'lucide-react';
 
-const SeatSelection = memo(({ onSelect, selectedSeats = [], passengers = 1 }) => {
+interface SeatSelectionProps {
+  onSelect: (seats: string[]) => void;
+  selectedSeats?: string[];
+  passengers?: number;
+}
+
+const SeatSelection = memo(({ onSelect, selectedSeats = [], passengers = 1 }: SeatSelectionProps) => {
   const [selected, setSelected] = useState(selectedSeats);
   const [busLayout] = useState({
     rows: 10,
@@ -59,7 +66,7 @@ const SeatSelection = memo(({ onSelect, selectedSeats = [], passengers = 1 }) =>
         {/* Driver Cabin */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
           <div className="w-16 h-8 bg-primary/30 rounded-t-lg flex items-center justify-center text-xs">
-            <i data-lucide="steering-wheel" className="w-4 h-4 mr-1"></i>
+            <Gauge className="w-4 h-4 mr-1" />
             Driver
           </div>
         </div>
@@ -85,7 +92,7 @@ const SeatSelection = memo(({ onSelect, selectedSeats = [], passengers = 1 }) =>
                     disabled={status === 'booked'}
                   >
                     <div className="text-center">
-                      <i data-lucide="armchair" className="w-5 h-5 mx-auto mb-1"></i>
+                      <Armchair className="w-5 h-5 mx-auto mb-1" />
                       <span className="text-xs">{seat}</span>
                     </div>
                   </button>

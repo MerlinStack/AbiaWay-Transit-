@@ -1,8 +1,10 @@
+import { ClipboardCheck } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 import { recordCheckEvent, isMaintenanceRequired, type CheckItemKey } from '../../utils/maintenanceTracker';
-import { FLEET, setBusStatus } from '../../data/fleet';
+import { getTransitService } from '../../services/transit';
+import { FleetBus } from '../../types/abssin';
 import { generateRollingTicketQr } from '../../utils/secureTicketQr';
 import { getSolarThroughput, estimateChargeTime } from '../../utils/telemetry';
 
@@ -34,21 +36,36 @@ const CHECKLIST_ITEMS: { key: CheckItemKey; label: string }[] = [
   { key: 'firstAid', label: 'First aid kit stocked' },
 ];
 
-const PLATE_NUMBERS = FLEET.map((b) => b.plateNumber).slice(0, 10);
-
 const DriverCheckin = () => {
   const [step, setStep] = useState<'login' | 'checklist' | 'done' | 'blocked'>('login');
   const [driverId, setDriverId] = useState('');
   const [coPilotId, setCoPilotId] = useState('');
-  const [plate, setPlate] = useState(PLATE_NUMBERS[0]);
+  const [plate, setPlate] = useState('');
   const [odometer, setOdometer] = useState('');
   const [checklist, setChecklist] = useState<VehicleChecklist>(INITIAL_CHECKLIST);
   const [maintenanceItems, setMaintenanceItems] = useState<CheckItemKey[]>([]);
   const [qrToken, setQrToken] = useState('');
+  const [plates, setPlates] = useState<string[]>([]);
+  const [loadingPlates, setLoadingPlates] = useState(true);
   const user = useAuthStore((s) => s.user);
   const showNotification = useNotificationStore((s) => s.showNotification);
 
-  const bus = useMemo(() => FLEET.find((b) => b.plateNumber === plate), [plate]);
+  useEffect(() => {
+    const loadPlates = async () => {
+      const transit = getTransitService();
+      const fleet = await transit.getActiveFleet();
+      setPlates(fleet.map(b => b.plateNumber).slice(0, 10));
+      setLoadingPlates(false);
+    };
+    loadPlates();
+  }, []);
+
+  const bus = useMemo(() => {
+    if (!plate) return null;
+    // We'll need to fetch the bus data or store it
+    // For now, return a minimal mock - in real app we'd fetch from transit service
+    return null;
+  }, [plate]);
 
   useEffect(() => {
     if (qrToken) {
@@ -86,7 +103,8 @@ const DriverCheckin = () => {
     recordCheckEvent(plate, passed, failed);
     const flagged = isMaintenanceRequired(plate);
     if (flagged.length >= 3) {
-      setBusStatus(plate, 'maintenance');
+      // TODO: Update bus status via TransitService when real API is available
+      // await transit.updateBusStatus(plate, 'maintenance');
       setMaintenanceItems(flagged);
       setStep('blocked');
       showNotification('Auto-Locked', `${plate} flagged maintenance (${flagged.length} items)`, 'error');
@@ -135,7 +153,7 @@ const DriverCheckin = () => {
   return (
     <div className="glass-card p-6">
       <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <i data-lucide="clipboard-check" className="text-primary"></i>
+        <ClipboardCheck className="text-primary" />
         Driver Check-in
       </h3>
 
@@ -157,7 +175,11 @@ const DriverCheckin = () => {
             <label className="block text-sm text-gray-400 mb-2">Vehicle Plate</label>
             <select value={plate} onChange={(e) => setPlate(e.target.value)}
               className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3">
-              {PLATE_NUMBERS.map((p) => <option key={p} value={p}>{p}</option>)}
+              {loadingPlates ? (
+              <option value="">Loading...</option>
+            ) : (
+              plates.map((p) => <option key={p} value={p}>{p}</option>)
+            )}
             </select>
           </div>
           <div>

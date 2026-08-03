@@ -1,7 +1,12 @@
+import { Star, Clock, ArrowRight, Plus } from 'lucide-react';
 import React from 'react';
 import useBookingStore from '../../stores/bookingStore';
 
-const SavedRoutes = ({ onSelect }) => {
+interface SavedRoutesProps {
+  onSelect: (data: { from: string; to: string; date: string; time: string; passengers: number }) => void;
+}
+
+const SavedRoutes = ({ onSelect }: SavedRoutesProps) => {
   const savedRoutes = useBookingStore((s) => s.savedRoutes);
   const saveRoute = useBookingStore((s) => s.saveRoute);
 
@@ -14,7 +19,7 @@ const SavedRoutes = ({ onSelect }) => {
   return (
     <div className="glass-card p-4">
       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <i data-lucide="star" className="text-yellow-400 fill-yellow-400"></i>
+        <Star className="text-yellow-400 fill-yellow-400" />
         Saved Routes
       </h3>
 
@@ -35,12 +40,12 @@ const SavedRoutes = ({ onSelect }) => {
               <div>
                 <p className="font-medium">{route.from} → {route.to}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  <i data-lucide="clock" className="w-3 h-3 inline mr-1"></i>
+                  <Clock className="w-3 h-3 inline mr-1" />
                   {route.frequency} • Last used {route.lastUsed}
                 </p>
               </div>
               <button className="opacity-0 group-hover:opacity-100 transition">
-                <i data-lucide="arrow-right" className="w-4 h-4 text-primary"></i>
+                <ArrowRight className="w-4 h-4 text-primary" />
               </button>
             </div>
           </div>
@@ -48,7 +53,7 @@ const SavedRoutes = ({ onSelect }) => {
       </div>
 
       <button className="w-full btn-secondary mt-4 py-2 text-sm">
-        <i data-lucide="plus" className="w-4 h-4 inline mr-2"></i>
+        <Plus className="w-4 h-4 inline mr-2" />
         Save Current Route
       </button>
     </div>

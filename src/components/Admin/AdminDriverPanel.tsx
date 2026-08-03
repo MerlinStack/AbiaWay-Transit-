@@ -1,23 +1,19 @@
-import { useMemo, useState } from 'react';
-import { FLEET } from '../../data/fleet';
+import { useMemo, useState, useEffect } from 'react';
+import { getTransitService } from '../../services/transit';
+import { FleetBus } from '../../types/abssin';
 import { getConsecutiveFailures } from '../../utils/maintenanceTracker';
 
-const DRIVERS = Array.from({ length: 40 }, (_, i) => {
-  const bus = FLEET[i];
-  const isActive = i < 32;
-  const statusList: ('online' | 'on-trip' | 'offline')[] = ['online', 'on-trip', 'offline'];
-  return {
-    id: `DRV-${String(i + 1).padStart(3, '0')}`,
-    name: `Driver ${i + 1}`,
-    phone: `+234-80${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
-    assignedBus: isActive ? bus?.plateNumber || null : null,
-    routeId: isActive ? bus?.routeId || null : null,
-    status: isActive ? (i < 20 ? 'on-trip' : 'online') : 'offline',
-    lastCheckin: isActive ? new Date(Date.now() - Math.floor(Math.random() * 8) * 3600000).toISOString() : null,
-    shiftStart: isActive ? new Date(Date.now() - Math.floor(Math.random() * 4 + 1) * 3600000).toISOString() : null,
-    checkinsToday: Math.floor(Math.random() * 3) + 1,
-  };
-});
+interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  assignedBus: string | null;
+  routeId: string | null;
+  status: 'online' | 'on-trip' | 'offline';
+  lastCheckin: string | null;
+  shiftStart: string | null;
+  checkinsToday: number;
+}
 
 type SortKey = 'id' | 'name' | 'status' | 'assignedBus';
 
@@ -25,9 +21,36 @@ function AdminDriverPanel() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortKey, setSortKey] = useState<SortKey>('id');
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDrivers = async () => {
+      const transit = getTransitService();
+      const fleet = await transit.getActiveFleet();
+      const generatedDrivers = Array.from({ length: 40 }, (_, i) => {
+        const bus = fleet[i];
+        const isActive = i < 32;
+        return {
+          id: `DRV-${String(i + 1).padStart(3, '0')}`,
+          name: `Driver ${i + 1}`,
+          phone: `+234-80${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
+          assignedBus: isActive ? bus?.plateNumber || null : null,
+          routeId: isActive ? bus?.routeId || null : null,
+          status: isActive ? (i < 20 ? 'on-trip' : 'online') : 'offline',
+          lastCheckin: isActive ? new Date(Date.now() - Math.floor(Math.random() * 8) * 3600000).toISOString() : null,
+          shiftStart: isActive ? new Date(Date.now() - Math.floor(Math.random() * 4 + 1) * 3600000).toISOString() : null,
+          checkinsToday: Math.floor(Math.random() * 3) + 1,
+        };
+      });
+      setDrivers(generatedDrivers);
+      setLoading(false);
+    };
+    loadDrivers();
+  }, []);
 
   const filtered = useMemo(() => {
-    let list = [...DRIVERS];
+    let list = [...drivers];
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((d) => d.id.toLowerCase().includes(q) || d.name.toLowerCase().includes(q) || (d.assignedBus || '').toLowerCase().includes(q));
@@ -41,13 +64,17 @@ function AdminDriverPanel() {
       return typeof va === 'string' ? va.localeCompare(vb as string) : 0;
     });
     return list;
-  }, [search, statusFilter, sortKey]);
+  }, [search, statusFilter, sortKey, drivers]);
 
   const statusCounts = useMemo(() => ({
-    online: DRIVERS.filter((d) => d.status === 'online').length,
-    'on-trip': DRIVERS.filter((d) => d.status === 'on-trip').length,
-    offline: DRIVERS.filter((d) => d.status === 'offline').length,
-  }), []);
+    online: drivers.filter((d) => d.status === 'online').length,
+    'on-trip': drivers.filter((d) => d.status === 'on-trip').length,
+    offline: drivers.filter((d) => d.status === 'offline').length,
+  }), [drivers]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -90,7 +117,7 @@ function AdminDriverPanel() {
           <option value="status">Sort by Status</option>
           <option value="assignedBus">Sort by Bus</option>
         </select>
-        <span className="text-xs text-gray-500 ml-auto">{filtered.length} of {DRIVERS.length} drivers</span>
+        <span className="text-xs text-gray-500 ml-auto">{filtered.length} of {drivers.length} drivers</span>
       </div>
 
       <div className="glass-card overflow-hidden">

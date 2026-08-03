@@ -42,19 +42,7 @@ const ABSSINRegister = ({ isOpen, onClose }: ABSSINRegisterProps) => {
     }
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 1500));
-    await login(email, 'abssin', {
-      id: `ABN-${abssin}`,
-      email,
-      name: fullName,
-      role: 'passenger',
-      tier: 'Standard',
-      avatar: fullName.split(' ').map((n) => n[0]).join(''),
-      phone,
-      abssin,
-      lga,
-      verified: true,
-      joinDate: new Date().toISOString().split('T')[0],
-    });
+    await login(email, 'abssin');
     setIsSubmitting(false);
     showNotification('Welcome!', `ABSSIN ${abssin} linked to your account`, 'success');
     onClose();

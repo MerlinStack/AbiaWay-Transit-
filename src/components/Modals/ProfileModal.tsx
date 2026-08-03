@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
+import { X, Camera } from 'lucide-react';
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const user = useAuthStore((s) => s.user);
@@ -36,7 +37,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               onClick={onClose} 
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
             >
-              <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+              <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
 
@@ -50,7 +51,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               </div>
               {isEditing && (
                 <button className="absolute bottom-0 right-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 transition">
-                  <i data-lucide="camera" className="w-4 h-4 text-white"></i>
+                  <Camera className="w-4 h-4 text-white" />
                 </button>
               )}
             </div>

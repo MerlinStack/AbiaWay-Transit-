@@ -32,6 +32,10 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           runtimeCaching: [
             {
+              urlPattern: /^https?:\/\/telemetry\.abiaway\.gov\.ng\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
               urlPattern: /^https?:\/\/api\.abiaway\.com\/.*/i,
               handler: 'NetworkFirst',
               options: {
@@ -101,7 +105,7 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'leaflet', 'qrcode.react', 'lucide-react', '@mui/material', '@mui/icons-material/esm'],
+      include: ['react', 'react-dom', 'leaflet', 'qrcode.react', 'lucide-react', '@mui/material'],
     },
   };
 });

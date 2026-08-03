@@ -1,3 +1,4 @@
+import { Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
@@ -62,7 +63,7 @@ function LoginPortal() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <i data-lucide="bolt" className="w-8 h-8 text-white"></i>
+            <Zap className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white">Abia Transit Portal</h2>
           <p className="text-sm text-gray-400 mt-1">State Transport Network Gateway</p>

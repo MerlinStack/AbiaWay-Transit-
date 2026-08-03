@@ -18,7 +18,6 @@ import WalletErrorBoundary from './components/error-boundaries/WalletErrorBounda
 import DriverErrorBoundary from './components/error-boundaries/DriverErrorBoundary';
 import useAuthStore from './stores/authStore';
 import useABSINStore from './stores/absinStore';
-import { loadIcons } from './utils/iconLoader';
 import SEO from './components/SEO';
 
 const LazyMapTab = lazy(() => import('./components/Map/MapTab'));
@@ -48,10 +47,6 @@ function AppContent() {
     useABSINStore.getState().initialize();
     return () => { if (unsubscribe) unsubscribe(); };
   }, []);
-
-  useEffect(() => {
-    loadIcons();
-  }, [location.pathname, modalOpen]);
 
   if (loading) {
     return <LoadingSpinner fullScreen />;

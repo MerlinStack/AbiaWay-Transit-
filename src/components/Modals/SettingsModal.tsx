@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useNotificationStore from '../../stores/notificationStore';
+import { X, Bell, Palette, Volume2, Repeat, Shield, Lock, Fingerprint, Info } from 'lucide-react';
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const showNotification = useNotificationStore((s) => s.showNotification);
@@ -42,14 +43,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
               onClick={onClose} 
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
             >
-              <i data-lucide="x" className="w-4 h-4 text-gray-400"></i>
+              <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
 
           {/* Notification Settings */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="bell" className="w-5 h-5 text-green-400"></i>
+              <Bell className="w-5 h-5 text-green-400" />
               Notifications
             </h4>
             <div className="space-y-3">
@@ -83,7 +84,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* Appearance Settings */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="palette" className="w-5 h-5 text-green-400"></i>
+              <Palette className="w-5 h-5 text-green-400" />
               Appearance
             </h4>
             <div className="space-y-3">
@@ -121,7 +122,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* Sound & Vibration */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="volume-2" className="w-5 h-5 text-green-400"></i>
+              <Volume2 className="w-5 h-5 text-green-400" />
               Sound & Vibration
             </h4>
             <div className="space-y-3">
@@ -143,7 +144,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* Auto Top-up */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="repeat" className="w-5 h-5 text-green-400"></i>
+              <Repeat className="w-5 h-5 text-green-400" />
               Auto Top-up
             </h4>
             <div className="space-y-3">
@@ -180,15 +181,15 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* Security Section */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="shield" className="w-5 h-5 text-green-400"></i>
+              <Shield className="w-5 h-5 text-green-400" />
               Security
             </h4>
             <button className="w-full bg-white/10 hover:bg-white/20 text-white py-2 rounded-xl transition text-left px-4 flex items-center gap-3">
-              <i data-lucide="lock" className="w-4 h-4"></i>
+              <Lock className="w-4 h-4" />
               <span>Change Password</span>
             </button>
             <button className="w-full bg-white/10 hover:bg-white/20 text-white py-2 rounded-xl transition text-left px-4 flex items-center gap-3 mt-2">
-              <i data-lucide="fingerprint" className="w-4 h-4"></i>
+              <Fingerprint className="w-4 h-4" />
               <span>Enable Biometric Login</span>
             </button>
           </div>
@@ -196,7 +197,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* About Section */}
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <i data-lucide="info" className="w-5 h-5 text-green-400"></i>
+              <Info className="w-5 h-5 text-green-400" />
               About
             </h4>
             <div className="space-y-2 text-sm text-gray-400">

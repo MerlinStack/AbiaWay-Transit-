@@ -1,4 +1,5 @@
 import React from 'react';
+import { RefreshCw } from 'lucide-react';
 
 const ExchangeRate = ({ rate }) => {
   const currencies = [
@@ -12,7 +13,7 @@ const ExchangeRate = ({ rate }) => {
     <div className="glass-card p-4 animate-fadeIn">
       <div className="flex justify-between items-center mb-3">
         <h4 className="font-semibold flex items-center gap-2">
-          <i data-lucide="refresh-cw" className="w-4 h-4 text-primary"></i>
+          <RefreshCw className="w-4 h-4 text-primary" />
           Live Exchange Rates
         </h4>
         <span className="text-xs text-green-400 animate-pulse">Live • Updates every 10s</span>

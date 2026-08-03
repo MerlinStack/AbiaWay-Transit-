@@ -1,3 +1,4 @@
+import { History, Clock, CheckCircle, XCircle, Circle, Bus, Armchair, Calendar } from 'lucide-react';
 import React, { memo, useState } from 'react';
 import useBookingStore from '../../stores/bookingStore';
 
@@ -29,10 +30,10 @@ const BookingHistory = memo(() => {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'confirmed': return 'clock';
-      case 'completed': return 'check-circle';
-      case 'cancelled': return 'x-circle';
-      default: return 'circle';
+      case 'confirmed': return <Clock className="w-3 h-3" />;
+      case 'completed': return <CheckCircle className="w-3 h-3" />;
+      case 'cancelled': return <XCircle className="w-3 h-3" />;
+      default: return <Circle className="w-3 h-3" />;
     }
   };
 
@@ -40,7 +41,7 @@ const BookingHistory = memo(() => {
     <div className="glass-card p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <i data-lucide="history" className="text-primary"></i>
+          <History className="text-primary" />
           Your Bookings
         </h3>
         <div className="flex gap-1 bg-white/10 rounded-lg p-1">
@@ -71,18 +72,18 @@ const BookingHistory = memo(() => {
                   <p className="text-xs text-gray-400">{booking.date} at {booking.time}</p>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${getStatusColor(booking.status)}`}>
-                  <i data-lucide={getStatusIcon(booking.status)} className="w-3 h-3"></i>
+                  {getStatusIcon(booking.status)}
                   {booking.status}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <div className="flex gap-3">
                   <span className="text-gray-400">
-                    <i data-lucide="bus" className="w-3 h-3 inline mr-1"></i>
+                    <Bus className="w-3 h-3 inline mr-1" />
                     {booking.bus || 'N/A'}
                   </span>
                   <span className="text-gray-400">
-                    <i data-lucide="armchair" className="w-3 h-3 inline mr-1"></i>
+                    <Armchair className="w-3 h-3 inline mr-1" />
                     {Array.isArray(booking.seats) ? booking.seats.join(', ') : 'Auto'}
                   </span>
                 </div>
@@ -109,7 +110,7 @@ const BookingHistory = memo(() => {
           ))
         ) : (
           <div className="text-center py-8">
-            <i data-lucide="calendar" className="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+            <Calendar className="w-12 h-12 text-gray-600 mx-auto mb-3" />
             <p className="text-gray-400">No bookings found</p>
           </div>
         )}
