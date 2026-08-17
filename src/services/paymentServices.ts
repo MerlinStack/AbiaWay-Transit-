@@ -77,3 +77,48 @@ export const ABSINPaymentService = {
     return { success: true, transactionId: `ABSIN-${Date.now()}`, amount, fee: 50, total: totalAmount, balanceAfter: card.balance, pointsEarned: Math.floor(amount / 10) };
   },
 };
+
+export const PaystackPaymentService = {
+  getPublicKey() {
+    return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_PAYSTACK_PUBLIC_KEY) || '';
+  },
+  isConfigured() {
+    return Boolean(this.getPublicKey());
+  },
+  async loadScript() {
+    if (typeof window !== 'undefined' && (window as any).PaystackPop) return true;
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.async = true;
+      script.onload = () => resolve(Boolean((window as any).PaystackPop));
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+    });
+  },
+  async charge({ amount, email, onSuccess, onClose }: { amount: number; email?: string; onSuccess: (reference: string) => void; onClose?: () => void }) {
+    if (!this.isConfigured()) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const reference = `PAYSTACK-MOCK-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
+      onSuccess(reference);
+      return { success: true, mock: true, reference };
+    }
+    const loaded = await this.loadScript();
+    if (!loaded) return { success: false, message: 'Paystack could not be loaded. Check your connection.' };
+    const reference = `PAYSTACK-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
+    const handler = (window as any).PaystackPop.setup({
+      key: this.getPublicKey(),
+      email: email || 'wallet@abiaway.gov.ng',
+      amount: amount * 100,
+      currency: 'NGN',
+      ref: reference,
+      metadata: { custom_fields: [{ display_name: 'Wallet Funding', variable_name: 'purpose', value: 'AbiaWay Wallet Top-up' }] },
+      callback: (response: { reference: string; status: string }) => {
+        if (response.status === 'success') onSuccess(response.reference);
+      },
+      onClose: () => onClose?.(),
+    });
+    handler.openIframe();
+    return { success: true, reference };
+  },
+};

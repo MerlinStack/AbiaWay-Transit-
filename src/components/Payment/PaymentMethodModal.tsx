@@ -1,18 +1,21 @@
-import { CreditCard, Smartphone, Banknote, ChevronRight } from 'lucide-react';
+import { CreditCard, Smartphone, Banknote, ChevronRight, Landmark } from 'lucide-react';
 import { useState } from 'react';
 import useWalletStore from '../../stores/walletStore';
+import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
-import { CardPaymentService, USSDPaymentService, TransferPaymentService, ABSINPaymentService } from '../../services/paymentServices';
+import { CardPaymentService, USSDPaymentService, TransferPaymentService, ABSINPaymentService, PaystackPaymentService } from '../../services/paymentServices';
 import { cardPaymentSchema, ussdPaymentSchema, transferPaymentSchema, absinPaymentSchema, validateWithSchema } from '../../schemas/paymentSchemas';
 import PaymentCardForm from './PaymentCardForm';
 import PaymentUSSDForm from './PaymentUSSDForm';
 import PaymentTransferForm from './PaymentTransferForm';
 import PaymentABSINForm from './PaymentABSINForm';
+import PaymentPaystackForm from './PaymentPaystackForm';
 
 const paymentMethods = [
   { id: 'card', name: 'Card Payment', icon: 'credit-card', description: 'Visa, Mastercard, Verve', color: 'blue', fee: 50, minAmount: 100, maxAmount: 500000 },
   { id: 'ussd', name: 'USSD Payment', icon: 'smartphone', description: 'Quick banking via USSD', color: 'green', fee: 30, minAmount: 100, maxAmount: 200000 },
   { id: 'transfer', name: 'Bank Transfer', icon: 'banknote', description: 'Direct bank transfer', color: 'purple', fee: 0, minAmount: 500, maxAmount: 1000000 },
+  { id: 'paystack', name: 'Paystack', icon: 'landmark', description: 'Card, bank & transfer via Paystack', color: 'blue', fee: '1.5% + ₦100', minAmount: 100, maxAmount: 1000000 },
   { id: 'absin', name: 'ABSIN Card', icon: 'credit-card', description: 'Abia State Integrated Network', color: 'orange', fee: 50, minAmount: 50, maxAmount: 1000000 },
 ];
 
@@ -60,6 +63,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
   const addFunds = useWalletStore((s) => s.addFunds);
   const refreshBalance = useWalletStore((s) => s.refreshBalance);
   const showNotification = useNotificationStore((s) => s.showNotification);
+  const user = useAuthStore((s) => s.user);
 
   if (!isOpen) return null;
 
@@ -204,6 +208,37 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
     setIsProcessing(false);
   };
 
+  const handlePaystackPayment = async () => {
+    const amountNum = parseInt(amount);
+    if (!amountNum || amountNum < 100) {
+      showNotification('Error', 'Minimum top-up is ₦100', 'error');
+      return;
+    }
+
+    setIsProcessing(true);
+    setProcessingMessage('Opening Paystack...');
+    const result = await PaystackPaymentService.charge({
+      amount: amountNum,
+      email: user?.email,
+      onSuccess: async (reference) => {
+        addFunds(amountNum);
+        await refreshBalance();
+        showNotification('Payment Successful', `₦${amountNum.toLocaleString()} added to wallet! (${reference})`, 'success');
+        onSuccess?.();
+        setIsProcessing(false);
+        onClose();
+      },
+      onClose: () => {
+        setIsProcessing(false);
+        showNotification('Payment Cancelled', 'Paystack popup was closed', 'info');
+      },
+    });
+    if (result && !result.success) {
+      showNotification('Payment Failed', result.message || 'Payment failed', 'error');
+      setIsProcessing(false);
+    }
+  };
+
   const handleCardDetailChange = (field, value) => {
     setCardDetails((prev) => ({ ...prev, [field]: value }));
   };
@@ -220,7 +255,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
             className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl hover:border-primary transition-all group"
             onClick={() => selectPaymentMethod(pm.id)}>
             <div className={`w-12 h-12 rounded-full ${pm.color === 'blue' ? 'bg-blue-500/20' : pm.color === 'green' ? 'bg-green-500/20' : pm.color === 'purple' ? 'bg-purple-500/20' : 'bg-yellow-500/20'} flex items-center justify-center`}>
-              {(() => { const icons: Record<string, React.JSX.Element> = { 'credit-card': <CreditCard className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, smartphone: <Smartphone className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, banknote: <Banknote className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} /> }; return icons[pm.icon] || null; })()}
+              {(() => { const icons: Record<string, React.JSX.Element> = { 'credit-card': <CreditCard className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, smartphone: <Smartphone className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, banknote: <Banknote className={`w-6 h-6 ${pm.color === 'blue' ? 'text-blue-400' : pm.color === 'green' ? 'text-green-400' : pm.color === 'purple' ? 'text-purple-400' : 'text-yellow-400'}`} />, landmark: <Landmark className="w-6 h-6 text-blue-400" /> }; return icons[pm.icon] || null; })()}
             </div>
             <div className="flex-1 text-left">
               <p className="font-semibold">{pm.name}</p>
@@ -285,6 +320,13 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
               onCardNumberChange={(val) => setAbsinCard((p) => ({ ...p, number: val }))}
               onPinChange={(val) => setAbsinCard((p) => ({ ...p, pin: val }))}
               isProcessing={isProcessing} onPay={handleABSINPayment}
+              onBack={() => setCurrentView('select')}
+            />
+          )}
+          {currentView === 'paystack' && (
+            <PaymentPaystackForm
+              amount={amount} onAmountChange={setAmount}
+              isProcessing={isProcessing} onPay={handlePaystackPayment}
               onBack={() => setCurrentView('select')}
             />
           )}
