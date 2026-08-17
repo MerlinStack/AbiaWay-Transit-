@@ -107,7 +107,7 @@ function AdminDashboard() {
                 <span className="text-sm text-gray-400 w-16">{bin.label}</span>
                 <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
                   <div className={`h-full ${bin.color} rounded-full transition-all`}
-                    style={{ width: `${(bin.count / FLEET.length) * 100}%` }} />
+                    style={{ width: `${(bin.count / Math.max(fleet.length, 1)) * 100}%` }} />
                 </div>
                 <span className="text-sm font-mono w-8 text-right">{bin.count}</span>
               </div>
