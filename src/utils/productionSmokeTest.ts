@@ -6,7 +6,7 @@ import { TelemetrySyncEngine } from './telemetrySync';
 import type { TransportMode } from './telemetrySync';
 import { FLEET, getFleetSummary, getBatteryColor, setBusStatus } from '../data/fleet';
 
-export function runSystemSmokeTest(): string {
+export async function runSystemSmokeTest(): Promise<string> {
   console.log('--- Abia Transit OS End-to-End Test ---');
 
   let passed = 0;
@@ -43,20 +43,24 @@ export function runSystemSmokeTest(): string {
   const noonEstimate = estimateChargeTime(20, 90);
   assert(noonEstimate > 0, 'Charge time computed at current solar throughput');
 
-  assert(verifyRollingTicketQrWithSkew(btoa(JSON.stringify({
+  const freshQr = await generateRollingTicketQr('123456789012', 2000);
+  const decoded = JSON.parse(atob(freshQr));
+  assert(decoded.abssin === '123456789012' && decoded.walletBalance === 2000 && !!decoded.sig,
+    'generateRollingTicketQr encodes ABSSIN + balance and signs the payload');
+
+  const freshResult = await verifyRollingTicketQrWithSkew(freshQr, 30, 2);
+  assert(freshResult.isValid, 'Fresh signed QR verifies OK');
+
+  const forged = await verifyRollingTicketQrWithSkew(btoa(JSON.stringify({
     abssin: '123456789012', walletBalance: 1500,
     timestamp: Date.now() - 45000, nonce: 'test',
-  })), 30, 2).isValid, '45s clock skew absorbed with 2 drift windows');
+  })), 30, 2);
+  assert(forged.error === 'FORGED', 'Unsigned payload rejected as FORGED');
 
-  assert(verifyRollingTicketQrWithSkew(btoa(JSON.stringify({
-    abssin: '123456789012', walletBalance: 1500,
-    timestamp: Date.now() - 180000, nonce: 'test',
-  })), 30, 2).isValid === false, '180s clock skew properly rejected');
-
-  const qr = generateRollingTicketQr('123456789012', 2000);
-  const decoded = JSON.parse(atob(qr));
-  assert(decoded.abssin === '123456789012' && decoded.walletBalance === 2000,
-    'generateRollingTicketQr encodes ABSSIN + balance correctly');
+  const forgedTampered = await verifyRollingTicketQrWithSkew(btoa(JSON.stringify({
+    ...decoded, walletBalance: 99999999,
+  })), 30, 2);
+  assert(forgedTampered.error === 'FORGED', 'Tampered balance on signed QR rejected as FORGED');
 
   recordCheckEvent('TEST-001', ['batterySoC', 'cctv'], ['tires']);
   assert(getConsecutiveFailures('TEST-001', 'tires') >= 1,

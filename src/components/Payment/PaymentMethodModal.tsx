@@ -10,6 +10,7 @@ import PaymentUSSDForm from './PaymentUSSDForm';
 import PaymentTransferForm from './PaymentTransferForm';
 import PaymentABSINForm from './PaymentABSINForm';
 import PaymentPaystackForm from './PaymentPaystackForm';
+import { verifyPaystackCredit } from '../../lib/paystackVerify';
 
 const paymentMethods = [
   { id: 'card', name: 'Card Payment', icon: 'credit-card', description: 'Visa, Mastercard, Verve', color: 'blue', fee: 50, minAmount: 100, maxAmount: 500000 },
@@ -221,12 +222,25 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
       amount: amountNum,
       email: user?.email,
       onSuccess: async (reference) => {
-        addFunds(amountNum);
-        await refreshBalance();
-        showNotification('Payment Successful', `₦${amountNum.toLocaleString()} added to wallet! (${reference})`, 'success');
-        onSuccess?.();
-        setIsProcessing(false);
-        onClose();
+        setProcessingMessage('Verifying payment with Paystack...');
+        let credited = false;
+        if (PaystackPaymentService.isConfigured()) {
+          const verification = await verifyPaystackCredit(reference, amountNum, user?.email);
+          if (!verification.success) {
+            showNotification('Verification Failed', verification.message || 'Payment could not be verified', 'error');
+            setIsProcessing(false);
+            return;
+          }
+          credited = verification.alreadyCredited === true || verification.success;
+        }
+        if (!PaystackPaymentService.isConfigured() || credited) {
+          addFunds(amountNum);
+          await refreshBalance();
+          showNotification('Payment Successful', `₦${amountNum.toLocaleString()} added to wallet! (${reference})`, 'success');
+          onSuccess?.();
+          setIsProcessing(false);
+          onClose();
+        }
       },
       onClose: () => {
         setIsProcessing(false);

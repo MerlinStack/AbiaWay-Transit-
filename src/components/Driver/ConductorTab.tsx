@@ -114,9 +114,9 @@ const ConductorTab = () => {
   }, [abssinInput, selectedRoute, showNotification]);
 
   const handleQrScan = useCallback(async () => {
-    const result = verifyRollingTicketQr(qrInput);
+    const result = await verifyRollingTicketQr(qrInput);
     if (!result.isValid) {
-      showNotification('Invalid QR', result.error === 'EXPIRED' ? 'QR code expired (30s window)' : 'Malformed QR data', 'error');
+      showNotification('Invalid QR', result.error === 'EXPIRED' ? 'QR code expired (30s window)' : result.error === 'FORGED' ? 'QR signature invalid' : 'Malformed QR data', 'error');
       return;
     }
     setAbssinInput(result.payload!.abssin);

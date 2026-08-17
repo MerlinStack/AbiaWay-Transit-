@@ -20,6 +20,7 @@ interface ImportMetaEnv {
   readonly VITE_DEMO_BANK_CARDS: string
 
   readonly VITE_PAYSTACK_PUBLIC_KEY: string
+  readonly VITE_TICKET_SIGNING_KEY: string
 }
 
 interface ImportMeta {

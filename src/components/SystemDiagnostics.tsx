@@ -39,7 +39,7 @@ const SystemDiagnostics = () => {
     setTestLogs(newLogs);
 
     try {
-      const coreResult = runSystemSmokeTest();
+      const coreResult = await runSystemSmokeTest();
       const corePassed = coreResult !== 'FAIL';
       newLogs.push({
         timestamp: new Date().toLocaleTimeString(),

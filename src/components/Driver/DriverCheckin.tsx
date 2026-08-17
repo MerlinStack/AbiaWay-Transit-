@@ -69,8 +69,8 @@ const DriverCheckin = () => {
 
   useEffect(() => {
     if (qrToken) {
-      const timer = setInterval(() => {
-        setQrToken(generateRollingTicketQr(driverId, odometer ? parseInt(odometer) : 0));
+      const timer = setInterval(async () => {
+        setQrToken(await generateRollingTicketQr(driverId, odometer ? parseInt(odometer) : 0));
       }, 15000);
       return () => clearInterval(timer);
     }
@@ -86,7 +86,7 @@ const DriverCheckin = () => {
       return;
     }
     showNotification('Driver Logged In', `Driver ${driverId} assigned to ${plate}`, 'success');
-    setQrToken(generateRollingTicketQr(driverId, 0));
+    generateRollingTicketQr(driverId, 0).then(setQrToken);
     setStep('checklist');
   };
 
