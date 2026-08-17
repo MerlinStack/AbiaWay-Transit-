@@ -102,7 +102,8 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
           tier: cardToSave.tier
         });
         
-        localStorage.setItem('linkedABSINCard', JSON.stringify(cardToSave));
+        const { fullCardId: _removed, ...cardToPersist } = cardToSave;
+        localStorage.setItem('linkedABSINCard', JSON.stringify(cardToPersist));
         showNotification('Success', 'ABSIN card linked successfully!', 'success');
         setShowLinkModal(false);
         setCardNumber('');
