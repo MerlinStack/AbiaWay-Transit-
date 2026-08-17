@@ -71,7 +71,7 @@ function AppContent() {
   return (
     <Box className="flex min-h-screen bg-[#07101f] text-[#f8fafc]">
       <Sidebar />
-      <Box component="main" className="flex-1 lg:ml-[280px] p-2 md:p-4 overflow-y-auto min-h-screen">
+      <Box component="main" className="flex-1 min-w-0 p-2 md:p-4 overflow-y-auto min-h-screen">
         <Routes>
           <Route path="/map" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>

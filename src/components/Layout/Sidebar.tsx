@@ -2,8 +2,9 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Drawer } from '@mui/material';
 import Logo from './Logo';
-import { Map, Wallet, Ticket, CarFront, Bus, ClipboardCheck, QrCode, IdCard, Bug, Shield, Users, Circle } from 'lucide-react';
+import { Map, Wallet, Ticket, CarFront, Bus, ClipboardCheck, QrCode, IdCard, Bug, Shield, Users, Circle, Leaf } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
+import useTripStore from '../../stores/tripStore';
 
 const mainTabs = [
   { path: '/map', icon: <Map size={20} />, label: 'Live Tracking', badge: 'LIVE' as const },
@@ -28,6 +29,10 @@ function Sidebar() {
   const currentPath = location.pathname;
   const user = useAuthStore((s) => s.user);
   const isAdmin = user?.role === 'admin';
+  const lastSummary = useTripStore((s) => s.lastSummary);
+  const tripDistance = lastSummary?.distanceKm || 0;
+  const tripPassengers = lastSummary?.passengers || 0;
+  const co2Saved = Math.max(0, Math.round(tripDistance * 0.05 * 100) / 100);
 
   return (
     <Drawer
@@ -105,6 +110,23 @@ function Sidebar() {
               </nav>
             </>
           )}
+        </div>
+
+        <div className="mt-6 bg-gradient-to-br from-green-600/20 to-emerald-900/20 border border-green-500/25 rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Leaf className="w-4 h-4 text-green-400" />
+            <p className="text-xs font-semibold text-green-300">Eco Impact</p>
+          </div>
+          <p className="text-lg font-bold text-white">
+            {co2Saved > 0 ? `${co2Saved.toFixed(2)} kg` : '0 kg'} <span className="text-xs font-normal text-gray-400">CO₂ saved</span>
+          </p>
+          <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <span>{tripDistance.toFixed(1)} km green travel</span>
+            <span>{tripPassengers} riders</span>
+          </div>
+          <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400" style={{ width: `${Math.min(100, co2Saved * 10)}%` }}></div>
+          </div>
         </div>
 
         <div className="mt-4 bg-[rgba(255,255,255,0.05)] p-3 rounded-2xl border border-[rgba(148,163,184,0.12)]">
