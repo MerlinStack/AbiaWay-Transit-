@@ -57,7 +57,7 @@ function AppContent() {
   if (isLanding) {
     return (
       <Suspense fallback={<LoadingSpinner fullScreen />}>
-        <LazyLandingPage onGetStarted={() => navigate('/map')} />
+        <LazyLandingPage onGetStarted={() => navigate('/booking')} />
       </Suspense>
     );
   }
@@ -83,11 +83,13 @@ function AppContent() {
         <Routes>
           <Route path="/map" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>
-              <MapErrorBoundary>
-                <SEO title="Live Map" description="Real-time bus tracking and route planning for Abia State" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
-                <LazyMapTab />
-              </MapErrorBoundary>
+              <AdminGuard requiredRole="admin">
+                <MapErrorBoundary>
+                  <SEO title="Live Tracking" description="Real-time fleet tracking and driver location monitoring (admin only)" />
+                  <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
+                  <LazyMapTab />
+                </MapErrorBoundary>
+              </AdminGuard>
             </Suspense>
           } />
           <Route path="/wallet" element={
@@ -138,7 +140,7 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <SEO title="ABSSIN Registration" description="Register with Abia State Identification Number" />
               <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
-              <LazyABSSINRegister isOpen={true} onClose={() => navigate('/map')} />
+              <LazyABSSINRegister isOpen={true} onClose={() => navigate('/booking')} />
             </Suspense>
           } />
           <Route path="/diagnostics" element={

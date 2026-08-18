@@ -14,7 +14,6 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { path: '/map', label: 'Live Tracking', shortLabel: 'Live', icon: Map, section: 'passenger', badge: 'LIVE' },
   { path: '/wallet', label: 'My Wallet', shortLabel: 'Wallet', icon: Wallet, section: 'passenger' },
   { path: '/booking', label: 'Book & Pay', shortLabel: 'Book', icon: Ticket, section: 'passenger' },
   { path: '/register', label: 'ABSSIN Register', shortLabel: 'ABSSIN', icon: IdCard, section: 'passenger' },
@@ -22,6 +21,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/checkin', label: 'Driver Check-in', shortLabel: 'Check-in', icon: ClipboardCheck, section: 'operations' },
   { path: '/conductor', label: 'Conductor Tap', shortLabel: 'Tap', icon: QrCode, section: 'operations' },
   { path: '/diagnostics', label: 'Diagnostics', shortLabel: 'Diag', icon: Bug, section: 'operations' },
+  { path: '/map', label: 'Live Tracking', shortLabel: 'Live', icon: Map, section: 'administration', badge: 'LIVE' },
   { path: '/fleet', label: 'Fleet Mgmt', shortLabel: 'Fleet', icon: Bus, section: 'administration' },
   { path: '/admin', label: 'Admin Dashboard', shortLabel: 'Admin', icon: Shield, section: 'administration' },
   { path: '/admin/drivers', label: 'Driver Management', shortLabel: 'Drivers', icon: Users, section: 'administration' },
@@ -34,16 +34,16 @@ export const SECTION_LABELS: Record<NavItem['section'], string> = {
 };
 
 export const ROLE_ACCESS: Record<AccessRole, string[]> = {
-  guest: ['/map', '/wallet', '/booking', '/register'],
-  passenger: ['/map', '/wallet', '/booking', '/register'],
+  guest: ['/wallet', '/booking', '/register'],
+  passenger: ['/wallet', '/booking', '/register'],
   driver: ['/driver', '/checkin', '/diagnostics'],
   conductor: ['/conductor', '/diagnostics'],
-  admin: ['/fleet', '/admin', '/admin/drivers', '/diagnostics'],
+  admin: ['/map', '/fleet', '/admin', '/admin/drivers', '/diagnostics'],
 };
 
 export const HOME_ROUTE: Record<AccessRole, string> = {
-  guest: '/map',
-  passenger: '/map',
+  guest: '/booking',
+  passenger: '/booking',
   driver: '/driver',
   conductor: '/conductor',
   admin: '/admin',

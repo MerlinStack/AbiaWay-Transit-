@@ -7,6 +7,7 @@ import { z } from 'zod';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 import SegmentedControl from '../ui/SegmentedControl';
+import { getRole, HOME_ROUTE } from '../../config/navConfig';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
@@ -146,7 +147,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     if (result.success) {
       showNotification('Account Created', `Welcome to Abia Way, ${result.user?.name}! You're signed in.`, 'success');
       onClose();
-      navigate('/map');
+      navigate(HOME_ROUTE[getRole(result.user ?? null)]);
     } else {
       const friendly =
         result.error?.includes('email-already-in-use') || result.error?.includes('EMAIL_EXISTS')
