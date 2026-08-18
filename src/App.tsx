@@ -20,6 +20,7 @@ import DriverErrorBoundary from './components/error-boundaries/DriverErrorBounda
 import useAuthStore from './stores/authStore';
 import useABSINStore from './stores/absinStore';
 import SEO from './components/SEO';
+import { getRole, HOME_ROUTE, isRouteAllowed } from './config/navConfig';
 
 const LazyMapTab = lazy(() => import('./components/Map/MapTab'));
 const LazyWalletTab = lazy(() => import('./components/Wallet/WalletTab'));
@@ -67,6 +68,12 @@ function AppContent() {
         <LazyLoginPortal />
       </Suspense>
     );
+  }
+
+  const role = getRole(user);
+
+  if (!isRouteAllowed(location.pathname, role)) {
+    return <Navigate to={HOME_ROUTE[role]} replace />;
   }
 
   return (
@@ -158,7 +165,7 @@ function AppContent() {
               </AdminGuard>
             </Suspense>
           } />
-          <Route path="*" element={<Navigate to="/map" replace />} />
+          <Route path="*" element={<Navigate to={HOME_ROUTE[role]} replace />} />
         </Routes>
       </Box>
 
