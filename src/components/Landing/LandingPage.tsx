@@ -12,24 +12,9 @@ const LandingPage = ({ onGetStarted }) => {
   const stepsRef = useRef(null);
   const statsRef = useRef(null);
 
-  // rAF-throttled parallax via CSS custom property — zero React re-renders
+  // Counter animation when stats section is visible (rAF + easeOutExpo, single pass)
   useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Counter animation when stats section is visible
-  useEffect(() => {
+    let rafId = 0;
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -37,29 +22,28 @@ const LandingPage = ({ onGetStarted }) => {
           setHasAnimated(true);
           const targets = { users: 10000, buses: 50, trips: 100000, rating: 48 };
           const duration = 2000;
-          const stepTime = 20;
-          const steps = duration / stepTime;
-          let currentStep = 0;
-          const interval = setInterval(() => {
-            currentStep++;
-            if (currentStep <= steps) {
-              const progress = currentStep / steps;
-              setCounts({
-                users: Math.floor(progress * targets.users),
-                buses: Math.floor(progress * targets.buses),
-                trips: Math.floor(progress * targets.trips),
-                rating: Math.floor(progress * targets.rating) / 10,
-              });
-            } else {
-              clearInterval(interval);
-            }
-          }, stepTime);
+          const start = performance.now();
+          const tick = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(2, -10 * progress);
+            setCounts({
+              users: Math.floor(eased * targets.users),
+              buses: Math.floor(eased * targets.buses),
+              trips: Math.floor(eased * targets.trips),
+              rating: Math.floor(eased * targets.rating) / 10,
+            });
+            if (progress < 1) rafId = requestAnimationFrame(tick);
+          };
+          rafId = requestAnimationFrame(tick);
         }
       },
       { threshold: 0.3 }
     );
     if (statsRef.current) observer.observe(statsRef.current);
-    return () => { if (statsRef.current) observer.unobserve(statsRef.current); };
+    return () => {
+      if (statsRef.current) observer.unobserve(statsRef.current);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [hasAnimated]);
 
   // IntersectionObserver for fade-in animations
@@ -91,11 +75,11 @@ const LandingPage = ({ onGetStarted }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-x-hidden">
-      {/* Floating Animated Background Elements */}
+      {/* Floating Animated Background Elements — static (cheap) so no per-frame repaint */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="absolute top-20 left-10 w-64 h-64 bg-green-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-20 left-10 w-64 h-64 bg-green-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Navigation */}
@@ -151,11 +135,8 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </nav>
 
-      {/* Hero Section — GPU-accelerated parallax via CSS var */}
-      <section
-        className="container mx-auto px-4 pt-32 pb-16 relative"
-        style={{ transform: 'translateY(calc(var(--scroll-y, 0) * 0.3))', willChange: 'transform', position: 'relative', zIndex: 1 }}
-      >
+      {/* Hero Section — scrolls normally, no parallax (parallax caused section overlap + heavy GPU layers) */}
+      <section className="container mx-auto px-4 pt-32 pb-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fadeInLeft">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-600/20 rounded-full text-green-400 text-sm mb-6">
@@ -221,7 +202,7 @@ const LandingPage = ({ onGetStarted }) => {
 
           {/* Abia Connect Card visual */}
           <div className="relative animate-float">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-600/30 to-blue-600/30 rounded-3xl blur-3xl animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-green-600/30 to-blue-600/30 rounded-3xl blur-3xl"></div>
             <div className="relative max-w-[400px] mx-auto h-[420px] rounded-3xl bg-gradient-to-br from-green-900 to-gray-900 p-6 flex flex-col justify-between shadow-2xl border border-white/10 overflow-hidden group">
               <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/5 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
 
@@ -336,7 +317,7 @@ const LandingPage = ({ onGetStarted }) => {
       {/* Stats Section */}
       <section id="stats" ref={statsRef} className="container mx-auto px-4 py-24 relative z-10">
         <div className="glass-card p-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-blue-600/10 animate-gradient"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-blue-600/10"></div>
           <div className="grid md:grid-cols-4 gap-8 text-center relative z-10">
             <div className="group">
               <Users className="w-10 h-10 mx-auto mb-4 text-green-400 group-hover:scale-110 transition-transform duration-300" />
@@ -369,7 +350,7 @@ const LandingPage = ({ onGetStarted }) => {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16 relative z-10">
         <div className="glass-card p-16 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-blue-600/20 animate-pulse"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-blue-600/20"></div>
           <div className="relative z-10">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Start Your Journey?</h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Join thousands of verified users and experience the future of public transportation across Abia State.</p>
@@ -432,12 +413,10 @@ const LandingPage = ({ onGetStarted }) => {
 
       <style>{`
         @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes fadeInLeft { from { opacity:0; transform:translateX(-50px); } to { opacity:1; transform:translateX(0); } }
         @keyframes fadeInUp { from { opacity:0; transform:translateY(50px); } to { opacity:1; transform:translateY(0); } }
         @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
         .animate-float { animation: float 3s ease-in-out infinite; }
-        .animate-gradient { background-size: 200% 200%; animation: gradient 3s ease infinite; }
         .animate-fadeInLeft { animation: fadeInLeft 1s ease-out forwards; }
         .animate-fadeInUp { opacity:0; animation: fadeInUp 0.8s ease-out forwards; }
         .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
