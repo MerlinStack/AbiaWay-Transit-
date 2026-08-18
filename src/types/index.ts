@@ -15,6 +15,7 @@ export interface User {
   assignedRoute?: string;
   assignedVehicle?: string;
   badgeNumber?: string;
+  adminKeyHash?: string;
 }
 
 export interface Booking {

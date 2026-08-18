@@ -10,6 +10,8 @@ import {
 } from '../lib/firebaseAuth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { sha256Hex } from '../utils/crypto';
+import { ADMIN_BOOTSTRAP_KEY } from '../config/accessControl';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 type UserRole = User['role'];
@@ -27,7 +29,7 @@ interface AuthState {
   register: (data: { name: string; email: string; phone: string; password: string }) => Promise<{success: boolean; user?: User; error?: string}>;
   resetPassword: (email: string) => Promise<{success: boolean; error?: string}>;
   staffLogin: (badgeId: string, role: 'driver' | 'conductor') => Promise<{success: boolean; user?: User; error?: string}>;
-  adminLogin: (email: string, password: string) => Promise<{success: boolean; user?: User; error?: string}>;
+  adminLogin: (email: string, password: string, adminKey: string) => Promise<{success: boolean; user?: User; error?: string}>;
   logout: () => Promise<{success: boolean}>;
   updateUser: (data: Partial<User>) => User;
   hasRole: (role: UserRole) => boolean;
@@ -177,6 +179,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
         return { success: false, error: 'Role mismatch for this badge.' };
       }
 
+      if (badgeData.status === 'deactivated') {
+        return { success: false, error: 'This badge has been deactivated. Contact your administrator.' };
+      }
+
       const user: User = {
         id: badgeId,
         email: `${badgeId.toLowerCase()}@abiaway.gov.ng`,
@@ -203,7 +209,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  adminLogin: async (email, password) => {
+  adminLogin: async (email, password, adminKey) => {
     try {
       const firebaseUser = await firebaseSignIn(email, password);
       const tokenResult = await firebaseUser.getIdTokenResult();
@@ -211,6 +217,23 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
       if (!userProfile || userProfile.role !== 'admin') {
         return { success: false, error: 'Access denied. Not an admin account.' };
+      }
+
+      const normalizedKey = adminKey.trim().toUpperCase();
+      if (!normalizedKey) {
+        return { success: false, error: 'Admin access key is required.' };
+      }
+
+      const enteredHash = await sha256Hex(normalizedKey);
+
+      if (!userProfile.adminKeyHash) {
+        if (normalizedKey !== ADMIN_BOOTSTRAP_KEY) {
+          return { success: false, error: 'No admin access key issued for this account. Contact your administrator.' };
+        }
+        await setDoc(doc(db, 'users', firebaseUser.uid), { adminKeyHash: enteredHash }, { merge: true });
+        userProfile = { ...userProfile, adminKeyHash: enteredHash };
+      } else if (userProfile.adminKeyHash !== enteredHash) {
+        return { success: false, error: 'Invalid admin access key.' };
       }
 
       userProfile = { ...userProfile, loginTime: new Date().toISOString() };

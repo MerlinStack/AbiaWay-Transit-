@@ -23,6 +23,7 @@ function LoginPortal() {
   const [badgeId, setBadgeId] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminKey, setAdminKey] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -46,12 +47,12 @@ function LoginPortal() {
         }
         navigate(staffRole === 'driver' ? '/checkin' : '/conductor');
       } else {
-        if (!adminEmail.trim() || !adminPassword.trim()) {
-          setError('Please enter both email and password.');
+        if (!adminEmail.trim() || !adminPassword.trim() || !adminKey.trim()) {
+          setError('Please enter email, password, and admin access key.');
           setLoading(false);
           return;
         }
-        const result = await adminLogin(adminEmail.trim().toLowerCase(), adminPassword);
+        const result = await adminLogin(adminEmail.trim().toLowerCase(), adminPassword, adminKey.trim().toUpperCase());
         if (!result.success) {
           setError(result.error || 'Authentication failed.');
           setLoading(false);
@@ -160,7 +161,7 @@ function LoginPortal() {
                       placeholder="e.g. PLT-8837"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Drivers: PLT-8837, PLT-8841, PLT-8852 &middot; Conductors: CON-7712, CON-7725</p>
+                    <p className="text-xs text-gray-500 mt-1">Badges are vetted and issued by the administration.</p>
                   </div>
                 </>
               ) : (
@@ -184,6 +185,17 @@ function LoginPortal() {
                       placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Admin Access Key</label>
+                    <input
+                      type="text"
+                      value={adminKey}
+                      onChange={(e) => setAdminKey(e.target.value.toUpperCase())}
+                      placeholder="e.g. ABW-AK-XXXX-XXXX"
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Access keys are vetted and issued by the administration.</p>
                   </div>
                 </>
               )}

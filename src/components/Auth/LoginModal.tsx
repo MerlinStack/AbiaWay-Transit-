@@ -1,4 +1,4 @@
-import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft, User, Bus, Shield, ChevronRight, BadgeCheck, Ticket } from 'lucide-react';
+import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft, User, Bus, Shield, ChevronRight, BadgeCheck, Ticket, KeyRound } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -59,6 +59,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
   const [badgeId, setBadgeId] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminKey, setAdminKey] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [portalError, setPortalError] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
@@ -103,6 +104,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
       setBadgeId('');
       setAdminEmail('');
       setAdminPassword('');
+      setAdminKey('');
       setPortalError('');
     } else {
       setTab(initialTab);
@@ -204,12 +206,12 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
   const onAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPortalError('');
-    if (!adminEmail.trim() || !adminPassword) {
-      setPortalError('Please enter both email and password.');
+    if (!adminEmail.trim() || !adminPassword || !adminKey.trim()) {
+      setPortalError('Please enter your email, password, and admin access key.');
       return;
     }
     setPortalLoading(true);
-    const result = await adminLogin(adminEmail.trim().toLowerCase(), adminPassword);
+    const result = await adminLogin(adminEmail.trim().toLowerCase(), adminPassword, adminKey.trim().toUpperCase());
     setPortalLoading(false);
     if (!result.success) {
       setPortalError(result.error || 'Authentication failed.');
@@ -235,7 +237,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     {
       key: 'signin' as AuthTab,
       title: 'Passenger',
-      subtitle: 'Book rides, top up wallet, and track buses',
+      subtitle: 'Sign in or create a passenger account',
       icon: User,
       iconClass: 'bg-green-500/20',
       iconColor: 'text-green-400',
@@ -243,7 +245,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     {
       key: 'driver' as AuthTab,
       title: 'Driver',
-      subtitle: 'Check in your vehicle and start trips',
+      subtitle: 'Sign in with your issued badge',
       icon: Bus,
       iconClass: 'bg-blue-500/20',
       iconColor: 'text-blue-400',
@@ -251,7 +253,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     {
       key: 'admin' as AuthTab,
       title: 'Admin',
-      subtitle: 'Manage the fleet, drivers, and operations',
+      subtitle: 'Sign in with issued credentials',
       icon: Shield,
       iconClass: 'bg-purple-500/20',
       iconColor: 'text-purple-400',
@@ -349,6 +351,10 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
                   />
                 </div>
               </div>
+              <p className="text-xs text-gray-500 flex items-start gap-1.5">
+                <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-green-400" />
+                Badges are vetted and issued by Abia Way administration. Staff cannot self-register.
+              </p>
               <button
                 type="submit"
                 disabled={portalLoading}
@@ -414,6 +420,24 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
                   </button>
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Admin Access Key</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={adminKey}
+                    onChange={(e) => setAdminKey(e.target.value.toUpperCase())}
+                    placeholder="e.g. ABW-AK-XXXX-XXXX"
+                    className={inputClass(false)}
+                    disabled={portalLoading}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 flex items-start gap-1.5">
+                <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-green-400" />
+                Access keys are vetted and issued by Abia Way administration. Admins cannot self-register.
+              </p>
               <button
                 type="submit"
                 disabled={portalLoading}

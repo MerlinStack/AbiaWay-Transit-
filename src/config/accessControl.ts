@@ -1,0 +1,1 @@
+export const ADMIN_BOOTSTRAP_KEY = 'ABW-AK-8F2D-4H7Q-9X3Z';
