@@ -110,7 +110,7 @@ const LandingPage = ({ onGetStarted }) => {
               </a>
               <button
                 onClick={onGetStarted}
-                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-600/30"
+                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
               >
                 Launch App
               </button>
@@ -153,7 +153,7 @@ const LandingPage = ({ onGetStarted }) => {
             <div className="flex flex-wrap gap-4 animate-fadeInUp delay-400">
               <button
                 onClick={onGetStarted}
-                className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-600/40"
+                className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 transform hover:scale-105"
               >
                 Get Moving Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -272,7 +272,7 @@ const LandingPage = ({ onGetStarted }) => {
               style={{ animationDelay: `${index * 200}ms`, position: 'relative', zIndex: 2 }}
             >
               <div className="relative mb-6">
-                <div className="w-20 h-20 mx-auto bg-gradient-to-r from-green-600 to-green-500 rounded-2xl flex items-center justify-center text-2xl font-bold transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-green-600/30">
+                <div className="w-20 h-20 mx-auto bg-gradient-to-r from-green-600 to-green-500 rounded-2xl flex items-center justify-center text-2xl font-bold transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
                   {step.number}
                 </div>
                 <div className="absolute top-1/2 left-full w-full h-0.5 bg-gradient-to-r from-green-600/50 to-transparent hidden md:block"></div>
@@ -413,7 +413,7 @@ const LandingPage = ({ onGetStarted }) => {
           <div className="relative z-10">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Start Your Journey?</h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Join thousands of verified users and experience the future of public transportation across Abia State.</p>
-            <button onClick={onGetStarted} className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-600/40">
+            <button onClick={onGetStarted} className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105">
               Launch App Now
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
