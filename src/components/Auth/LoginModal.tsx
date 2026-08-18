@@ -1,6 +1,7 @@
 import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import useAuthStore from '../../stores/authStore';
@@ -58,6 +59,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
   const register = useAuthStore((s) => s.register);
   const resetPassword = useAuthStore((s) => s.resetPassword);
   const showNotification = useNotificationStore((s) => s.showNotification);
+  const navigate = useNavigate();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -142,8 +144,9 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
       password: data.password,
     });
     if (result.success) {
-      showNotification('Account Created', `Welcome to Abia Way, ${result.user?.name}!`, 'success');
+      showNotification('Account Created', `Welcome to Abia Way, ${result.user?.name}! You're signed in.`, 'success');
       onClose();
+      navigate('/map');
     } else {
       const friendly =
         result.error?.includes('email-already-in-use') || result.error?.includes('EMAIL_EXISTS')
