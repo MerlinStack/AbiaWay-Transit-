@@ -1,8 +1,29 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Avatar, Button, Menu, MenuItem, Chip } from '@mui/material';
-import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, Circle, UserPlus } from 'lucide-react';
+import { Avatar, Menu, MenuItem } from '@mui/material';
+import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, UserPlus, Zap, Calendar, Crown } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
+import StatusPill from '../ui/StatusPill';
+
+const IconButton = ({ onClick, ariaLabel, title, className, children }) => (
+  <button
+    onClick={onClick}
+    aria-label={ariaLabel}
+    title={title}
+    className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-full transition pressable ${className}`}
+  >
+    {children}
+  </button>
+);
+
+const LabeledButton = ({ onClick, className, children }) => (
+  <button
+    onClick={onClick}
+    className={`h-10 shrink-0 inline-flex items-center gap-1.5 px-3.5 rounded-full text-sm font-semibold whitespace-nowrap transition pressable ${className}`}
+  >
+    {children}
+  </button>
+);
 
 const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
   const [greeting, setGreeting] = useState('');
@@ -44,53 +65,65 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
   };
 
   return (
-    <header
-      className="flex flex-wrap justify-between items-center gap-2 mb-4 p-3 rounded-2xl bg-[rgba(15,23,42,0.88)] border border-[rgba(148,163,184,0.12)] shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
-    >
+    <header className="flex items-center justify-between gap-3 mb-4 p-3 rounded-2xl bg-[rgba(15,23,42,0.88)] border border-[rgba(148,163,184,0.12)] shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
       <div className="min-w-0 flex-1">
-        <h2 className="text-3xl font-extrabold mb-1 text-white">
-          {greeting}, {user?.name || 'Guest'}! 👋
+        <h2 className="text-2xl lg:text-3xl font-extrabold mb-2 text-white truncate">
+          {greeting}, {user?.name?.split(' ')[0] || 'Guest'}! 👋
         </h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-wrap">
-          <Chip label="System Online" color="success" icon={<Circle size={10} />} size="small" />
-          <span className="text-sm text-gray-400">Abia State Transit ⚡</span>
-          <Chip label={`${user?.tier || 'Premium'} Member`} color="secondary" size="small" />
-          <span className="text-sm text-gray-400">{currentDate}</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <StatusPill dot>
+            <span className="text-green-400 font-semibold">System Online</span>
+          </StatusPill>
+          <StatusPill icon={<Zap className="w-3 h-3 text-green-400" />}>Abia State Transit</StatusPill>
+          <StatusPill icon={<Crown className="w-3 h-3 text-yellow-400" />}>{user?.tier || 'Premium'} Member</StatusPill>
+          <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-gray-500 pl-3 ml-1 border-l border-white/10">
+            <Calendar className="w-3.5 h-3.5 text-gray-500" />
+            {currentDate}
+          </span>
         </div>
       </div>
 
-      <div className="flex flex-row gap-1 flex-wrap items-center">
-        <Button color="error" variant="contained" startIcon={<Shield size={20} />} onClick={handleSOS} className="min-w-[120px]">
-          SOS
-        </Button>
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <IconButton
+          onClick={handleSOS}
+          ariaLabel="Emergency SOS"
+          title="Emergency SOS"
+          className="bg-red-600 hover:bg-red-500"
+        >
+          <Shield className="w-5 h-5 text-white" />
+        </IconButton>
 
         {!user && (
           <>
-            <Button color="primary" variant="contained" startIcon={<LogIn size={20} />} onClick={onLoginClick} className="min-w-[120px]">
-              Sign In
-            </Button>
-            <Button color="secondary" variant="outlined" startIcon={<UserPlus size={20} />} onClick={onSignUpClick} className="min-w-[140px]">
-              Create Account
-            </Button>
+            <IconButton
+              onClick={onLoginClick}
+              ariaLabel="Sign In"
+              title="Sign In"
+              className="bg-blue-600 hover:bg-blue-500 sm:hidden"
+            >
+              <LogIn className="w-5 h-5 text-white" />
+            </IconButton>
+            <LabeledButton onClick={onLoginClick} className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:inline-flex">
+              <LogIn className="w-4 h-4" /> Sign In
+            </LabeledButton>
+            <LabeledButton onClick={onSignUpClick} className="bg-white/10 hover:bg-white/20 border border-white/10 text-white hidden lg:inline-flex">
+              <UserPlus className="w-4 h-4" /> Create Account
+            </LabeledButton>
           </>
         )}
 
         {user && (
           <>
-            <Button
-              color="secondary"
-              variant="outlined"
-              startIcon={
-                <Avatar className="bg-primary w-8 h-8 font-bold">
-                  {user.avatar || user.name?.charAt(0) || 'U'}
-                </Avatar>
-              }
-              endIcon={<ChevronDown size={20} />}
+            <button
               onClick={(event) => setAnchorEl(event.currentTarget)}
-              className="min-w-[160px]"
+              aria-label="Account menu"
+              title={user.name}
+              className="h-10 shrink-0 inline-flex items-center gap-2 pl-1 pr-2 sm:pl-1.5 sm:pr-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition pressable"
             >
-              {user.name}
-            </Button>
+              <Avatar className="bg-primary w-8 h-8 font-bold text-sm">{user.avatar || user.name?.charAt(0) || 'U'}</Avatar>
+              <span className="hidden md:inline text-sm font-semibold max-w-[120px] truncate">{user.name}</span>
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            </button>
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
@@ -125,9 +158,10 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
           </>
         )}
 
-        <Button color="primary" variant="contained" startIcon={<Plus size={20} />} onClick={() => onOpenModal('quickTopup')} className="min-w-[160px]">
-          Quick Top-up
-        </Button>
+        <LabeledButton onClick={() => onOpenModal('quickTopup')} className="bg-primary hover:bg-primary-dark text-white">
+          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Quick Top-up</span>
+          <span className="sm:hidden">Top-up</span>
+        </LabeledButton>
       </div>
     </header>
   );

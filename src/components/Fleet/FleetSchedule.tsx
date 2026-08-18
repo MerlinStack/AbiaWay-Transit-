@@ -1,8 +1,10 @@
 import { useMemo, useState, useEffect } from 'react';
 import { getTransitService } from '../../services/transit';
-import { FleetBus, FleetSummary } from '../../types/abssin';
+import { FleetBus } from '../../types/abssin';
+import type { FleetSummary } from '../../services/transit/TransitDataSource';
 import { Bus } from 'lucide-react';
 import { getBatteryColor } from '../../utils/battery';
+import SegmentedControl from '../ui/SegmentedControl';
 
 const FLEET_SCALING_TARGET = 120;
 const LOOP_LABELS = ['Loop 1 (06:00–09:00)', 'Loop 2 (09:00–12:00)', 'Loop 3 (12:00–15:00)', 'Loop 4 (15:00–18:00)', 'Loop 5 (18:00–21:00)', 'Night Pool (21:00–06:00)'];
@@ -51,67 +53,110 @@ const FleetSchedule = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="glass-card p-6">
+    <div className="max-w-7xl mx-auto animate-page-in space-y-6">
+      {/* Page header */}
+      <div>
+        <h2 className="text-3xl font-bold flex items-center gap-3">
+          <span className="w-11 h-11 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+            <Bus className="w-5 h-5 text-green-400" />
+          </span>
+          Fleet Management
+          <span className="text-sm font-normal text-gray-400 ml-2">({summary.total} / {FLEET_SCALING_TARGET} target)</span>
+        </h2>
+        <p className="text-sm text-gray-400 mt-2 ml-14">Live battery telemetry, route assignments, and loop schedules.</p>
+      </div>
+
+      <div className="surface-2 p-6">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Bus className="text-primary" />
-            Fleet Management
-            <span className="text-sm font-normal text-gray-400 ml-2">({summary.total} / {FLEET_SCALING_TARGET} target)</span>
-          </h3>
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-1">
             {['all', 'active', 'charging', 'idle', 'maintenance'].map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-3 py-1 rounded-lg text-xs transition ${filterStatus === s ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20'}`}>
+                className={`px-3 py-1 rounded-lg text-xs transition whitespace-nowrap ${filterStatus === s ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20'}`}>
                 {s.charAt(0).toUpperCase() + s.slice(1)} {s === 'all' ? `(${summary.total})` : `(${summary[s as keyof typeof summary]})`}
               </button>
             ))}
           </div>
-          <div className="flex gap-1 bg-white/10 rounded-lg p-1">
-            <button onClick={() => setView('cards')} className={`px-3 py-1 rounded-lg text-xs ${view === 'cards' ? 'bg-primary text-white' : ''}`}>Cards</button>
-            <button onClick={() => setView('list')} className={`px-3 py-1 rounded-lg text-xs ${view === 'list' ? 'bg-primary text-white' : ''}`}>List</button>
-          </div>
+          <SegmentedControl
+            ariaLabel="Fleet view"
+            value={view}
+            onChange={(v) => setView(v as 'cards' | 'list')}
+            options={[
+              { label: 'Cards', value: 'cards' },
+              { label: 'List', value: 'list' },
+            ]}
+            className="shrink-0"
+          />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          {Object.entries(summary).map(([key, val]) => (
-            <div key={key} className="p-4 bg-white/5 rounded-lg text-center">
-              <p className="text-2xl font-bold">{val}</p>
-              <p className="text-xs text-gray-400 capitalize">{key}</p>
-            </div>
-          ))}
+          <div className="p-4 bg-white/5 rounded-lg text-center border-l-2 border-l-green-500">
+            <p className="text-2xl font-bold text-green-400 tabular-nums">{summary.total}</p>
+            <p className="text-xs text-gray-400 capitalize">total</p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-lg text-center border-l-2 border-l-emerald-400">
+            <p className="text-2xl font-bold text-emerald-400 tabular-nums">{summary.active}</p>
+            <p className="text-xs text-gray-400 capitalize">active</p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-lg text-center border-l-2 border-l-blue-500">
+            <p className="text-2xl font-bold text-blue-400 tabular-nums">{summary.charging}</p>
+            <p className="text-xs text-gray-400 capitalize">charging</p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-lg text-center border-l-2 border-l-amber-400">
+            <p className="text-2xl font-bold text-amber-400 tabular-nums">{summary.idle}</p>
+            <p className="text-xs text-gray-400 capitalize">idle</p>
+          </div>
+          <div className={`p-4 bg-white/5 rounded-lg text-center border-l-2 ${summary.maintenance > 0 ? 'border-l-red-500' : 'border-l-gray-500'}`}>
+            <p className={`text-2xl font-bold tabular-nums ${summary.maintenance > 0 ? 'text-red-400' : 'text-gray-400'}`}>{summary.maintenance}</p>
+            <p className="text-xs text-gray-400 capitalize">maintenance</p>
+          </div>
         </div>
 
         {view === 'cards' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredFleet.map((bus) => (
-              <div key={bus.id} className="p-4 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-semibold">{bus.id}</p>
-                    <p className="text-xs text-gray-400">{bus.plateNumber}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger">
+            {filteredFleet.map((bus) => {
+              const lowCharge = bus.batterySoC < 30;
+              const inMaintenance = bus.status === 'maintenance';
+              const cardTone = inMaintenance
+                ? 'border-red-500/40 bg-red-500/5 hover:border-red-500/70'
+                : lowCharge
+                  ? 'border-amber-400/40 bg-amber-400/5 hover:border-amber-400/70'
+                  : 'border-white/10 bg-white/5 hover:border-green-500/50';
+              return (
+                <div key={bus.id} className={`p-4 rounded-xl border transition-all duration-300 stagger-item ${cardTone}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-semibold">{bus.id}</p>
+                      <p className="text-xs text-gray-400">{bus.plateNumber}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        bus.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                        bus.status === 'charging' ? 'bg-blue-500/20 text-blue-400' :
+                        bus.status === 'maintenance' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'
+                      }`}>{bus.status}</span>
+                      {(inMaintenance || lowCharge) && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${inMaintenance ? 'bg-red-500/25 text-red-300' : 'bg-amber-400/25 text-amber-300'}`}>
+                          {inMaintenance ? 'Needs attention' : 'Low charge'}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    bus.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                    bus.status === 'charging' ? 'bg-blue-500/20 text-blue-400' :
-                    bus.status === 'maintenance' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'
-                  }`}>{bus.status}</span>
+                  <div className="space-y-1 text-xs text-gray-400">
+                    <div className="flex justify-between">
+                      <span>Battery</span>
+                      <span className="font-semibold" style={{ color: getBatteryColor(bus.batterySoC) }}>{bus.batterySoC}%</span>
+                    </div>
+                    <div className="w-full bg-white/10 rounded-full h-1.5">
+                      <div className="h-1.5 rounded-full transition-all"
+                        style={{ width: `${bus.batterySoC}%`, backgroundColor: getBatteryColor(bus.batterySoC) }}></div>
+                    </div>
+                    <div className="flex justify-between"><span>Range</span><span className={lowCharge ? 'text-amber-300 font-semibold' : ''}>{bus.rangeKm} km</span></div>
+                    {bus.routeId && <div className="flex justify-between"><span>Route</span><span className="text-right text-white">{bus.routeId}</span></div>}
+                    {bus.lastHealthCheck && <div className="flex justify-between"><span>Last Check</span><span>{new Date(bus.lastHealthCheck).toLocaleDateString()}</span></div>}
+                  </div>
                 </div>
-                <div className="space-y-1 text-xs text-gray-400">
-                  <div className="flex justify-between">
-                    <span>Battery</span>
-                    <span style={{ color: getBatteryColor(bus.batterySoC) }}>{bus.batterySoC}%</span>
-                  </div>
-                  <div className="w-full bg-white/10 rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full transition-all"
-                      style={{ width: `${bus.batterySoC}%`, backgroundColor: getBatteryColor(bus.batterySoC) }}></div>
-                  </div>
-                  <div className="flex justify-between"><span>Range</span><span>{bus.rangeKm} km</span></div>
-                  {bus.routeId && <div className="flex justify-between"><span>Route</span><span className="text-right text-white">{bus.routeId}</span></div>}
-                  {bus.lastHealthCheck && <div className="flex justify-between"><span>Last Check</span><span>{new Date(bus.lastHealthCheck).toLocaleDateString()}</span></div>}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -155,7 +200,7 @@ const FleetSchedule = () => {
         )}
       </div>
 
-      <div className="glass-card p-6">
+      <div className="surface-2 p-6">
         <h4 className="font-semibold mb-4">Active Loops & Schedule</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {activeLoops.map(([loop, buses]) => (

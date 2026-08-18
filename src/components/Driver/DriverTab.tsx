@@ -86,9 +86,21 @@ function DriverTab() {
   ];
 
   return (
+    <div className="max-w-7xl mx-auto animate-page-in">
+      {/* Page header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold flex items-center gap-3">
+          <span className="w-11 h-11 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+            <Navigation className="w-5 h-5 text-green-400" />
+          </span>
+          Driver Dashboard
+        </h2>
+        <p className="text-sm text-gray-400 mt-2 ml-14">GPS simulation, trip timer, and live passenger controls.</p>
+      </div>
+
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="glass-card p-6" style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', border: '2px solid #16a34a' }}>
-        <h3 className="text-xl font-semibold mb-6">Driver Dashboard</h3>
+        <h3 className="text-xl font-semibold mb-6">Trip Console</h3>
         <div className="space-y-6">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
@@ -238,6 +250,7 @@ function DriverTab() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -169,35 +169,6 @@ const LandingPage = ({ onGetStarted }) => {
               <div className="flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400 fill-yellow-400" /><span className="text-sm text-gray-300">4.8 Rating</span></div>
               <div className="flex items-center gap-2"><Bus className="w-5 h-5 text-blue-400" /><span className="text-sm text-gray-300">50+ Buses</span></div>
             </div>
-
-            {/* ABSSIN Quick-Check Widget */}
-            <div className="mt-8 border border-white/10 bg-white/5 backdrop-blur p-5 rounded-2xl max-w-md animate-fadeInUp delay-700">
-              <span className="text-xs font-semibold text-gray-400 block mb-3 uppercase tracking-wider flex items-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-green-400" />
-                Abia Connect Card &mdash; Pre-Flight Verification
-              </span>
-              <form onSubmit={handleAbssinVerification} className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={12}
-                  placeholder="Enter 12-digit ABSSIN number"
-                  value={abssinInput}
-                  onChange={(e) => setAbssinInput(e.target.value.replace(/\D/g, ''))}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition"
-                />
-                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">
-                  Verify
-                </button>
-              </form>
-              {checkStatus === 'INVALID' && <p className="text-xs text-red-400 font-semibold mt-2">ABSSIN must be exactly 12 numeric digits.</p>}
-              {checkStatus === 'PENDING' && <p className="text-xs text-gray-400 font-semibold mt-2 animate-pulse">Querying state transit identity ledger...</p>}
-              {checkStatus === 'VALID' && (
-                <p className="text-xs text-green-400 font-bold mt-2 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                  Card active. Proceed to launch app to fund your digital wallet.
-                </p>
-              )}
-            </div>
           </div>
 
           {/* Abia Connect Card visual */}
@@ -344,6 +315,94 @@ const LandingPage = ({ onGetStarted }) => {
               <div className="w-0 h-1 bg-purple-500 mx-auto group-hover:w-16 transition-all duration-500 mt-2"></div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="container mx-auto px-4 py-16 relative z-10">
+        <h2 className="text-4xl lg:text-5xl font-bold text-center mb-4">
+          <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+            Serving Every Corner of Abia State
+          </span>
+        </h2>
+        <p className="text-center text-gray-400 mb-10 max-w-2xl mx-auto">
+          The green fleet connects all 17 LGAs &mdash; from Umuahia's capital corridors to the Aba commercial axis and the rural routes in between.
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3 mb-14">
+          {['Umuahia North', 'Umuahia South', 'Aba North', 'Aba South', 'Ohafia', 'Bende', 'Isuikwuato', 'Arochukwu', 'Ikwuano', 'Osisioma', 'Ukwa East'].map((lga) => (
+            <span key={lga} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-green-500/50 hover:text-green-300 transition">
+              {lga}
+            </span>
+          ))}
+          <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-500">+6 more</span>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 stagger">
+          {[
+            { name: 'Ngozi E.', role: 'Daily commuter, Aba', quote: 'I tap my card and board in seconds. No more cash or waiting for change at the park.' },
+            { name: 'Chidi O.', role: 'Market trader, Umuahia', quote: 'The offline validation is a lifesaver on the Ohafia corridor. My taps always count.' },
+            { name: 'Adaeze K.', role: 'Student, Arochukwu', quote: 'Battery telemetry means the bus I book actually shows up charged. It just works.' },
+          ].map((t, i) => (
+            <div key={i} className="glass-card p-6 relative stagger-item">
+              <div className="flex items-center gap-1 text-yellow-400 mb-3">
+                {[...Array(5)].map((_, s) => <Star key={s} className="w-4 h-4 fill-yellow-400" />)}
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-green-600/30 border border-green-500/30 flex items-center justify-center font-bold text-green-300">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-gray-600 mt-6">
+          Placeholder testimonials &mdash; replace with verified rider feedback before public launch.
+        </p>
+      </section>
+
+      {/* ABSSIN Card Check — secondary section for existing cardholders */}
+      <section className="container mx-auto px-4 py-16 relative z-10">
+        <div className="glass-card max-w-3xl mx-auto p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="flex-1">
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-2">
+                <Shield className="w-3.5 h-3.5 text-green-400" />
+                Already have an ABSSIN?
+              </span>
+              <h3 className="text-2xl font-bold mb-2">Check your Abia Connect Card</h3>
+              <p className="text-sm text-gray-400">
+                Verify your card status in seconds before your next trip. Active cards board instantly
+                &mdash; no cash, no queue.
+              </p>
+            </div>
+            <form onSubmit={handleAbssinVerification} className="flex-1 flex gap-2">
+              <input
+                type="text"
+                maxLength={12}
+                placeholder="12-digit ABSSIN number"
+                value={abssinInput}
+                onChange={(e) => setAbssinInput(e.target.value.replace(/\D/g, ''))}
+                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition"
+              />
+              <button type="submit" className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition pressable whitespace-nowrap">
+                Verify
+              </button>
+            </form>
+          </div>
+          {checkStatus === 'INVALID' && <p className="text-xs text-red-400 font-semibold mt-3">ABSSIN must be exactly 12 numeric digits.</p>}
+          {checkStatus === 'PENDING' && <p className="text-xs text-gray-400 font-semibold mt-3 animate-pulse">Querying state transit identity ledger...</p>}
+          {checkStatus === 'VALID' && (
+            <p className="text-xs text-green-400 font-bold mt-3 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+              Card active. Proceed to launch app to fund your digital wallet.
+            </p>
+          )}
         </div>
       </section>
 

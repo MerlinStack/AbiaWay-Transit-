@@ -1,6 +1,7 @@
 import { History, Clock, CheckCircle, XCircle, Circle, Bus, Armchair, Calendar } from 'lucide-react';
 import React, { memo, useState } from 'react';
 import useBookingStore from '../../stores/bookingStore';
+import SegmentedControl from '../ui/SegmentedControl';
 
 const getRouteLabel = (booking) => {
   if (typeof booking.route === 'string') return booking.route;
@@ -44,19 +45,12 @@ const BookingHistory = memo(() => {
           <History className="text-primary" />
           Your Bookings
         </h3>
-        <div className="flex gap-1 bg-white/10 rounded-lg p-1">
-          {['all', 'confirmed', 'completed', 'cancelled'].map(status => (
-            <button
-              key={status}
-              className={`px-3 py-1 rounded-lg text-xs capitalize transition ${
-                filter === status ? 'bg-primary text-white' : 'hover:bg-white/10'
-              }`}
-              onClick={() => setFilter(status)}
-            >
-              {status}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          ariaLabel="Booking filter"
+          value={filter}
+          onChange={(f) => setFilter(f as 'all' | 'confirmed' | 'completed' | 'cancelled')}
+          options={['all', 'confirmed', 'completed', 'cancelled'].map((s) => ({ label: s, value: s }))}
+        />
       </div>
 
       <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">

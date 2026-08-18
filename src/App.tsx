@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import LoadingSpinner from './components/Layout/LoadingSpinner';
+import MobileNav from './components/Layout/MobileNav';
 import AdminGuard from './components/Auth/AdminGuard';
 import NotificationToast from './components/Layout/NotificationToast';
 import QuickTopupModal from './components/Modals/QuickTopupModal';
@@ -71,7 +72,7 @@ function AppContent() {
   return (
     <Box className="flex min-h-screen bg-[#07101f] text-[#f8fafc]">
       <Sidebar />
-      <Box component="main" className="flex-1 min-w-0 p-2 md:p-4 overflow-y-auto min-h-screen">
+      <Box key={location.pathname} component="main" className="flex-1 min-w-0 p-2 md:p-4 overflow-y-auto min-h-screen pb-24 lg:pb-4 animate-page-in">
         <Routes>
           <Route path="/map" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>
@@ -162,6 +163,7 @@ function AppContent() {
       </Box>
 
       <NotificationToast />
+      <MobileNav />
       <QuickTopupModal isOpen={modalOpen === 'quickTopup'} onClose={() => setModalOpen(null)} />
       <QRCodeModal isOpen={modalOpen === 'qrCode'} onClose={() => setModalOpen(null)} />
       <NotificationsModal isOpen={modalOpen === 'notifications'} onClose={() => setModalOpen(null)} />

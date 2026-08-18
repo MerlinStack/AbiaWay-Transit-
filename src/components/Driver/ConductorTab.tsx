@@ -4,6 +4,7 @@ import { generateSecuredTicket } from '../../utils/cryptoSync';
 import { LeakyBucketSync, atomicIndexedDbWrite } from '../../utils/syncEngine';
 import { verifyRollingTicketQr } from '../../utils/secureTicketQr';
 import useNotificationStore from '../../stores/notificationStore';
+import PillButton from '../ui/PillButton';
 
 interface TapRecord {
   id: string;
@@ -156,12 +157,20 @@ const ConductorTab = () => {
   }, {});
 
   return (
-    <div className="glass-card p-6">
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          <ScanLine className="text-primary" />
+    <div className="max-w-7xl mx-auto animate-page-in">
+      {/* Page header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold flex items-center gap-3">
+          <span className="w-11 h-11 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+            <ScanLine className="w-5 h-5 text-green-400" />
+          </span>
           Conductor Tap Validation
-        </h3>
+        </h2>
+        <p className="text-sm text-gray-400 mt-2 ml-14">Validate passenger ABSSIN taps and rolling QR tickets — online or offline.</p>
+      </div>
+
+      <div className="surface-2 p-6">
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-400">Today: <span className="text-white font-semibold">₦{totalFare.toLocaleString()}</span></span>
           <span className="text-gray-400">Riders: <span className="text-white font-semibold">{records.length}</span></span>
@@ -194,10 +203,9 @@ const ConductorTab = () => {
               className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm">
               {ROUTES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
-            <button className={`px-4 py-2 rounded-lg text-sm transition ${isScanning ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-white/10 hover:bg-white/20'}`}
-              onClick={() => setIsScanning(!isScanning)}>
+            <PillButton variant={isScanning ? 'danger' : 'secondary'} className={isScanning ? 'animate-pulse' : ''} onClick={() => setIsScanning(!isScanning)}>
               {isScanning ? 'Scanning...' : 'Scan NFC'}
-            </button>
+            </PillButton>
           </div>
 
           <div className="flex gap-3">
@@ -210,9 +218,15 @@ const ConductorTab = () => {
             </button>
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto space-y-2">
+          <div className="max-h-[400px] overflow-y-auto space-y-2 custom-scrollbar">
             {records.length === 0 && (
-              <p className="text-center text-gray-500 py-12">No taps yet today. Tap a passenger ABSSIN to begin.</p>
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-3">
+                  <ScanLine className="w-6 h-6 text-green-400/60" />
+                </div>
+                <p className="text-gray-400 text-sm">No taps yet today</p>
+                <p className="text-xs text-gray-600 mt-1">Tap a passenger ABSSIN or scan a rolling QR to begin</p>
+              </div>
             )}
             {records.map((r) => (
               <div key={r.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
@@ -263,6 +277,7 @@ const ConductorTab = () => {
             <p className="text-xs text-gray-500 text-center">{syncEngineRef.current.pending} records in leaky-bucket queue (15/batch)</p>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

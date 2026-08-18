@@ -1,5 +1,6 @@
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import { History, Inbox, ArrowDownLeft, ArrowUpRight, Download } from 'lucide-react';
+import SegmentedControl from '../ui/SegmentedControl';
 
 interface TransactionHistoryProps {
   transactions: Array<{
@@ -32,21 +33,16 @@ const TransactionHistory = memo(({ transactions }: TransactionHistoryProps) => {
           <History className="text-primary" />
           Transactions
         </h3>
-        <div className="flex gap-1 bg-white/10 rounded-lg p-1">
-          {(['all', 'credit', 'debit'] as const).map((f) => (
-            <button
-              key={f}
-              className={`px-3 py-1 rounded-lg text-xs transition ${
-                filter === f
-                  ? f === 'all' ? 'bg-primary text-white' : f === 'credit' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                  : 'hover:bg-white/10'
-              }`}
-              onClick={() => handleFilterChange(f)}
-            >
-              {f === 'all' ? 'All' : f === 'credit' ? 'Credits' : 'Debits'}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          ariaLabel="Transaction filter"
+          value={filter}
+          onChange={(f) => handleFilterChange(f as 'all' | 'credit' | 'debit')}
+          options={[
+            { label: 'All', value: 'all' },
+            { label: 'Credits', value: 'credit', activeClass: 'bg-green-600 text-white' },
+            { label: 'Debits', value: 'debit', activeClass: 'bg-red-600 text-white' },
+          ]}
+        />
       </div>
 
       <div className="custom-scrollbar space-y-2 max-h-[380px] overflow-y-auto">

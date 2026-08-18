@@ -1,5 +1,5 @@
 import { ClipboardCheck } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 import { recordCheckEvent, isMaintenanceRequired, type CheckItemKey } from '../../utils/maintenanceTracker';
@@ -117,64 +117,93 @@ const DriverCheckin = () => {
     setStep('done');
   };
 
-  if (step === 'blocked') {
+if (step === 'blocked') {
     return (
-      <div className="glass-card p-6 text-center border-2 border-red-500/50">
-        <div className="text-6xl mb-4">🚫</div>
-        <h3 className="text-xl font-bold text-red-400 mb-2">Vehicle Blocked — Maintenance Required</h3>
-        <p className="text-gray-400 mb-4">{plate} locked from route assignment</p>
-        <div className="max-w-sm mx-auto space-y-2 mb-6">
-          <p className="text-sm text-gray-500">3-strike threshold exceeded for:</p>
-          {maintenanceItems.map((item) => (
-            <div key={item} className="p-2 bg-red-500/10 rounded-lg text-sm text-red-400">{item}</div>
-          ))}
+      <div className="max-w-2xl mx-auto animate-page-in">
+        <div className="surface-2 p-8 text-center border-2 border-red-500/50">
+          <div className="text-6xl mb-4">🚫</div>
+          <h3 className="text-xl font-bold text-red-400 mb-2">Vehicle Blocked — Maintenance Required</h3>
+          <p className="text-gray-400 mb-4">{plate} locked from route assignment</p>
+          <div className="max-w-sm mx-auto space-y-2 mb-6">
+            <p className="text-sm text-gray-500">3-strike threshold exceeded for:</p>
+            {maintenanceItems.map((item) => (
+              <div key={item} className="p-2 bg-red-500/10 rounded-lg text-sm text-red-400">{item}</div>
+            ))}
+          </div>
+          <button className="btn-primary px-6 py-2 rounded-lg pressable"
+            onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); }}>Back to Login</button>
         </div>
-        <button className="btn-primary px-6 py-2 rounded-lg"
-          onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); }}>Back to Login</button>
       </div>
     );
   }
 
   if (step === 'done') {
     return (
-      <div className="glass-card p-6 text-center">
-        <div className="text-6xl mb-4">✅</div>
-        <h3 className="text-xl font-bold mb-2">Check-in Complete</h3>
-        <p className="text-gray-400 mb-2">Vehicle {plate} is ready for service</p>
-        <p className="text-sm text-gray-500">{bus ? `Battery: ${bus.batterySoC}% · Est. charge time: ${estimateChargeTime(bus.batterySoC)} min` : ''}</p>
-        <p className="text-sm text-gray-500">Solar throughput: {Math.round(getSolarThroughput() * 100)}%</p>
-        {odometer && <p className="text-sm text-gray-500">Odometer: {parseInt(odometer).toLocaleString()} km</p>}
-        <button className="btn-primary mt-6 px-6 py-2 rounded-lg"
-          onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); setOdometer(''); }}>New Check-in</button>
+      <div className="max-w-2xl mx-auto animate-page-in">
+        <div className="surface-2 p-8 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h3 className="text-xl font-bold mb-2">Check-in Complete</h3>
+          <p className="text-gray-400 mb-2">Vehicle {plate} is ready for service</p>
+          <p className="text-sm text-gray-500">{bus ? `Battery: ${bus.batterySoC}% · Est. charge time: ${estimateChargeTime(bus.batterySoC)} min` : ''}</p>
+          <p className="text-sm text-gray-500">Solar throughput: {Math.round(getSolarThroughput() * 100)}%</p>
+          {odometer && <p className="text-sm text-gray-500">Odometer: {parseInt(odometer).toLocaleString()} km</p>}
+          <button className="btn-primary mt-6 px-6 py-2 rounded-lg pressable"
+            onClick={() => { setStep('login'); setChecklist(INITIAL_CHECKLIST); setOdometer(''); }}>New Check-in</button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card p-6">
-      <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <ClipboardCheck className="text-primary" />
-        Driver Check-in
-      </h3>
+    <div className="max-w-3xl mx-auto animate-page-in">
+      {/* Page header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold flex items-center gap-3">
+          <span className="w-11 h-11 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+            <ClipboardCheck className="w-5 h-5 text-green-400" />
+          </span>
+          Driver Check-in
+        </h2>
+        <p className="text-sm text-gray-400 mt-2 ml-14">Pre-trip safety validation before vehicle dispatch.</p>
+      </div>
+
+      <div className="surface-2 p-6">
+        {/* Step indicator */}
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-6 overflow-x-auto custom-scrollbar pb-1">
+          {['Credentials', 'Safety Checklist', 'Dispatch'].map((label, i) => {
+            const idx = step === 'login' ? 0 : step === 'checklist' ? 1 : 2;
+            const state = i < idx ? 'done' : i === idx ? 'current' : 'next';
+            return (
+              <React.Fragment key={label}>
+                {i > 0 && <div className={`flex-1 h-0.5 rounded-full min-w-3 ${state === 'next' ? 'bg-white/10' : 'bg-green-500/60'}`} />}
+                <div className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold whitespace-nowrap ${
+                  state === 'current' ? 'bg-green-600 text-white' : state === 'done' ? 'bg-green-500/15 text-green-400' : 'bg-white/5 text-gray-500'
+                }`}>
+                  {state === 'done' ? '✓' : i + 1} {label === 'Safety Checklist' ? (<><span className="hidden sm:inline">Safety </span>Checklist</>) : label}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
 
       {step === 'login' && (
-        <div className="space-y-4 max-w-md">
+        <div className="space-y-4 max-w-md mx-auto">
           <div>
             <label className="block text-sm text-gray-400 mb-2">Driver ID</label>
             <input type="text" value={driverId}
               onChange={(e) => setDriverId(e.target.value.toUpperCase())}
-              placeholder="e.g. DRV-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+              placeholder="e.g. DRV-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-2">Co-Pilot ID (optional)</label>
             <input type="text" value={coPilotId}
               onChange={(e) => setCoPilotId(e.target.value.toUpperCase())}
-              placeholder="e.g. COP-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+              placeholder="e.g. COP-001" className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-2">Vehicle Plate</label>
             <select value={plate} onChange={(e) => setPlate(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3">
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500">
               {loadingPlates ? (
               <option value="">Loading...</option>
             ) : (
@@ -187,16 +216,16 @@ const DriverCheckin = () => {
             <input type="text" value={odometer}
               onChange={(e) => setOdometer(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 45230" maxLength={7}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3" />
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" />
           </div>
-          <button className="w-full btn-primary py-3 rounded-lg" onClick={handleLogin}>
+          <button className="w-full btn-primary py-3 rounded-lg pressable" onClick={handleLogin}>
             Start Check-in
           </button>
         </div>
       )}
 
       {step === 'checklist' && (
-        <div className="space-y-4 max-w-lg">
+        <div className="space-y-4 max-w-lg mx-auto">
           <div className="flex justify-between items-center mb-2">
             <div>
               <p className="text-sm text-gray-400">Vehicle: <span className="text-white font-semibold">{plate}</span></p>
@@ -213,12 +242,13 @@ const DriverCheckin = () => {
               </label>
             ))}
           </div>
-          <button className="w-full btn-primary py-3 rounded-lg mt-4 disabled:opacity-50"
+          <button className="w-full btn-primary py-3 rounded-lg mt-4 disabled:opacity-50 pressable"
             onClick={handleSubmitChecklist} disabled={!allChecked}>
             {allChecked ? 'Sign Off & Start Shift' : `Complete ${8 - checkedCount} remaining checks`}
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 };

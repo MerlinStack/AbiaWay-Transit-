@@ -6,10 +6,12 @@ import { Locate, MapPin, Maximize, Bus, BatteryFull, BatteryCharging, Route, Cir
 import { abiaCenter } from '../../data/constants';
 import { BusMarkersLayer, StopMarkersLayer, SolarStationLayer } from './BusMarkersLayer';
 import { getTransitService } from '../../services/transit';
-import { FleetSummary } from '../../types/abssin';
+import type { FleetSummary } from '../../services/transit/TransitDataSource';
 import { MapZoomControl } from './MapControls';
 import { TelemetrySyncEngine } from '../../utils/telemetrySync';
 import type { TransportMode } from '../../utils/telemetrySync';
+import SegmentedControl from '../ui/SegmentedControl';
+import PillButton from '../ui/PillButton';
 
 const TILE_LAYERS = [
   { name: 'Street', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap' },
@@ -32,9 +34,9 @@ const CenterButton = memo(({ map }: CenterButtonProps) => {
     showNotification('Location', 'Centering map on your position');
   }, [map, showNotification]);
   return (
-    <button className="btn-secondary px-3 py-1 rounded-lg text-sm" onClick={handleClick} title="Center on my location">
+    <PillButton onClick={handleClick} title="Center on my location" aria-label="Center on my location">
       <Locate className="w-4 h-4" />
-    </button>
+    </PillButton>
   );
 });
 
@@ -111,23 +113,20 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
     <div className="space-y-4">
       <div className="glass-card overflow-hidden">
         <div className="p-4 pb-0">
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex justify-between items-center mb-4 gap-3 overflow-x-auto custom-scrollbar whitespace-nowrap pb-1">
+            <div className="flex items-center gap-3 shrink-0">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <MapPin className="text-green-400" />
                 Live Bus Tracking
               </h3>
-              <div className="flex gap-1 bg-white/10 rounded-lg p-1">
-                {TILE_LAYERS.map((layer, i) => (
-                  <button key={layer.name}
-                    className={`px-3 py-1 rounded-lg text-xs transition ${i === activeLayerIndex ? 'bg-primary text-white' : 'hover:bg-white/10'}`}
-                    onClick={() => setActiveLayerIndex(i)}>
-                    {layer.name}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl
+                ariaLabel="Map style"
+                value={TILE_LAYERS[activeLayerIndex].name}
+                onChange={(name) => setActiveLayerIndex(TILE_LAYERS.findIndex((l) => l.name === name))}
+                options={TILE_LAYERS.map((l) => ({ label: l.name, value: l.name }))}
+              />
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 shrink-0">
               <span className={`text-sm flex items-center gap-1 px-3 py-1 rounded-full ${
                 transportMode === 'WEBSOCKET' ? 'bg-green-500/20 text-green-400' :
                 transportMode === 'DISCONNECTED' ? 'bg-red-500/20 text-red-400' :
@@ -140,9 +139,9 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
                 {MODE_LABELS[transportMode]}
               </span>
               {map && <CenterButton map={map} />}
-              <button className="btn-secondary px-3 py-1 rounded-lg text-sm" title="Toggle fullscreen" onClick={toggleFullscreen}>
+              <PillButton title="Toggle fullscreen" onClick={toggleFullscreen} aria-label="Toggle fullscreen">
                 <Maximize className="w-4 h-4" />
-              </button>
+              </PillButton>
             </div>
           </div>
         </div>

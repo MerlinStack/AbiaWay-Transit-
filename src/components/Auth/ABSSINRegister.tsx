@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
+import SegmentedControl from '../ui/SegmentedControl';
 
 interface ABSSINRegisterProps {
   isOpen: boolean;
@@ -52,8 +54,11 @@ const ABSSINRegister = ({ isOpen, onClose }: ABSSINRegisterProps) => {
 
   const lgAs = ['Umuahia North', 'Umuahia South', 'Aba North', 'Aba South', 'Ohafia', 'Bende', 'Isuikwuato', 'Arochukwu', 'Ikwuano', 'Ukwa East', 'Ukwa West', 'Osisioma', 'Ugwuagbo'];
 
-  return (
-    <div className="fixed inset-0 z-50">
+  // Portal to document.body: escapes any transformed ancestor (which would
+  // otherwise turn `position: fixed` into a containing-block trap) and sits
+  // above the MUI Drawer (z-index 1200).
+  return createPortal(
+    <div className="fixed inset-0 z-[1300]">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4">
         <div className="glass-card p-6">
@@ -62,13 +67,18 @@ const ABSSINRegister = ({ isOpen, onClose }: ABSSINRegisterProps) => {
             <button onClick={onClose} className="text-gray-400 hover:text-white">&times;</button>
           </div>
 
-          <div className="flex gap-1 mb-6 bg-white/10 rounded-lg p-1">
-            {[1, 2].map((s) => (
-              <div key={s} className={`flex-1 text-center py-2 rounded-lg text-sm ${step === s ? 'bg-primary text-white' : 'text-gray-400'}`}>
-                {s === 1 ? 'Verify ID' : 'Profile'}
-              </div>
-            ))}
-          </div>
+          <SegmentedControl
+              fill
+              size="md"
+              ariaLabel="Registration step"
+              value={String(step)}
+              onChange={(s) => setStep(Number(s))}
+              options={[
+                { label: 'Verify ID', value: '1' },
+                { label: 'Profile', value: '2' },
+              ]}
+              className="mb-6"
+            />
 
           {step === 1 && (
             <div className="space-y-4">
@@ -124,7 +134,8 @@ const ABSSINRegister = ({ isOpen, onClose }: ABSSINRegisterProps) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

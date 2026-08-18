@@ -43,7 +43,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        display: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Sora', 'Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'display-lg': ['2.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
@@ -64,6 +64,11 @@ export default {
         'card': '0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
         'elevated': '0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.3)',
         'modal': '0 25px 50px rgba(0,0,0,0.5)',
+        'surface-1': '0 1px 2px rgba(2,6,23,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
+        'surface-2': '0 4px 12px rgba(2,6,23,0.45), inset 0 1px 0 rgba(255,255,255,0.06)',
+        'surface-3': '0 12px 32px rgba(2,6,23,0.55), inset 0 1px 0 rgba(255,255,255,0.08)',
+        'glow-green': '0 0 24px rgba(34,197,94,0.25)',
+        'glow-blue': '0 0 24px rgba(59,130,246,0.25)',
       },
       screens: {
         'xs': '475px',

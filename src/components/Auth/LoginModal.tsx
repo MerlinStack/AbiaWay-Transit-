@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
+import SegmentedControl from '../ui/SegmentedControl';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
@@ -240,32 +241,24 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
             </form>
           ) : (
             <>
-              <div className="flex bg-white/5 rounded-lg p-1 mb-5">
-                <button
-                  type="button"
-                  onClick={() => { setTab('signin'); loginForm.clearErrors(); }}
-                  className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all ${
-                    tab === 'signin' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <span className="flex items-center justify-center gap-1.5">
-                    <LogIn className="w-4 h-4" />
-                    Sign In
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setTab('register'); registerForm.clearErrors(); }}
-                  className={`flex-1 py-2.5 rounded-md text-sm font-semibold transition-all ${
-                    tab === 'register' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <span className="flex items-center justify-center gap-1.5">
-                    <UserPlus className="w-4 h-4" />
-                    Create Account
-                  </span>
-                </button>
-              </div>
+              <SegmentedControl
+              size="md"
+              fill
+              ariaLabel="Sign in or register"
+              value={tab}
+              onChange={(v) => { setTab(v as 'signin' | 'register'); if (v === 'signin') loginForm.clearErrors(); else registerForm.clearErrors(); }}
+              options={[
+                {
+                  label: <span className="flex items-center justify-center gap-1.5"><LogIn className="w-4 h-4" /> Sign In</span>,
+                  value: 'signin',
+                },
+                {
+                  label: <span className="flex items-center justify-center gap-1.5"><UserPlus className="w-4 h-4" /> Create Account</span>,
+                  value: 'register',
+                },
+              ]}
+              className="mb-5"
+            />
 
               {tab === 'signin' ? (
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)}>
