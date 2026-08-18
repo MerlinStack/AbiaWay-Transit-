@@ -33,3 +33,7 @@ dist-ssr
 # Firebase
 .firebase/
 *-firebase-adminsdk-*.json
+
+# Cloudflare Worker
+worker/.dev.vars
+.wrangler/

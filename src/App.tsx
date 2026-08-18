@@ -77,7 +77,7 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <MapErrorBoundary>
                 <SEO title="Live Map" description="Real-time bus tracking and route planning for Abia State" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                 <LazyMapTab />
               </MapErrorBoundary>
             </Suspense>
@@ -129,7 +129,7 @@ function AppContent() {
           <Route path="/register" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <SEO title="ABSSIN Registration" description="Register with Abia State Identification Number" />
-              <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+              <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
               <LazyABSSINRegister isOpen={true} onClose={() => navigate('/map')} />
             </Suspense>
           } />
@@ -143,7 +143,7 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <AdminGuard requiredRole="admin">
                 <SEO title="Admin Dashboard" description="System-wide fleet and operations overview" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                 <LazyAdminDashboard />
               </AdminGuard>
             </Suspense>
@@ -152,7 +152,7 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <AdminGuard requiredRole="admin">
                 <SEO title="Driver Management" description="View and manage all drivers" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} />
+                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                 <LazyAdminDriverPanel />
               </AdminGuard>
             </Suspense>
@@ -165,7 +165,7 @@ function AppContent() {
       <QuickTopupModal isOpen={modalOpen === 'quickTopup'} onClose={() => setModalOpen(null)} />
       <QRCodeModal isOpen={modalOpen === 'qrCode'} onClose={() => setModalOpen(null)} />
       <NotificationsModal isOpen={modalOpen === 'notifications'} onClose={() => setModalOpen(null)} />
-      <LoginModal isOpen={modalOpen === 'login'} onClose={() => setModalOpen(null)} />
+      <LoginModal isOpen={modalOpen === 'login' || modalOpen === 'register'} onClose={() => setModalOpen(null)} initialTab={modalOpen === 'register' ? 'register' : 'signin'} />
       <ProfileModal isOpen={modalOpen === 'profile'} onClose={() => setModalOpen(null)} />
       <SettingsModal isOpen={modalOpen === 'settings'} onClose={() => setModalOpen(null)} />
     </Box>

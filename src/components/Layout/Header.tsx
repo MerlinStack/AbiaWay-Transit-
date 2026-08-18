@@ -1,10 +1,10 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Menu, MenuItem, Chip } from '@mui/material';
-import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, Circle } from 'lucide-react';
+import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, Circle, UserPlus } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 
-const Header = ({ onOpenModal, user, onLoginClick }) => {
+const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
   const [greeting, setGreeting] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -65,9 +65,14 @@ const Header = ({ onOpenModal, user, onLoginClick }) => {
         </Button>
 
         {!user && (
-          <Button color="primary" variant="contained" startIcon={<LogIn size={20} />} onClick={onLoginClick} className="min-w-[120px]">
-            Sign In
-          </Button>
+          <>
+            <Button color="primary" variant="contained" startIcon={<LogIn size={20} />} onClick={onLoginClick} className="min-w-[120px]">
+              Sign In
+            </Button>
+            <Button color="secondary" variant="outlined" startIcon={<UserPlus size={20} />} onClick={onSignUpClick} className="min-w-[140px]">
+              Create Account
+            </Button>
+          </>
         )}
 
         {user && (

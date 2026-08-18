@@ -225,7 +225,7 @@ const PaymentMethodModal = ({ isOpen, onClose, onSuccess }: PaymentMethodModalPr
         setProcessingMessage('Verifying payment with Paystack...');
         let credited = false;
         if (PaystackPaymentService.isConfigured()) {
-          const verification = await verifyPaystackCredit(reference, amountNum, user?.email);
+          const verification = await verifyPaystackCredit(reference, amountNum, user?.email, user?.uid);
           if (!verification.success) {
             showNotification('Verification Failed', verification.message || 'Payment could not be verified', 'error');
             setIsProcessing(false);

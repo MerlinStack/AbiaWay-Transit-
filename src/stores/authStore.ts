@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { User } from '../types';
 import {
   firebaseSignIn,
+  firebaseSignUp,
   firebaseSignOut,
+  firebaseResetPassword,
   onFirebaseAuthChanged,
   getUserProfile,
 } from '../lib/firebaseAuth';
@@ -22,6 +24,8 @@ interface AuthState {
   initialize: () => () => void;
   verifyToken: () => Promise<void>;
   login: (email: string, password: string) => Promise<{success: boolean; user?: User; error?: string}>;
+  register: (data: { name: string; email: string; phone: string; password: string }) => Promise<{success: boolean; user?: User; error?: string}>;
+  resetPassword: (email: string) => Promise<{success: boolean; error?: string}>;
   staffLogin: (badgeId: string, role: 'driver' | 'conductor') => Promise<{success: boolean; user?: User; error?: string}>;
   adminLogin: (email: string, password: string) => Promise<{success: boolean; user?: User; error?: string}>;
   logout: () => Promise<{success: boolean}>;
@@ -115,6 +119,48 @@ const useAuthStore = create<AuthState>((set, get) => ({
       return { success: true, user: userProfile };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Authentication failed';
+      return { success: false, error: message };
+    }
+  },
+
+  register: async (data) => {
+    try {
+      const firebaseUser = await firebaseSignUp(data.email.trim().toLowerCase(), data.password);
+      const user: User = {
+        id: firebaseUser.uid,
+        email: data.email.trim().toLowerCase(),
+        name: data.name.trim(),
+        role: 'passenger',
+        tier: 'Premium',
+        avatar: data.name.trim().charAt(0).toUpperCase(),
+        phone: data.phone.trim(),
+        joinDate: new Date().toISOString(),
+        loginTime: new Date().toISOString(),
+        identifier: firebaseUser.uid,
+      };
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        ...user,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      const tokenResult = await firebaseUser.getIdTokenResult();
+      set({ user, token: tokenResult.token, isAuthenticated: true });
+      sessionStorage.setItem('currentUser', JSON.stringify(user));
+      return { success: true, user };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      return { success: false, error: message };
+    }
+  },
+
+  resetPassword: async (email) => {
+    try {
+      await firebaseResetPassword(email);
+      return { success: true };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Password reset failed';
       return { success: false, error: message };
     }
   },
