@@ -25,7 +25,7 @@ export class ABSINService {
     try {
       await this.encryption.initialize(this.config.apiKey);
       this.initialized = true;
-      console.log('✅ ABSIN Service initialized (demo mode)');
+      console.log('ABSIN Service initialized (demo mode)');
       return { success: true };
     } catch (error) {
       console.error('ABSIN initialization error:', error);

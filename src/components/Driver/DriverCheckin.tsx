@@ -1,4 +1,4 @@
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, XCircle, CheckCircle2 } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
@@ -121,7 +121,7 @@ if (step === 'blocked') {
     return (
       <div className="max-w-2xl mx-auto animate-page-in">
         <div className="surface-2 p-8 text-center border-2 border-red-500/50">
-          <div className="text-6xl mb-4">🚫</div>
+          <XCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
           <h3 className="text-xl font-bold text-red-400 mb-2">Vehicle Blocked — Maintenance Required</h3>
           <p className="text-gray-400 mb-4">{plate} locked from route assignment</p>
           <div className="max-w-sm mx-auto space-y-2 mb-6">
@@ -141,7 +141,7 @@ if (step === 'blocked') {
     return (
       <div className="max-w-2xl mx-auto animate-page-in">
         <div className="surface-2 p-8 text-center">
-          <div className="text-6xl mb-4">✅</div>
+          <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-500" />
           <h3 className="text-xl font-bold mb-2">Check-in Complete</h3>
           <p className="text-gray-400 mb-2">Vehicle {plate} is ready for service</p>
           <p className="text-sm text-gray-500">{bus ? `Battery: ${bus.batterySoC}% · Est. charge time: ${estimateChargeTime(bus.batterySoC)} min` : ''}</p>

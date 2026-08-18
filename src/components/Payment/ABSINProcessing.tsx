@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface ABSINProcessingProps {
   progress: number;
@@ -14,7 +15,7 @@ const stepMessages = {
 const ABSINProcessing = memo(({ progress, step }: ABSINProcessingProps) => (
   <div className="glass-card text-center p-8">
     <div className="mb-6">
-      <div className="text-6xl mb-4 animate-spin">🔄</div>
+      <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin text-primary" />
       <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-4">
         <div className="h-full bg-gradient-to-r from-green-600 to-green-500 transition-all" style={{ width: `${progress}%` }}></div>
       </div>

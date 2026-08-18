@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { QrCode } from 'lucide-react';
 
 interface ABSINQRScannerProps {
   progress: number;
@@ -9,7 +10,7 @@ const ABSINQRScanner = memo(({ progress, onCancel }: ABSINQRScannerProps) => (
   <div className="glass-card text-center p-8">
     <div className="mb-6">
       <div className="w-48 h-48 mx-auto mb-4 bg-white rounded-2xl flex items-center justify-center flex-col">
-        <div className="text-6xl">📷</div>
+        <QrCode className="w-16 h-16 text-gray-800" />
         <div className="text-xs text-gray-600 mt-2">Scan ABSIN QR Code</div>
       </div>
       <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-4">

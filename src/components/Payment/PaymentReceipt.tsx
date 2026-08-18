@@ -1,5 +1,5 @@
 import React, { memo, useRef } from 'react';
-import { Printer } from 'lucide-react';
+import { Printer, CheckCircle2 } from 'lucide-react';
 
 interface PaymentReceiptProps {
   receipt: {
@@ -120,7 +120,7 @@ const PaymentReceipt = memo(({ receipt, onClose, onPrint }: PaymentReceiptProps)
     <div className="space-y-4">
       <div ref={receiptRef}>
         <div className="text-center mb-6">
-          <div className="text-6xl mb-3">✅</div>
+          <CheckCircle2 className="w-16 h-16 mx-auto mb-3 text-green-500" />
           <h3 className="text-2xl font-bold text-green-400">Payment Successful!</h3>
           <p className="text-gray-400 text-sm">Transaction ID: {receipt.transactionId}</p>
         </div>

@@ -170,7 +170,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
             <div className="glass-card p-6 bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="text-lg font-semibold mb-2">👋 Welcome to Abia Way!</h4>
+                  <h4 className="text-lg font-semibold mb-2">Welcome to Abia Way!</h4>
                   <p className="text-sm text-gray-300 mb-3">
                     Your wallet is empty. Choose a payment method to add funds.
                   </p>
@@ -316,7 +316,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
             </div>
 
             <div className="p-3 bg-yellow-500/10 rounded-lg text-xs">
-              <p className="text-yellow-400">💡 Payment Options:</p>
+              <p className="text-yellow-400">Payment Options:</p>
               <ul className="text-gray-400 mt-1 space-y-1">
                 <li>• Card: Visa, Mastercard, Verve (Fee: ₦50)</li>
                 <li>• USSD: Quick banking via phone (Fee: ₦30)</li>

@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import useNotificationStore from '../../stores/notificationStore';
-import { Clock } from 'lucide-react';
+import { Clock, Bell } from 'lucide-react';
 
 const ETAPanel = memo(() => {
   const [updates, setUpdates] = useState([
@@ -29,7 +29,7 @@ const ETAPanel = memo(() => {
   };
 
   const handleSubscribe = (busId) => {
-    showNotification('🔔', `Notifications enabled for Bus ${busId}`);
+    showNotification('Notifications', `Notifications enabled for Bus ${busId}`);
   };
 
   return (
@@ -58,10 +58,10 @@ const ETAPanel = memo(() => {
                 <span className="text-gray-400">{bus.capacity}% · Platform {bus.platform}</span>
               </div>
               <button
-                className="text-xs text-primary mt-2 hover:text-green-300 transition"
+                className="text-xs text-primary mt-2 hover:text-green-300 transition inline-flex items-center gap-1"
                 onClick={() => handleSubscribe(bus.id)}
               >
-                🔔 Notify when approaching
+                <Bell className="w-3.5 h-3.5" /> Notify when approaching
               </button>
             </div>
           );

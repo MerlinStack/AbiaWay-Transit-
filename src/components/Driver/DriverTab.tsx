@@ -114,7 +114,7 @@ function DriverTab() {
                 status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
                 status === 'ended' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'
               }`}>
-                {status === 'idle' ? 'No active trip' : status === 'active' ? '● Trip in progress' : status === 'paused' ? '⏸ Trip paused' : 'Trip ended'}
+                {status === 'idle' ? 'No active trip' : status === 'active' ? '● Trip in progress' : status === 'paused' ? 'Trip paused' : 'Trip ended'}
               </span>
             </div>
             {tripRunning && (

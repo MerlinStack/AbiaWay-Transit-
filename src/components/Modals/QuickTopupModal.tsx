@@ -31,7 +31,7 @@ const QuickTopupModal = ({ isOpen, onClose }: QuickTopupModalProps) => {
     const amount = customAmount ? parseInt(customAmount) : selectedAmount;
     if (amount >= 10000) {
       const bonus = Math.floor(amount * 0.05);
-      return `🎁 +${bonus.toLocaleString()} bonus points!`;
+      return `+${bonus.toLocaleString()} bonus points!`;
     }
     return null;
   };
@@ -186,7 +186,7 @@ const QuickTopupModal = ({ isOpen, onClose }: QuickTopupModalProps) => {
           {/* Info */}
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
-              💡 Minimum top-up: ₦50 | Fee: ₦{fee} per transaction
+              Minimum top-up: ₦50 | Fee: ₦{fee} per transaction
             </p>
           </div>
         </div>

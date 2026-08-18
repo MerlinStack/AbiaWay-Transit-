@@ -50,7 +50,7 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
 const SOS_NUMBER = '09038941435';
 
 const handleSOS = () => {
-  if (window.confirm(`🚨 Emergency SOS? This will call the Abia State emergency line (${SOS_NUMBER}) and share your location.`)) {
+  if (window.confirm(`Emergency SOS? This will call the Abia State emergency line (${SOS_NUMBER}) and share your location.`)) {
     window.location.href = `tel:${SOS_NUMBER}`;
     showNotification('SOS', `Calling ${SOS_NUMBER}…`, 'error');
   }
@@ -73,7 +73,7 @@ const handleSOS = () => {
     <header className="flex items-center justify-between gap-3 mb-4 p-3 rounded-2xl bg-[rgba(15,23,42,0.88)] border border-[rgba(148,163,184,0.12)] shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
       <div className="min-w-0 flex-1">
         <h2 className="text-2xl lg:text-3xl font-extrabold mb-2 text-white truncate">
-          {greeting}, {user?.name?.split(' ')[0] || 'Guest'}! 👋
+          {greeting}, {user?.name?.split(' ')[0] || 'Guest'}!
         </h2>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <StatusPill dot>

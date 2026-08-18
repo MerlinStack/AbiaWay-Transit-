@@ -57,7 +57,7 @@ const AIAssistant = () => {
     { 
       id: 1, 
       type: 'ai', 
-      text: "👋 Hello! I'm your AI travel assistant. I can help with routes, fares, delays, and more. How can I assist you today?", 
+      text: "Hello! I'm your AI travel assistant. I can help with routes, fares, delays, and more. How can I assist you today?", 
       time: 'Just now',
       suggestions: ['Check traffic', 'Find route', 'Fare info', 'Report issue'],
       quickReplies: undefined
@@ -71,27 +71,27 @@ const AIAssistant = () => {
 
   const responses = {
     traffic: {
-      text: '🚦 **Traffic Update**\n\n• Umuahia-Aba: Moderate (25 min)\n• Aba-PH: Heavy (45 min)\n• Umuahia-Ohafia: Light (30 min)',
+      text: '**Traffic Update**\n\n• Umuahia-Aba: Moderate (25 min)\n• Aba-PH: Heavy (45 min)\n• Umuahia-Ohafia: Light (30 min)',
       quickReplies: ['Delays?', 'Accidents?', 'Best time?']
     },
     fare: {
-      text: '💰 **Fare Information**\n\n• Standard Bus: ₦150\n• Premium Bus: ₦250 (AC)\n• Express: ₦350\n• Student Discount: 20% off',
+      text: '**Fare Information**\n\n• Standard Bus: ₦150\n• Premium Bus: ₦250 (AC)\n• Express: ₦350\n• Student Discount: 20% off',
       quickReplies: ['Student discount', 'Monthly pass', 'Group fare']
     },
     peak: {
-      text: '⏰ **Peak Hours**\n\n• Morning: 7:00 - 9:00 AM\n• Evening: 4:00 - 7:00 PM\n• Weekend: 10:00 AM - 2:00 PM',
+      text: '**Peak Hours**\n\n• Morning: 7:00 - 9:00 AM\n• Evening: 4:00 - 7:00 PM\n• Weekend: 10:00 AM - 2:00 PM',
       quickReplies: ['Weekend schedule', 'Night buses', 'Holidays']
     },
     route: {
-      text: '🗺️ **Best Route to Aba**\n\n• Fastest: Umuahia-Aba Express (25 min)\n• Cheapest: Local route (35 min, ₦150)\n• Scenic: Via Bende (45 min)',
+      text: '**Best Route to Aba**\n\n• Fastest: Umuahia-Aba Express (25 min)\n• Cheapest: Local route (35 min, ₦150)\n• Scenic: Via Bende (45 min)',
       quickReplies: ['Show on map', 'Stops', 'Schedule']
     },
     delay: {
-      text: '⚠️ **Active Delays**\n\n• Osisioma to Park: +10 min (Construction)\n• Aba Terminal: +5 min (High traffic)',
+      text: '**Active Delays**\n\n• Osisioma to Park: +10 min (Construction)\n• Aba Terminal: +5 min (High traffic)',
       quickReplies: ['Other routes', 'Alternative', 'ETA']
     },
     weather: {
-      text: '☁️ **Weather Forecast**\n\n• Now: 28°C, Partly cloudy\n• 6 PM: Light rain expected\n• Tomorrow: 26°C, Sunny',
+      text: '**Weather Forecast**\n\n• Now: 28°C, Partly cloudy\n• 6 PM: Light rain expected\n• Tomorrow: 26°C, Sunny',
       quickReplies: ['Umbrella needed?', 'Weekend forecast']
     }
   };

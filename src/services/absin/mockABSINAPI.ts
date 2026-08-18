@@ -1,7 +1,7 @@
 // Mock ABSIN API for testing
 export const mockABSINAPI = {
   async validateCard(cardData) {
-    console.log('🔵 Mock ABSIN: Validating card', cardData);
+    console.log('Mock ABSIN: Validating card', cardData);
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));

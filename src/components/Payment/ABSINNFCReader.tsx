@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { Smartphone } from 'lucide-react';
 
 interface ABSINNFCReaderProps {
   progress: number;
@@ -8,7 +9,7 @@ interface ABSINNFCReaderProps {
 const ABSINNFCReader = memo(({ progress, onCancel }: ABSINNFCReaderProps) => (
   <div className="glass-card text-center p-8">
     <div className="mb-6">
-      <div className="w-32 h-32 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center text-5xl animate-pulse">📱</div>
+      <div className="w-32 h-32 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center animate-pulse"><Smartphone className="w-16 h-16 text-green-400" /></div>
       <h3 className="text-lg font-semibold mb-2">Place ABSIN Card Near Phone</h3>
       <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-4">
         <div className="h-full bg-gradient-to-r from-green-600 to-green-500 transition-all" style={{ width: `${progress}%` }}></div>

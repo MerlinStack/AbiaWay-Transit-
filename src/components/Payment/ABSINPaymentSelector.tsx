@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { CreditCard, Wallet } from 'lucide-react';
 
 interface ABSINPaymentSelectorProps {
   amount: number;
@@ -39,7 +40,7 @@ const ABSINPaymentSelector = memo(({
       }`}
       onClick={() => onSelectMethod('absin')}
     >
-      <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-2xl">💳</div>
+      <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center"><CreditCard className="w-6 h-6 text-purple-400" /></div>
       <div className="flex-1">
         <div className="font-semibold">ABSIN Card</div>
         <div className="text-xs text-gray-400">Tap or enter your ABSIN card details</div>
@@ -53,7 +54,7 @@ const ABSINPaymentSelector = memo(({
       }`}
       onClick={() => onSelectMethod('wallet')}
     >
-      <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center text-2xl">💰</div>
+      <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center"><Wallet className="w-6 h-6 text-green-400" /></div>
       <div className="flex-1">
         <div className="font-semibold">Wallet Balance</div>
         <div className="text-xs text-gray-400">₦{walletBalance?.toLocaleString()} available • 5% cashback</div>

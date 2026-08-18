@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 
 interface ReceiptData {
   transactionId: string;
@@ -20,7 +21,7 @@ interface ABSINReceiptProps {
 const ABSINReceipt = memo(({ receipt, amount, rideDetails, onPrint, onDone }: ABSINReceiptProps) => (
   <div className="glass-card p-6">
     <div className="text-center mb-6">
-      <div className="text-6xl mb-3">✅</div>
+      <CheckCircle2 className="w-16 h-16 mx-auto mb-3 text-green-500" />
       <h3 className="text-2xl font-bold text-green-400">Payment Successful!</h3>
       <p className="text-gray-400 text-sm">Transaction ID: {receipt.transactionId}</p>
     </div>

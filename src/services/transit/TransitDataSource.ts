@@ -64,6 +64,7 @@ export interface PaymentResult {
   };
   balance?: number;
   pointsEarned?: number;
+  required?: number;
   error?: string;
 }
 

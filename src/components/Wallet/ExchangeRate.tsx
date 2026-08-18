@@ -3,10 +3,10 @@ import { RefreshCw } from 'lucide-react';
 
 const ExchangeRate = ({ rate }) => {
   const currencies = [
-    { code: 'USD', name: 'US Dollar', flag: '🇺🇸', rate: 1 / 1500 },
-    { code: 'EUR', name: 'Euro', flag: '🇪🇺', rate: 1 / 1650 },
-    { code: 'GBP', name: 'British Pound', flag: '🇬🇧', rate: 1 / 1900 },
-    { code: 'CNY', name: 'Chinese Yuan', flag: '🇨🇳', rate: 1 / 210 },
+    { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1 / 1500 },
+    { code: 'EUR', name: 'Euro', symbol: '€', rate: 1 / 1650 },
+    { code: 'GBP', name: 'British Pound', symbol: '£', rate: 1 / 1900 },
+    { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', rate: 1 / 210 },
   ];
 
   return (
@@ -23,7 +23,7 @@ const ExchangeRate = ({ rate }) => {
         {currencies.map(currency => (
           <div key={currency.code} className="bg-white/5 p-3 rounded-lg">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{currency.flag}</span>
+              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold text-primary">{currency.symbol}</span>
               <span className="font-medium">{currency.code}</span>
             </div>
             <p className="text-sm">

@@ -28,7 +28,7 @@ function AdminDriverPanel() {
     const loadDrivers = async () => {
       const transit = getTransitService();
       const fleet = await transit.getActiveFleet();
-      const generatedDrivers = Array.from({ length: 40 }, (_, i) => {
+      const generatedDrivers: Driver[] = Array.from({ length: 40 }, (_, i) => {
         const bus = fleet[i];
         const isActive = i < 32;
         return {
