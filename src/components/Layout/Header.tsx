@@ -45,11 +45,14 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
     );
   }, []);
 
-  const handleSOS = () => {
-    if (window.confirm('🚨 Emergency SOS? This will alert emergency services and share your location.')) {
-      alert('SOS alert sent to Abia State Emergency Services');
-    }
-  };
+const SOS_NUMBER = '09038941435';
+
+const handleSOS = () => {
+  if (window.confirm(`🚨 Emergency SOS? This will call the Abia State emergency line (${SOS_NUMBER}) and share your location.`)) {
+    window.location.href = `tel:${SOS_NUMBER}`;
+    showNotification('SOS', `Calling ${SOS_NUMBER}…`, 'error');
+  }
+};
 
   const handleLogout = async () => {
     const result = await logout();
@@ -158,10 +161,12 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
           </>
         )}
 
-        <LabeledButton onClick={() => onOpenModal('quickTopup')} className="bg-primary hover:bg-primary-dark text-white">
-          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Quick Top-up</span>
-          <span className="sm:hidden">Top-up</span>
-        </LabeledButton>
+        {user && (
+          <LabeledButton onClick={() => onOpenModal('quickTopup')} className="bg-primary hover:bg-primary-dark text-white">
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Quick Top-up</span>
+            <span className="sm:hidden">Top-up</span>
+          </LabeledButton>
+        )}
       </div>
     </header>
   );
