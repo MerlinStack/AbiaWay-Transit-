@@ -173,7 +173,7 @@ function AppContent() {
       <QuickTopupModal isOpen={modalOpen === 'quickTopup'} onClose={() => setModalOpen(null)} />
       <QRCodeModal isOpen={modalOpen === 'qrCode'} onClose={() => setModalOpen(null)} />
       <NotificationsModal isOpen={modalOpen === 'notifications'} onClose={() => setModalOpen(null)} />
-      <LoginModal isOpen={modalOpen === 'login' || modalOpen === 'register'} onClose={() => setModalOpen(null)} initialTab={modalOpen === 'register' ? 'register' : 'signin'} />
+      <LoginModal isOpen={modalOpen === 'login' || modalOpen === 'register'} onClose={() => setModalOpen(null)} initialTab={modalOpen === 'register' ? 'register' : 'role'} />
       <ProfileModal isOpen={modalOpen === 'profile'} onClose={() => setModalOpen(null)} />
       <SettingsModal isOpen={modalOpen === 'settings'} onClose={() => setModalOpen(null)} />
     </Box>

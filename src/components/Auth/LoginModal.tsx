@@ -1,4 +1,4 @@
-import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft } from 'lucide-react';
+import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft, User, Bus, Shield, ChevronRight, BadgeCheck, Ticket } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -40,7 +40,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 type ResetFormData = z.infer<typeof resetSchema>;
 
-type AuthTab = 'signin' | 'register' | 'reset';
+type AuthTab = 'role' | 'signin' | 'register' | 'reset' | 'driver' | 'admin';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -55,10 +55,19 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
+  const [staffRole, setStaffRole] = useState<'driver' | 'conductor'>('driver');
+  const [badgeId, setBadgeId] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [portalError, setPortalError] = useState('');
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const login = useAuthStore((s) => s.login);
   const register = useAuthStore((s) => s.register);
   const resetPassword = useAuthStore((s) => s.resetPassword);
+  const staffLogin = useAuthStore((s) => s.staffLogin);
+  const adminLogin = useAuthStore((s) => s.adminLogin);
   const showNotification = useNotificationStore((s) => s.showNotification);
   const navigate = useNavigate();
 
@@ -91,6 +100,10 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
       loginForm.clearErrors();
       registerForm.clearErrors();
       resetForm.clearErrors();
+      setBadgeId('');
+      setAdminEmail('');
+      setAdminPassword('');
+      setPortalError('');
     } else {
       setTab(initialTab);
     }
@@ -169,6 +182,44 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     }
   };
 
+  const onStaffSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPortalError('');
+    if (!badgeId.trim()) {
+      setPortalError('Please enter your operational badge number.');
+      return;
+    }
+    setPortalLoading(true);
+    const result = await staffLogin(badgeId.trim().toUpperCase(), staffRole);
+    setPortalLoading(false);
+    if (!result.success) {
+      setPortalError(result.error || 'Authentication failed.');
+      return;
+    }
+    showNotification('Welcome!', `Signed in as ${staffRole === 'driver' ? 'Fleet Pilot' : 'Terminal Conductor'}`, 'success');
+    onClose();
+    navigate(HOME_ROUTE[getRole(result.user ?? null)]);
+  };
+
+  const onAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPortalError('');
+    if (!adminEmail.trim() || !adminPassword) {
+      setPortalError('Please enter both email and password.');
+      return;
+    }
+    setPortalLoading(true);
+    const result = await adminLogin(adminEmail.trim().toLowerCase(), adminPassword);
+    setPortalLoading(false);
+    if (!result.success) {
+      setPortalError(result.error || 'Authentication failed.');
+      return;
+    }
+    showNotification('Welcome back!', 'Signed in as Administrator', 'success');
+    onClose();
+    navigate(HOME_ROUTE[getRole(result.user ?? null)]);
+  };
+
   const inputClass = (hasError: boolean) =>
     `w-full bg-white/10 border ${hasError ? 'border-red-500' : 'border-white/20'} rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 transition`;
 
@@ -180,6 +231,42 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
       </p>
     ) : null;
 
+  const roleCards = [
+    {
+      key: 'signin' as AuthTab,
+      title: 'Passenger',
+      subtitle: 'Book rides, top up wallet, and track buses',
+      icon: User,
+      iconClass: 'bg-green-500/20',
+      iconColor: 'text-green-400',
+    },
+    {
+      key: 'driver' as AuthTab,
+      title: 'Driver',
+      subtitle: 'Check in your vehicle and start trips',
+      icon: Bus,
+      iconClass: 'bg-blue-500/20',
+      iconColor: 'text-blue-400',
+    },
+    {
+      key: 'admin' as AuthTab,
+      title: 'Admin',
+      subtitle: 'Manage the fleet, drivers, and operations',
+      icon: Shield,
+      iconClass: 'bg-purple-500/20',
+      iconColor: 'text-purple-400',
+    },
+  ];
+
+  const tabMeta: Record<AuthTab, { title: string; subtitle: string }> = {
+    role: { title: 'Welcome to Abia Way', subtitle: 'Select your role to continue' },
+    signin: { title: 'Welcome Back', subtitle: 'Sign in to continue to Abia Way' },
+    register: { title: 'Create Account', subtitle: 'Join Abia Way in under a minute' },
+    reset: { title: 'Reset Password', subtitle: 'We will send you a reset link' },
+    driver: { title: 'Driver Sign In', subtitle: 'Enter your operational badge number' },
+    admin: { title: 'Admin Sign In', subtitle: 'Enter your administrator credentials' },
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] animate-fadeIn">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -187,12 +274,8 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-white/10 shadow-2xl">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-2xl font-bold text-white">
-                {tab === 'signin' ? 'Welcome Back' : tab === 'register' ? 'Create Account' : 'Reset Password'}
-              </h3>
-              <p className="text-sm text-gray-400 mt-1">
-                {tab === 'signin' ? 'Sign in to continue to Abia Way' : tab === 'register' ? 'Join Abia Way in under a minute' : 'We will send you a reset link'}
-              </p>
+              <h3 className="text-2xl font-bold text-white">{tabMeta[tab].title}</h3>
+              <p className="text-sm text-gray-400 mt-1">{tabMeta[tab].subtitle}</p>
             </div>
             <div className="flex gap-2 items-center">
               {isLocked && (
@@ -204,7 +287,160 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
             </div>
           </div>
 
-          {tab === 'reset' ? (
+          {tab === 'role' ? (
+            <div className="space-y-3">
+              {roleCards.map(({ key, title, subtitle, icon: Icon, iconClass, iconColor }) => (
+                <button
+                  key={key}
+                  onClick={() => { setTab(key); setPortalError(''); }}
+                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 transition text-left group"
+                >
+                  <div className={`w-12 h-12 rounded-xl ${iconClass} flex items-center justify-center shrink-0`}>
+                    <Icon className={`w-6 h-6 ${iconColor}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold">{title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-green-400 group-hover:translate-x-1 transition shrink-0" />
+                </button>
+              ))}
+              <button
+                onClick={() => navigate('/login')}
+                className="w-full text-sm text-gray-400 hover:text-green-400 transition flex items-center justify-center gap-1 pt-1"
+              >
+                <Shield className="w-4 h-4" />
+                Visit the Staff &amp; Admin Portal
+              </button>
+            </div>
+          ) : tab === 'driver' ? (
+            <form onSubmit={onStaffSubmit} className="space-y-4">
+              {portalError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {portalError}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Role Type</label>
+                <SegmentedControl
+                  size="md"
+                  fill
+                  ariaLabel="Staff role"
+                  value={staffRole}
+                  onChange={(v) => setStaffRole(v as 'driver' | 'conductor')}
+                  options={[
+                    { label: <span className="flex items-center justify-center gap-1.5"><Bus className="w-4 h-4" /> Driver</span>, value: 'driver' },
+                    { label: <span className="flex items-center justify-center gap-1.5"><Ticket className="w-4 h-4" /> Conductor</span>, value: 'conductor' },
+                  ]}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Operational Badge Number</label>
+                <div className="relative">
+                  <BadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={badgeId}
+                    onChange={(e) => setBadgeId(e.target.value.toUpperCase())}
+                    placeholder="e.g. PLT-8837"
+                    className={inputClass(false)}
+                    disabled={portalLoading}
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={portalLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {portalLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Verifying badge...
+                  </>
+                ) : (
+                  <>
+                    <BadgeCheck className="w-5 h-5" />
+                    Sign In with Badge
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab('role')}
+                className="w-full text-sm text-gray-400 hover:text-green-400 transition flex items-center justify-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to role selection
+              </button>
+            </form>
+          ) : tab === 'admin' ? (
+            <form onSubmit={onAdminSubmit} className="space-y-4">
+              {portalError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {portalError}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Admin Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="email"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    placeholder="admin@abiaway.gov.ng"
+                    className={inputClass(false)}
+                    disabled={portalLoading}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type={showAdminPassword ? 'text' : 'password'}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className={inputClass(false)}
+                    disabled={portalLoading}
+                  />
+                  <button type="button" onClick={() => setShowAdminPassword(!showAdminPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                    {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={portalLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {portalLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Verifying credentials...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-5 h-5" />
+                    Sign In as Admin
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab('role')}
+                className="w-full text-sm text-gray-400 hover:text-green-400 transition flex items-center justify-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to role selection
+              </button>
+            </form>
+          ) : tab === 'reset' ? (
             <form onSubmit={resetForm.handleSubmit(onResetSubmit)}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>

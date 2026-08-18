@@ -10,7 +10,7 @@ const LandingPage = () => {
   const user = useAuthStore((s) => s.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [authTab, setAuthTab] = useState<'signin' | 'register'>('signin');
+  const [authTab, setAuthTab] = useState<'signin' | 'register' | 'role'>('role');
   const [counts, setCounts] = useState({ users: 0, buses: 0, trips: 0, rating: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [abssinInput, setAbssinInput] = useState('');
@@ -20,7 +20,7 @@ const LandingPage = () => {
     if (user) {
       navigate(HOME_ROUTE[getRole(user)]);
     } else {
-      setAuthTab('signin');
+      setAuthTab('role');
       setShowAuth(true);
     }
   };
