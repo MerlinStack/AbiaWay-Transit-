@@ -1,12 +1,34 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bus, Wallet, Clock, Shield, ArrowRight, MapPin, Users, Star, ChevronRight, Menu, X, WifiOff, CheckCircle2, BatteryCharging, Apple, Chrome } from 'lucide-react';
+import useAuthStore from '../../stores/authStore';
+import LoginModal from '../Auth/LoginModal';
+import { getRole, HOME_ROUTE } from '../../config/navConfig';
 
-const LandingPage = ({ onGetStarted }) => {
+const LandingPage = () => {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authTab, setAuthTab] = useState<'signin' | 'register'>('signin');
   const [counts, setCounts] = useState({ users: 0, buses: 0, trips: 0, rating: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [abssinInput, setAbssinInput] = useState('');
   const [checkStatus, setCheckStatus] = useState<'IDLE' | 'PENDING' | 'VALID' | 'INVALID'>('IDLE');
+
+  const handleLaunch = () => {
+    if (user) {
+      navigate(HOME_ROUTE[getRole(user)]);
+    } else {
+      setAuthTab('signin');
+      setShowAuth(true);
+    }
+  };
+
+  const handleCreateAccount = () => {
+    setAuthTab('register');
+    setShowAuth(true);
+  };
 
   const featuresRef = useRef(null);
   const stepsRef = useRef(null);
@@ -95,7 +117,7 @@ const LandingPage = ({ onGetStarted }) => {
               </span>
             </div>
 
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-gray-300 hover:text-white transition relative group">
                 Features
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-500 group-hover:w-full transition-all duration-300"></span>
@@ -109,7 +131,19 @@ const LandingPage = ({ onGetStarted }) => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-500 group-hover:w-full transition-all duration-300"></span>
               </a>
               <button
-                onClick={onGetStarted}
+                onClick={() => navigate('/login')}
+                className="text-gray-300 hover:text-green-400 transition text-sm font-medium"
+              >
+                Staff Portal
+              </button>
+              <button
+                onClick={handleCreateAccount}
+                className="border border-white/20 hover:border-green-500/50 text-gray-200 hover:text-white px-5 py-2 rounded-lg font-semibold transition-all duration-300"
+              >
+                Create Account
+              </button>
+              <button
+                onClick={handleLaunch}
                 className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
               >
                 Launch App
@@ -125,11 +159,13 @@ const LandingPage = ({ onGetStarted }) => {
           </div>
 
           {isMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 animate-slideDown">
+            <div className="md:hidden mt-4 pb-4 animate-slideDown space-y-2">
               <a href="#features" className="block py-2 text-gray-300 hover:text-white transition">Features</a>
               <a href="#how-it-works" className="block py-2 text-gray-300 hover:text-white transition">How It Works</a>
               <a href="#stats" className="block py-2 text-gray-300 hover:text-white transition">Stats</a>
-              <button onClick={onGetStarted} className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-500 px-6 py-2 rounded-lg font-semibold">Launch App</button>
+              <button onClick={handleCreateAccount} className="w-full border border-white/20 px-6 py-2 rounded-lg font-semibold text-gray-200">Create Account</button>
+              <button onClick={handleLaunch} className="w-full bg-gradient-to-r from-green-600 to-green-500 px-6 py-2 rounded-lg font-semibold">Launch App</button>
+              <button onClick={() => navigate('/login')} className="w-full text-gray-300 py-2 text-sm font-medium">Staff Portal</button>
             </div>
           )}
         </div>
@@ -152,15 +188,18 @@ const LandingPage = ({ onGetStarted }) => {
             </p>
             <div className="flex flex-wrap gap-4 animate-fadeInUp delay-400">
               <button
-                onClick={onGetStarted}
+                onClick={handleLaunch}
                 className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2 transition-all duration-300 transform hover:scale-105"
               >
                 Get Moving Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <a href="#features" className="group bg-white/10 hover:bg-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-white/20">
-                Explore Features
-              </a>
+              <button
+                onClick={handleCreateAccount}
+                className="group bg-white/10 hover:bg-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-green-500/40"
+              >
+                Create Account
+              </button>
             </div>
 
             {/* Floating Stats */}
@@ -413,7 +452,7 @@ const LandingPage = ({ onGetStarted }) => {
           <div className="relative z-10">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Start Your Journey?</h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Join thousands of verified users and experience the future of public transportation across Abia State.</p>
-            <button onClick={onGetStarted} className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105">
+            <button onClick={handleLaunch} className="group bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 px-12 py-5 rounded-xl font-semibold text-lg inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105">
               Launch App Now
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -484,6 +523,8 @@ const LandingPage = ({ onGetStarted }) => {
         .delay-400 { animation-delay:0.4s; } .delay-500 { animation-delay:0.5s; } .delay-600 { animation-delay:0.6s; }
         .delay-700 { animation-delay:0.7s; } .delay-1000 { animation-delay:1s; }
       `}</style>
+
+      <LoginModal isOpen={showAuth} onClose={() => setShowAuth(false)} initialTab={authTab} />
     </div>
   );
 };

@@ -128,6 +128,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
       }
 
       onClose();
+      navigate(HOME_ROUTE[getRole(result.user ?? null)]);
     } else {
       setLoginAttempts((prev) => prev + 1);
       const remaining = 4 - loginAttempts;

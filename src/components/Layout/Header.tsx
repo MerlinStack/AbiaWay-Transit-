@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar, Menu, MenuItem } from '@mui/material';
 import { Plus, Shield, LogIn, LogOut, User, Settings, ChevronDown, UserPlus, Zap, Calendar, Crown } from 'lucide-react';
 import useAuthStore from '../../stores/authStore';
@@ -31,6 +32,7 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const logout = useAuthStore((s) => s.logout);
   const showNotification = useNotificationStore((s) => s.showNotification);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -98,6 +100,13 @@ const handleSOS = () => {
 
         {!user && (
           <>
+            <button
+              onClick={() => navigate('/login')}
+              className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-full text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/10 transition pressable hidden xl:inline-flex"
+              title="Fleet staff and admin sign-in portal"
+            >
+              <Shield className="w-4 h-4" /> Staff Portal
+            </button>
             <IconButton
               onClick={onLoginClick}
               ariaLabel="Sign In"

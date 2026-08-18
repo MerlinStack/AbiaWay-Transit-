@@ -57,7 +57,7 @@ function AppContent() {
   if (isLanding) {
     return (
       <Suspense fallback={<LoadingSpinner fullScreen />}>
-        <LazyLandingPage onGetStarted={() => navigate('/booking')} />
+        <LazyLandingPage />
       </Suspense>
     );
   }
@@ -80,13 +80,13 @@ function AppContent() {
     <Box className="flex min-h-screen bg-[#07101f] text-[#f8fafc]">
       <Sidebar />
       <Box key={location.pathname} component="main" className="flex-1 min-w-0 p-2 md:p-4 overflow-y-auto min-h-screen pb-24 lg:pb-4 animate-page-in">
+        <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
         <Routes>
           <Route path="/map" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <AdminGuard requiredRole="admin">
                 <MapErrorBoundary>
                   <SEO title="Live Tracking" description="Real-time fleet tracking and driver location monitoring (admin only)" />
-                  <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                   <LazyMapTab />
                 </MapErrorBoundary>
               </AdminGuard>
@@ -139,7 +139,6 @@ function AppContent() {
           <Route path="/register" element={
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <SEO title="ABSSIN Registration" description="Register with Abia State Identification Number" />
-              <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
               <LazyABSSINRegister isOpen={true} onClose={() => navigate('/booking')} />
             </Suspense>
           } />
@@ -153,7 +152,6 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <AdminGuard requiredRole="admin">
                 <SEO title="Admin Dashboard" description="System-wide fleet and operations overview" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                 <LazyAdminDashboard />
               </AdminGuard>
             </Suspense>
@@ -162,7 +160,6 @@ function AppContent() {
             <Suspense fallback={<LoadingSpinner fullScreen />}>
               <AdminGuard requiredRole="admin">
                 <SEO title="Driver Management" description="View and manage all drivers" />
-                <Header onOpenModal={setModalOpen} user={user} onLoginClick={() => setModalOpen('login')} onSignUpClick={() => setModalOpen('register')} />
                 <LazyAdminDriverPanel />
               </AdminGuard>
             </Suspense>
