@@ -201,7 +201,7 @@ const RouteSelect = () => {
             onClick={() => handleRouteSelect(route)}>
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
                   <h4 className="font-semibold text-lg">{route.name}</h4>
                   <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full">{route.duration}</span>
                   <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full">{route.available} seats left</span>
@@ -209,7 +209,7 @@ const RouteSelect = () => {
                 <p className="text-sm text-gray-400 mb-2">
                   <MapPin className="w-3 h-3 inline mr-1" />Via: {route.via}
                 </p>
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2 mt-2 flex-wrap">
                   {route.departures.map((time) => (
                     <button key={time}
                       className="text-xs px-3 py-1 bg-white/10 rounded-lg hover:bg-primary/20 transition"
@@ -219,8 +219,8 @@ const RouteSelect = () => {
                   ))}
                 </div>
               </div>
-              <div className="text-right ml-4">
-                <p className="text-3xl font-bold text-primary">₦{route.fare}</p>
+              <div className="text-right ml-4 shrink-0">
+                <p className="text-2xl sm:text-3xl font-bold text-primary">₦{route.fare}</p>
                 <p className="text-xs text-gray-400">per seat</p>
               </div>
             </div>

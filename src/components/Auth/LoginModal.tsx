@@ -272,7 +272,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
   return (
     <div className="fixed inset-0 z-[9999] animate-fadeIn">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4 animate-slideUp">
+      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto max-h-[85vh] overflow-y-auto custom-scrollbar animate-slideUp">
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-white/10 shadow-2xl">
           <div className="flex justify-between items-center mb-4">
             <div>

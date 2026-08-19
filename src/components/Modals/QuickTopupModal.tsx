@@ -69,7 +69,7 @@ const QuickTopupModal = ({ isOpen, onClose }: QuickTopupModalProps) => {
   return (
     <div className="fixed inset-0 z-[9999] animate-fadeIn">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4 animate-slideUp">
+      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto max-h-[85vh] overflow-y-auto custom-scrollbar animate-slideUp">
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border border-white/10 shadow-2xl">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
@@ -98,7 +98,7 @@ const QuickTopupModal = ({ isOpen, onClose }: QuickTopupModalProps) => {
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Quick Select
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {suggestedAmounts.map(amount => (
                 <button
                   key={amount}

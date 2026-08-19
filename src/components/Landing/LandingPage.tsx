@@ -203,7 +203,7 @@ const LandingPage = () => {
             </div>
 
             {/* Floating Stats */}
-            <div className="flex gap-6 mt-12 animate-fadeInUp delay-600">
+            <div className="flex flex-wrap gap-4 sm:gap-6 mt-12 animate-fadeInUp delay-600">
               <div className="flex items-center gap-2"><Users className="w-5 h-5 text-green-400" /><span className="text-sm text-gray-300">10K+ Users</span></div>
               <div className="flex items-center gap-2"><Star className="w-5 h-5 text-yellow-400 fill-yellow-400" /><span className="text-sm text-gray-300">4.8 Rating</span></div>
               <div className="flex items-center gap-2"><Bus className="w-5 h-5 text-blue-400" /><span className="text-sm text-gray-300">50+ Buses</span></div>

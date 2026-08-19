@@ -40,12 +40,13 @@ const BookingHistory = memo(() => {
 
   return (
     <div className="glass-card p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <History className="text-primary" />
           Your Bookings
         </h3>
         <SegmentedControl
+          className="w-full sm:w-auto"
           ariaLabel="Booking filter"
           value={filter}
           onChange={(f) => setFilter(f as 'all' | 'confirmed' | 'completed' | 'cancelled')}

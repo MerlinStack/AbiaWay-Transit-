@@ -113,20 +113,12 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
     <div className="space-y-4">
       <div className="glass-card overflow-hidden">
         <div className="p-4 pb-0">
-          <div className="flex justify-between items-center mb-4 gap-3 overflow-x-auto custom-scrollbar whitespace-nowrap pb-1">
-            <div className="flex items-center gap-3 shrink-0">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <MapPin className="text-green-400" />
-                Live Bus Tracking
-              </h3>
-              <SegmentedControl
-                ariaLabel="Map style"
-                value={TILE_LAYERS[activeLayerIndex].name}
-                onChange={(name) => setActiveLayerIndex(TILE_LAYERS.findIndex((l) => l.name === name))}
-                options={TILE_LAYERS.map((l) => ({ label: l.name, value: l.name }))}
-              />
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="text-green-400" />
+              Live Bus Tracking
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-sm flex items-center gap-1 px-3 py-1 rounded-full ${
                 transportMode === 'WEBSOCKET' ? 'bg-green-500/20 text-green-400' :
                 transportMode === 'DISCONNECTED' ? 'bg-red-500/20 text-red-400' :
@@ -144,6 +136,13 @@ const LiveMap = memo(({ renderBusMarkers }: LiveMapProps) => {
               </PillButton>
             </div>
           </div>
+          <SegmentedControl
+            className="w-full sm:w-auto mb-4 overflow-x-auto"
+            ariaLabel="Map style"
+            value={TILE_LAYERS[activeLayerIndex].name}
+            onChange={(name) => setActiveLayerIndex(TILE_LAYERS.findIndex((l) => l.name === name))}
+            options={TILE_LAYERS.map((l) => ({ label: l.name, value: l.name }))}
+          />
         </div>
 
         <MapContainer

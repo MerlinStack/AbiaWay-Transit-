@@ -171,7 +171,7 @@ const ConductorTab = () => {
 
       <div className="surface-2 p-6">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm flex-wrap">
           <span className="text-gray-400">Today: <span className="text-white font-semibold">₦{totalFare.toLocaleString()}</span></span>
           <span className="text-gray-400">Riders: <span className="text-white font-semibold">{records.length}</span></span>
           <span className={`text-xs px-2 py-1 rounded-full ${syncedCount === records.length && records.length > 0 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>

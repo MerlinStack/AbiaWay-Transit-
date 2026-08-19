@@ -329,7 +329,7 @@ const ABSINPaymentDemo = ({ onClose, rideDetails, amount, onSuccess }: ABSINPaym
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto max-h-[90vh] overflow-y-auto custom-scrollbar">
         {notification && (
           <div className="fixed bottom-5 left-5 right-5 max-w-md mx-auto z-50">
             <div className={`p-4 rounded-xl text-white ${notification.type === 'success' ? 'bg-green-600' : 'bg-red-500'}`}>

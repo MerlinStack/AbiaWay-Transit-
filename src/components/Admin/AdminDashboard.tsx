@@ -73,7 +73,7 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold">Admin Dashboard</h2>
           <p className="text-sm text-gray-400">System-wide fleet and operations overview</p>
@@ -137,7 +137,7 @@ function AdminDashboard() {
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-3 border-t border-white/10 flex justify-between text-sm text-gray-500">
+          <div className="mt-4 pt-3 border-t border-white/10 flex justify-between text-sm text-gray-500 gap-2 flex-wrap">
             <span>Active on routes: <span className="font-bold text-white">{activeBuses.length}</span></span>
             <span>Total fleet: <span className="font-bold text-white">{summary.total}</span></span>
           </div>
