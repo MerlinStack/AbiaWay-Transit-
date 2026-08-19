@@ -8,10 +8,8 @@ const AIChatFab = () => {
   return (
     <>
       {open && (
-        <div className="fixed z-50 inset-x-3 sm:inset-x-auto sm:right-4 bottom-24 lg:bottom-24 sm:w-[400px]">
-          <div className="max-h-[calc(100vh-8.5rem)] overflow-y-auto custom-scrollbar rounded-2xl">
-            <AIAssistant onClose={() => setOpen(false)} />
-          </div>
+        <div className="fixed z-50 inset-x-2 sm:inset-x-auto sm:right-4 bottom-24 lg:bottom-20 sm:w-[400px] h-[min(calc(100vh-7.5rem),560px)]">
+          <AIAssistant variant="fab" onClose={() => setOpen(false)} />
         </div>
       )}
       <button

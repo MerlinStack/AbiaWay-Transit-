@@ -52,7 +52,8 @@ interface Message {
   quickReplies?: string[];
 }
 
-const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
+const AIAssistant = ({ onClose, variant = 'page' }: { onClose?: () => void; variant?: 'page' | 'fab' }) => {
+  const isFab = variant === 'fab';
   const [messages, setMessages] = useState<Message[]>([
     { 
       id: 1, 
@@ -180,7 +181,7 @@ const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
   ];
 
   return (
-    <div className="ai-assistant glass-card p-4">
+    <div className={`ai-assistant glass-card p-4 ${isFab ? 'flex flex-col h-full' : ''}`}>
       <div className="flex items-center gap-2 mb-4">
         <div className="relative">
           <div className="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
@@ -210,7 +211,7 @@ const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
       
       <div 
         ref={chatRef}
-        className="space-y-4 mb-4 max-h-64 overflow-y-auto custom-scrollbar pr-2"
+        className={`space-y-4 mb-4 overflow-y-auto custom-scrollbar pr-2 ${isFab ? 'flex-1 min-h-0' : 'max-h-64'}`}
       >
         {messages.map(msg => (
           <div key={msg.id}>
@@ -253,7 +254,7 @@ const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
         )}
       </div>
       
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
+      <div className={`grid grid-cols-3 md:grid-cols-6 gap-2 mb-3 ${isFab ? 'shrink-0' : ''}`}>
         {quickActions.map(({ icon, label, action, color }) => {
           const c = color === 'green' ? 'bg-green-500/10 hover:bg-green-500/20 text-green-400' :
                     color === 'blue' ? 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400' :
@@ -290,7 +291,7 @@ const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
         })}
       </div>
       
-      <div className="flex gap-2">
+      <div className={`flex gap-2 ${isFab ? 'shrink-0' : ''}`}>
         <div className="flex-1 relative">
           <input
             type="text"
@@ -317,7 +318,7 @@ const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
         </button>
       </div>
       
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className={`mt-4 grid grid-cols-2 gap-2 ${isFab ? 'shrink-0' : ''}`}>
         <div 
           className="ai-insight p-3 text-xs cursor-pointer hover:scale-[1.02] transition flex items-center gap-2"
           onClick={() => {
