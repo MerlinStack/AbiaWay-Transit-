@@ -35,7 +35,7 @@ function LoginPortal() {
     try {
       if (activeTab === 'STAFF') {
         if (!badgeId.trim()) {
-          setError('Please enter a valid Operational Badge Number.');
+          setError('Please enter a valid Staff Access Key.');
           setLoading(false);
           return;
         }
@@ -153,15 +153,15 @@ function LoginPortal() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Operational Badge Number</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Staff Access Key</label>
                     <input
                       type="text"
                       value={badgeId}
                       onChange={(e) => setBadgeId(e.target.value.toUpperCase())}
-                      placeholder="e.g. PLT-8837"
+                      placeholder="e.g. ABW-SK-XXXX-XXXX"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Badges are vetted and issued by the administration.</p>
+                    <p className="text-xs text-gray-500 mt-1">Access keys are vetted and issued by the administration.</p>
                   </div>
                 </>
               ) : (

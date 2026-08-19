@@ -8,10 +8,10 @@ import {
   onFirebaseAuthChanged,
   getUserProfile,
 } from '../lib/firebaseAuth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { sha256Hex } from '../utils/crypto';
-import { ADMIN_BOOTSTRAP_KEY } from '../config/accessControl';
+import { ADMIN_BOOTSTRAP_KEY, STAFF_ACCESS_KEY } from '../config/accessControl';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 type UserRole = User['role'];
@@ -169,42 +169,37 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   staffLogin: async (badgeId, role) => {
     try {
-      const badgeDoc = await getDoc(doc(db, 'staffBadges', badgeId));
-      if (!badgeDoc.exists()) {
-        return { success: false, error: 'Invalid badge number.' };
+      const normalizedKey = badgeId.trim().toUpperCase();
+      if (!normalizedKey) {
+        return { success: false, error: 'Staff access key is required.' };
       }
 
-      const badgeData = badgeDoc.data();
-      if (badgeData.role !== role) {
-        return { success: false, error: 'Role mismatch for this badge.' };
-      }
-
-      if (badgeData.status === 'deactivated') {
-        return { success: false, error: 'This badge has been deactivated. Contact your administrator.' };
+      if (normalizedKey !== STAFF_ACCESS_KEY) {
+        return { success: false, error: 'Invalid staff access key.' };
       }
 
       const user: User = {
-        id: badgeId,
-        email: `${badgeId.toLowerCase()}@abiaway.gov.ng`,
-        name: badgeData.name,
-        role: badgeData.role,
+        id: normalizedKey,
+        email: `${role}@abiaway.gov.ng`,
+        name: role === 'driver' ? 'Fleet Pilot' : 'Terminal Conductor',
+        role,
         tier: 'Staff',
-        avatar: badgeData.name.charAt(0),
+        avatar: (role === 'driver' ? 'Fleet Pilot' : 'Terminal Conductor').charAt(0),
         phone: '',
         joinDate: new Date().toISOString(),
         loginTime: new Date().toISOString(),
-        identifier: badgeId,
-        assignedRoute: badgeData.assignedRoute || '',
-        assignedVehicle: badgeData.assignedVehicle || '',
-        badgeNumber: badgeId,
+        identifier: normalizedKey,
+        assignedRoute: '',
+        assignedVehicle: '',
+        badgeNumber: normalizedKey,
       };
 
-      set({ user, token: badgeId, isAuthenticated: true });
-      localStorage.setItem('token', badgeId);
+      set({ user, token: normalizedKey, isAuthenticated: true });
+      localStorage.setItem('token', normalizedKey);
       sessionStorage.setItem('currentUser', JSON.stringify(user));
       return { success: true, user };
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Badge verification failed';
+      const message = error instanceof Error ? error.message : 'Staff authentication failed';
       return { success: false, error: message };
     }
   },

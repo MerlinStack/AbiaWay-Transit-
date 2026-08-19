@@ -1,4 +1,4 @@
-import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft, User, Bus, Shield, ChevronRight, BadgeCheck, Ticket, KeyRound } from 'lucide-react';
+import { X, Mail, AlertCircle, Lock, EyeOff, Eye, AlertTriangle, LogIn, UserPlus, Phone, ArrowLeft, User, Bus, Shield, ChevronRight, Ticket, KeyRound } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -188,7 +188,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     e.preventDefault();
     setPortalError('');
     if (!badgeId.trim()) {
-      setPortalError('Please enter your operational badge number.');
+      setPortalError('Please enter your staff access key.');
       return;
     }
     setPortalLoading(true);
@@ -245,7 +245,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     {
       key: 'driver' as AuthTab,
       title: 'Driver',
-      subtitle: 'Sign in with your issued badge',
+      subtitle: 'Sign in with your access key',
       icon: Bus,
       iconClass: 'bg-blue-500/20',
       iconColor: 'text-blue-400',
@@ -265,7 +265,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
     signin: { title: 'Welcome Back', subtitle: 'Sign in to continue to Abia Way' },
     register: { title: 'Create Account', subtitle: 'Join Abia Way in under a minute' },
     reset: { title: 'Reset Password', subtitle: 'We will send you a reset link' },
-    driver: { title: 'Driver Sign In', subtitle: 'Enter your operational badge number' },
+    driver: { title: 'Driver Sign In', subtitle: 'Enter your staff access key' },
     admin: { title: 'Admin Sign In', subtitle: 'Enter your administrator credentials' },
   };
 
@@ -338,14 +338,14 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Operational Badge Number</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Staff Access Key</label>
                 <div className="relative">
-                  <BadgeCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                   <input
                     type="text"
                     value={badgeId}
                     onChange={(e) => setBadgeId(e.target.value.toUpperCase())}
-                    placeholder="e.g. PLT-8837"
+                    placeholder="e.g. ABW-SK-XXXX-XXXX"
                     className={inputClass(false)}
                     disabled={portalLoading}
                   />
@@ -353,7 +353,7 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
               </div>
               <p className="text-xs text-gray-500 flex items-start gap-1.5">
                 <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0 text-green-400" />
-                Badges are vetted and issued by Abia Way administration. Staff cannot self-register.
+                Access keys are vetted and issued by Abia Way administration. Staff cannot self-register.
               </p>
               <button
                 type="submit"
@@ -363,12 +363,12 @@ function LoginModal({ isOpen, onClose, initialTab = 'signin' }: LoginModalProps)
                 {portalLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Verifying badge...
+                    Verifying key...
                   </>
                 ) : (
                   <>
-                    <BadgeCheck className="w-5 h-5" />
-                    Sign In with Badge
+                    <KeyRound className="w-5 h-5" />
+                    Sign In with Access Key
                   </>
                 )}
               </button>
