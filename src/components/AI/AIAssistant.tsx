@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import useNotificationStore from '../../stores/notificationStore';
-import { Bot, BarChart3, Clock, Map, AlertTriangle, CloudRain, CreditCard, Mic, Send } from 'lucide-react';
+import { Bot, BarChart3, Clock, Map, AlertTriangle, CloudRain, CreditCard, Mic, Send, X } from 'lucide-react';
 
 interface SpeechRecognition extends EventTarget {
   lang: string;
@@ -52,7 +52,7 @@ interface Message {
   quickReplies?: string[];
 }
 
-const AIAssistant = () => {
+const AIAssistant = ({ onClose }: { onClose?: () => void }) => {
   const [messages, setMessages] = useState<Message[]>([
     { 
       id: 1, 
@@ -192,10 +192,20 @@ const AIAssistant = () => {
           <h3 className="text-lg font-semibold">AI Travel Assistant</h3>
           <p className="text-xs text-gray-400">Online • Ready to help</p>
         </div>
-        <span className="ml-auto text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-          Active
-        </span>
+        {onClose ? (
+          <button
+            onClick={onClose}
+            aria-label="Close AI assistant"
+            className="ml-auto p-2 rounded-full hover:bg-white/10 transition"
+          >
+            <X className="w-5 h-5 text-gray-400" />
+          </button>
+        ) : (
+          <span className="ml-auto text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+            Active
+          </span>
+        )}
       </div>
       
       <div 

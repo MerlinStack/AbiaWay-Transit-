@@ -17,6 +17,7 @@ import MapErrorBoundary from './components/error-boundaries/MapErrorBoundary';
 import BookingErrorBoundary from './components/error-boundaries/BookingErrorBoundary';
 import WalletErrorBoundary from './components/error-boundaries/WalletErrorBoundary';
 import DriverErrorBoundary from './components/error-boundaries/DriverErrorBoundary';
+import AIChatFab from './components/AI/AIChatFab';
 import useAuthStore from './stores/authStore';
 import useABSINStore from './stores/absinStore';
 import SEO from './components/SEO';
@@ -58,6 +59,7 @@ function AppContent() {
     return (
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <LazyLandingPage />
+        <AIChatFab />
       </Suspense>
     );
   }
@@ -169,6 +171,7 @@ function AppContent() {
       </Box>
 
       <NotificationToast />
+      <AIChatFab />
       <MobileNav />
       <QuickTopupModal isOpen={modalOpen === 'quickTopup'} onClose={() => setModalOpen(null)} />
       <QRCodeModal isOpen={modalOpen === 'qrCode'} onClose={() => setModalOpen(null)} />

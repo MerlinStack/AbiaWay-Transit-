@@ -70,8 +70,8 @@ const handleSOS = () => {
   };
 
   return (
-    <header className="flex items-center justify-between gap-3 mb-4 p-3 rounded-2xl bg-[rgba(15,23,42,0.88)] border border-[rgba(148,163,184,0.12)] shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
-      <div className="min-w-0 flex-1">
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 p-3 rounded-2xl bg-[rgba(15,23,42,0.88)] border border-[rgba(148,163,184,0.12)] shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+      <div className="min-w-0 flex-1 w-full">
         <h2 className="text-2xl lg:text-3xl font-extrabold mb-2 text-white truncate">
           {greeting}, {user?.name?.split(' ')[0] || 'Guest'}!
         </h2>
@@ -88,7 +88,7 @@ const handleSOS = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto sm:justify-end justify-between">
         <IconButton
           onClick={handleSOS}
           ariaLabel="Emergency SOS"
