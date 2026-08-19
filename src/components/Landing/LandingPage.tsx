@@ -368,7 +368,7 @@ const LandingPage = () => {
           The green fleet connects all 17 LGAs &mdash; from Umuahia's capital corridors to the Aba commercial axis and the rural routes in between.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-14">
+        <div className="flex flex-wrap justify-center gap-3">
           {['Umuahia North', 'Umuahia South', 'Aba North', 'Aba South', 'Ohafia', 'Bende', 'Isuikwuato', 'Arochukwu', 'Ikwuano', 'Osisioma', 'Ukwa East'].map((lga) => (
             <span key={lga} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-green-500/50 hover:text-green-300 transition">
               {lga}
@@ -376,33 +376,6 @@ const LandingPage = () => {
           ))}
           <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-500">+6 more</span>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-6 stagger">
-          {[
-            { name: 'Ngozi E.', role: 'Daily commuter, Aba', quote: 'I tap my card and board in seconds. No more cash or waiting for change at the park.' },
-            { name: 'Chidi O.', role: 'Market trader, Umuahia', quote: 'The offline validation is a lifesaver on the Ohafia corridor. My taps always count.' },
-            { name: 'Adaeze K.', role: 'Student, Arochukwu', quote: 'Battery telemetry means the bus I book actually shows up charged. It just works.' },
-          ].map((t, i) => (
-            <div key={i} className="glass-card p-6 relative stagger-item">
-              <div className="flex items-center gap-1 text-yellow-400 mb-3">
-                {[...Array(5)].map((_, s) => <Star key={s} className="w-4 h-4 fill-yellow-400" />)}
-              </div>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-green-600/30 border border-green-500/30 flex items-center justify-center font-bold text-green-300">
-                  {t.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="text-center text-xs text-gray-600 mt-6">
-          Placeholder testimonials &mdash; replace with verified rider feedback before public launch.
-        </p>
       </section>
 
       {/* ABSSIN Card Check — secondary section for existing cardholders */}
