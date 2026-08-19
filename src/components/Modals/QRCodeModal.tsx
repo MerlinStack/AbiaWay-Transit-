@@ -1,9 +1,11 @@
 import { X, Download, Share } from 'lucide-react';
 import React, { useRef, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
+import useAuthStore from '../../stores/authStore';
 
 const QRCodeModal = ({ isOpen, onClose }) => {
   const qrRef = useRef(null);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (isOpen && qrRef.current) {
@@ -51,7 +53,7 @@ const QRCodeModal = ({ isOpen, onClose }) => {
           <div className="mb-6 flex justify-center">
             <div className="qr-container bg-white p-4 rounded-xl">
               <QRCodeCanvas 
-                value="ABIA-WAY-2026-ABUOMA-DAVID"
+                value={`ABIA-WAY-2026-${(user?.name || 'RIDER').toUpperCase().replace(/\s+/g, '-')}`}
                 size={200}
                 level="H"
                 includeMargin={true}

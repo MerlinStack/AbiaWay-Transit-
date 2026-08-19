@@ -1,5 +1,6 @@
 import React, { memo, useRef } from 'react';
 import { Printer, CheckCircle2 } from 'lucide-react';
+import useAuthStore from '../../stores/authStore';
 
 interface PaymentReceiptProps {
   receipt: {
@@ -21,6 +22,7 @@ interface PaymentReceiptProps {
 
 const PaymentReceipt = memo(({ receipt, onClose, onPrint }: PaymentReceiptProps) => {
   const receiptRef = useRef(null);
+  const user = useAuthStore((s) => s.user);
 
   const handlePrint = () => {
     const printContent = receiptRef.current.innerHTML;
@@ -136,7 +138,7 @@ const PaymentReceipt = memo(({ receipt, onClose, onPrint }: PaymentReceiptProps)
           </div>
           <div className="receipt-line">
             <span className="text-gray-400">Cardholder</span>
-            <span>{receipt.cardholder || 'Abuoma David'}</span>
+            <span>{receipt.cardholder || user?.name || 'AbiaWay Rider'}</span>
           </div>
           <div className="receipt-line">
             <span className="text-gray-400">Route</span>

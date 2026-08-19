@@ -47,10 +47,11 @@ const Header = ({ onOpenModal, user, onLoginClick, onSignUpClick }) => {
     );
   }, []);
 
-const SOS_NUMBER = '09038941435';
+const SOS_NUMBER = '08035415405';
+const SOS_HOTLINES = ['08035415405', '08079210004', '08079210005', '08079210006'];
 
 const handleSOS = () => {
-  if (window.confirm(`Emergency SOS? This will call the Abia State emergency line (${SOS_NUMBER}) and share your location.`)) {
+  if (window.confirm(`Emergency SOS? This will call the Abia State Police Command emergency hotline (${SOS_NUMBER}). All command hotlines: ${SOS_HOTLINES.join(', ')}.`)) {
     window.location.href = `tel:${SOS_NUMBER}`;
     showNotification('SOS', `Calling ${SOS_NUMBER}…`, 'error');
   }

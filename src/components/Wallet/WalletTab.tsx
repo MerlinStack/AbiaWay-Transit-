@@ -1,9 +1,9 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { Wallet, Plus, X, CreditCard, PlusCircle, Unlink, Smartphone, Banknote, QrCode, Bus, CheckCircle, History, Inbox, ArrowDownLeft, ArrowUpRight, Download, TrendingUp, BarChart3, TrendingDown, Shield } from 'lucide-react';
+import { Wallet, Plus, X, CreditCard, Unlink, Smartphone, Banknote, QrCode, Bus, CheckCircle, History, Inbox, ArrowDownLeft, ArrowUpRight, Download, TrendingUp, BarChart3, TrendingDown, Shield } from 'lucide-react';
 import useWalletStore from '../../stores/walletStore';
 import { getABSINService } from '../../services/absin';
 import useNotificationStore from '../../stores/notificationStore';
-import CreditCardDisplay from './CreditCard';
+import useAuthStore from '../../stores/authStore';
 import PaymentMethodModal from '../Payment/PaymentMethodModal';
 import { linkCardSchema, validateWithSchema } from '../../schemas/paymentSchemas';
 
@@ -13,6 +13,7 @@ interface WalletTabProps {
 
 const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
   const balance = useWalletStore((s) => s.balance);
+  const user = useAuthStore((s) => s.user);
   const transactions = useWalletStore((s) => s.transactions);
   const addFunds = useWalletStore((s) => s.addFunds);
   const deductFunds = useWalletStore((s) => s.deductFunds);
@@ -87,7 +88,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
         const cardToSave = {
           cardId: `****${cleanedCardNumber.slice(-4)}`,
           fullCardId: cleanedCardNumber,
-          cardholder: validation.data.cardholder?.name || 'ABSIN Cardholder',
+          cardholder: user?.name || validation.data.cardholder?.name || 'ABSIN Cardholder',
           tier: validation.data.tier || 'Standard',
           linkedAt: new Date().toISOString(),
           lastFour: cleanedCardNumber.slice(-4),
@@ -191,25 +192,14 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
             </div>
           )}
 
-          {/* Credit Card Display with Zero Balance State */}
-          <CreditCardDisplay balance={balance} />
-
-          {/* ABSIN Card Section */}
+          {/* ABSIN Card Section — only shown once an ABSIN card is registered */}
+          {linkedCard && (
           <div className="glass-card p-6">
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-lg font-semibold flex items-center gap-2">
                 <CreditCard className="text-purple-400" />
-                Linked ABSIN Card
+                Registered ABSIN Card
               </h4>
-              {!linkedCard ? (
-                <button 
-                  className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1"
-                  onClick={() => setShowLinkModal(true)}
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  Link Card
-                </button>
-              ) : (
                 <button 
                   className="text-sm text-red-400 hover:text-red-300 transition flex items-center gap-1"
                   onClick={handleUnlinkCard}
@@ -217,7 +207,6 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                   <Unlink className="w-4 h-4" />
                   Unlink
                 </button>
-              )}
             </div>
 
             {linkedCard ? (
@@ -229,7 +218,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                   <div className="flex justify-between items-end">
                     <div>
                       <p className="text-xs text-purple-200">Cardholder</p>
-                      <p className="font-semibold">{linkedCard.cardholder}</p>
+                      <p className="font-semibold uppercase">{user?.name || linkedCard.cardholder}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-purple-200">Tier</p>
@@ -246,10 +235,10 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
                 <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <CreditCard className="w-8 h-8 text-purple-400" />
                 </div>
-                <p className="font-semibold text-purple-400 mb-1">No ABSIN Card Linked</p>
-                <p className="text-xs text-gray-400">Link your ABSIN card to earn points and enjoy benefits</p>
+                <p className="font-semibold text-purple-400 mb-1">No ABSIN Card Registered</p>
+                <p className="text-xs text-gray-400">Register your ABSIN card to earn points and enjoy benefits</p>
                 <button className="mt-3 text-sm text-purple-400 hover:text-purple-300 transition">
-                  + Link Card
+                  + Register Card
                 </button>
               </div>
             )}
@@ -272,6 +261,7 @@ const WalletTab = memo(({ onOpenModal }: WalletTabProps) => {
               </div>
             )}
           </div>
+          )}
 
           {/* Payment Methods Section */}
           <div className="glass-card p-6">

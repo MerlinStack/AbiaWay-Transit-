@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, CreditCard } from 'lucide-react';
 import { getABSINService } from '../../services/absin';
+import useAuthStore from '../../stores/authStore';
 
 const ABSINCardDisplay = () => {
   const [cardInfo, setCardInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     loadCardInfo();
@@ -20,7 +22,7 @@ const ABSINCardDisplay = () => {
       // Simulate a linked card
       setCardInfo({
         cardId: '**** **** **** 3456',
-        cardholder: 'Abuoma David',
+        cardholder: user?.name || 'AbiaWay Rider',
         tier: 'Premium',
         status: 'Active',
         balance: 12450,
