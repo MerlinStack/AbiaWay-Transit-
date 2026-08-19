@@ -108,7 +108,7 @@ const BookingFlowRoot = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const handlePayment = useCallback(() => {
-    const amount = (bookingDetails.route?.fare || 350) * bookingDetails.passengers;
+    const amount = (bookingDetails.route?.fare || 800) * bookingDetails.passengers;
     if (bookingDetails.paymentMethod === 'absin') {
       setPaymentAmount(amount);
       setRideDetails({
@@ -254,7 +254,7 @@ const Payment = () => {
           busId: bookingDetails.route?.id || 'AB-101', seats: bookingDetails.seats,
           passengers: bookingDetails.passengers,
         }}
-        amount={(bookingDetails.route?.fare || 350) * bookingDetails.passengers}
+        amount={(bookingDetails.route?.fare || 800) * bookingDetails.passengers}
         onSuccess={handleABSINSuccess}
       />
       <BookingSummary details={bookingDetails} onConfirm={handlePayment} />

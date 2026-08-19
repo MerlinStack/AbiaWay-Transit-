@@ -80,7 +80,7 @@ function BookingContext() {
   return (
     <Section icon={Ticket} title="Book &amp; Pay">
       <p className="text-sm text-gray-300">Search routes, pick seats, and pay with wallet or ABSSIN card.</p>
-      <Hint>Flat fare: ₦300 · Reservations held 10 min</Hint>
+      <Hint>Flat fare: ₦800 · Reservations held 10 min</Hint>
     </Section>
   );
 }

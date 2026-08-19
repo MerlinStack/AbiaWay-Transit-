@@ -17,7 +17,7 @@ interface BookingSummaryProps {
 
 const BookingSummary = memo(({ details, onConfirm }: BookingSummaryProps) => {
   const totals = useMemo(() => {
-    const baseFare = details.route?.fare || 350;
+    const baseFare = details.route?.fare || 800;
     const subtotal = baseFare * details.passengers;
     const discount = details.passengers >= 4 ? subtotal * 0.2 : 0;
     const fee = 50;

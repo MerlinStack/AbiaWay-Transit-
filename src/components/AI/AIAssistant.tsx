@@ -75,7 +75,7 @@ const AIAssistant = () => {
       quickReplies: ['Delays?', 'Accidents?', 'Best time?']
     },
     fare: {
-      text: '**Fare Information**\n\n• Standard Bus: ₦150\n• Premium Bus: ₦250 (AC)\n• Express: ₦350\n• Student Discount: 20% off',
+      text: '**Fare Information**\n\n• Standard Bus: ₦800\n• Premium Bus: ₦900 (AC)\n• Express: ₦1000\n• Student Discount: 20% off',
       quickReplies: ['Student discount', 'Monthly pass', 'Group fare']
     },
     peak: {
@@ -83,7 +83,7 @@ const AIAssistant = () => {
       quickReplies: ['Weekend schedule', 'Night buses', 'Holidays']
     },
     route: {
-      text: '**Best Route to Aba**\n\n• Fastest: Umuahia-Aba Express (25 min)\n• Cheapest: Local route (35 min, ₦150)\n• Scenic: Via Bende (45 min)',
+      text: '**Best Route to Aba**\n\n• Fastest: Umuahia-Aba Express (25 min)\n• Cheapest: Local route (35 min, ₦800)\n• Scenic: Via Bende (45 min)',
       quickReplies: ['Show on map', 'Stops', 'Schedule']
     },
     delay: {

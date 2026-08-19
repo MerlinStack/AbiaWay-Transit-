@@ -140,7 +140,7 @@ const SeatSelection = memo(({ onSelect, selectedSeats = [], passengers = 1 }: Se
           <div className="text-right">
             <p className="text-sm text-gray-400">Total Fare</p>
             <p className="text-lg font-bold text-primary">
-              ₦{(350 * selected.length).toLocaleString()}
+              ₦{(800 * selected.length).toLocaleString()}
             </p>
           </div>
         </div>

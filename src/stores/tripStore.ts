@@ -34,7 +34,7 @@ interface TripState {
   removePassenger: () => void;
 }
 
-const FARE_PER_PASSENGER = 300;
+const FARE_PER_PASSENGER = 800;
 
 const useTripStore = create<TripState>((set, get) => ({
   status: 'idle',

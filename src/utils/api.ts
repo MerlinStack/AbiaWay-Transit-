@@ -101,9 +101,9 @@ const API = {
     getAll: async () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       return [
-        { id: 1, name: 'Umuahia-Aba Express', duration: 25, fare: 350, stops: 8, popularity: 95 },
-        { id: 2, name: 'Aba-Umuahia Local', duration: 35, fare: 300, stops: 12, popularity: 82 },
-        { id: 3, name: 'Umuahia-Ohafia', duration: 45, fare: 250, stops: 10, popularity: 78 },
+        { id: 1, name: 'Umuahia-Aba Express', duration: 25, fare: 800, stops: 8, popularity: 95 },
+        { id: 2, name: 'Aba-Umuahia Local', duration: 35, fare: 900, stops: 12, popularity: 82 },
+        { id: 3, name: 'Umuahia-Ohafia', duration: 45, fare: 1000, stops: 10, popularity: 78 },
         { id: 4, name: 'Aba-PH Express', duration: 60, fare: 800, stops: 5, popularity: 88 },
       ];
     },
@@ -135,9 +135,9 @@ const API = {
     getTransactions: async () => {
       await new Promise(resolve => setTimeout(resolve, 600));
       return [
-        { id: 1, type: 'debit', description: 'Bus Fare - AB-101', amount: 350, date: '2024-03-14T08:45:00' },
+        { id: 1, type: 'debit', description: 'Bus Fare - AB-101', amount: 800, date: '2024-03-14T08:45:00' },
         { id: 2, type: 'credit', description: 'Wallet Top-up', amount: 5000, date: '2024-03-13T18:30:00' },
-        { id: 3, type: 'debit', description: 'Bus Fare - AB-102', amount: 350, date: '2024-03-13T09:15:00' },
+        { id: 3, type: 'debit', description: 'Bus Fare - AB-102', amount: 800, date: '2024-03-13T09:15:00' },
         { id: 4, type: 'credit', description: 'Bonus Credit', amount: 200, date: '2024-03-12T09:00:00' },
       ];
     }
@@ -193,7 +193,7 @@ const API = {
       await new Promise(resolve => setTimeout(resolve, 1200));
       const responses = {
         traffic: 'Traffic is moderate on Umuahia-Aba. Expect 5-10 min delays near Osisioma.',
-        fare: 'Fares: Standard ₦350, Premium ₦500, Express ₦750',
+        fare: 'Fares: Standard ₦800, Premium ₦900, Express ₦1000',
         peak: 'Peak hours: 7-9 AM and 4-7 PM weekdays',
         route: 'Fastest route: Umuahia-Aba Expressway (25 mins)',
         default: 'I can help with routes, fares, delays, and schedules.'

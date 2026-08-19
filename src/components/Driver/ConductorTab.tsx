@@ -22,7 +22,7 @@ interface TapRecord {
 }
 
 const ROUTES = ['Umuahia → Aba', 'Aba → Umuahia', 'Umuahia → Ohafia', 'Ohafia → Umuahia'];
-const LOCAL_FARE = 150;
+const LOCAL_FARE = 800;
 const DEVICE_SECRET = 'abia-green-shuttle-2026-v1';
 
 const SECTOR_TAGS: Record<string, string> = {

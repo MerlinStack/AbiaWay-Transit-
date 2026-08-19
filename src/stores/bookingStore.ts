@@ -23,8 +23,8 @@ interface BookingState {
 const useBookingStore = create<BookingState>((set) => ({
   currentBooking: null,
   bookingHistory: [
-    { id: 'BK-001', route: 'Umuahia → Aba', date: '2024-03-14', time: '08:30', seats: ['A12'], fare: 350, status: 'completed', bus: 'AB-101' },
-    { id: 'BK-002', route: 'Aba → Umuahia', date: '2024-03-13', time: '17:45', seats: ['B04', 'B05'], fare: 700, status: 'completed', bus: 'AB-102' }
+    { id: 'BK-001', route: 'Umuahia → Aba', date: '2024-03-14', time: '08:30', seats: ['A12'], fare: 800, status: 'completed', bus: 'AB-101' },
+    { id: 'BK-002', route: 'Aba → Umuahia', date: '2024-03-13', time: '17:45', seats: ['B04', 'B05'], fare: 1600, status: 'completed', bus: 'AB-102' }
   ],
   savedRoutes: [],
   recentSearches: [],
